@@ -1,0 +1,435 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/forms";
+@custom-variant dark (&:where(.dark, .dark *));
+
+::selection {
+	background: var(--primary);
+	color: var(--primary-foreground);
+	text-shadow: none;
+}
+
+::-moz-selection {
+	background: var(--primary);
+	color: var(--primary-foreground);
+	text-shadow: none;
+}
+
+@theme {
+	--animate-accordion-down: accordion-down 0.2s ease-out;
+	--animate-accordion-up: accordion-up 0.2s ease-out;
+
+	@keyframes accordion-down {
+		from {
+			height: 0;
+		}
+		to {
+			height: var(--starwind-accordion-content-height);
+		}
+	}
+
+	@keyframes accordion-up {
+		from {
+			height: var(--starwind-accordion-content-height);
+		}
+		to {
+			height: 0;
+		}
+	}
+}
+
+@theme {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-foreground-muted: color-mix(
+		in oklch,
+		var(--foreground) 45%,
+		var(--background)
+	);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-hover: color-mix(in oklch, var(--primary) 80%, white 20%);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-accent-hover: color-mix(in oklch, var(--accent) 80%, white 20%);
+	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	--color-discount-badge: var(--discount-badge);
+	--color-discount-badge-foreground: var(--discount-badge-foreground);
+	--color-info: var(--info);
+	--color-info-foreground: var(--info-foreground);
+	--color-success: var(--success);
+	--color-success-foreground: var(--success-foreground);
+	--color-warning: var(--warning);
+	--color-warning-foreground: var(--warning-foreground);
+	--color-error: var(--error);
+	--color-error-foreground: var(--error-foreground);
+	--color-outline: var(--outline);
+
+	--radius-xl: calc(var(--radius) + 2rem);
+	--radius-lg: var(--radius);
+	--radius-md: calc(var(--radius) - 0.1rem);
+	--radius-sm: calc(var(--radius) - 3rem);
+	--radius-xs: calc(var(--radius) - 0.7rem);
+
+	--font-family-sans: "Overused Grotesk", ui-sans-serif, system-ui, sans-serif;
+
+	--font-size-xs: clamp(0.8rem, 2vw + 0.35rem, 0.95rem);
+	--font-size-sm: clamp(0.85rem, 2vw + 0.4rem, 1rem);
+	--font-size-base: clamp(1rem, 2vw + 0.5rem, 1.125rem);
+	--font-size-lg: clamp(1.15rem, 2vw + 0.6rem, 1.35rem);
+	--font-size-xl: clamp(1.25rem, 2vw + 0.75rem, 1.75rem);
+	--font-size-2xl: clamp(1.5rem, 2vw + 1rem, 2rem);
+	--font-size-3xl: clamp(1.75rem, 2vw + 1rem, 2.5rem);
+	--font-size-4xl: clamp(2rem, 2vw + 1.25rem, 3rem);
+	--font-size-5xl: clamp(2.25rem, 2vw + 1.5rem, 3.5rem);
+	--font-size-6xl: clamp(2.5rem, 2vw + 1.75rem, 4rem);
+	--font-size-7xl: clamp(3rem, 2vw + 2rem, 5rem);
+	--font-size-8xl: clamp(3.5rem, 2vw + 2.5rem, 6rem);
+	--font-size-9xl: clamp(4rem, 2vw + 3rem, 8rem);
+}
+
+
+:root {
+
+	--background: oklch(0.9735 0.013 263.26);
+	--foreground: oklch(0.1148 0.06 263.26);
+
+	--primary: oklch(0.3333 0.1133 263.26);
+	--primary-foreground: oklch(0.9441 0.026 263.26);
+
+	--muted: oklch(0.6977 0.1133 263.26);
+	--muted-foreground: oklch(0.304 0.1133 263.26);
+
+	/* make sure border is the same as secondary but with 50% opacity */
+	
+	--secondary: oklch(0.8052 0.1269 91.98);
+	/* --secondary-hover: oklch(0.5072 0.2029 var(--hue) calc(l_ * _0 0.9)); */
+
+	/* --accent: oklch(0.6921 0.1318 334.41);
+	--accent-foreground: var(--background); */
+
+	/* --destructive: oklch(0.6368 0.2078 25.33);
+	--destructive-foreground: oklch(0.9779 0.0112 var(--hue)); */
+
+	--border: oklch(0.6977 0.1133 263.26 / 0.3);
+	/* --input: oklch(0.8895 0.1033 var(--beige-hue));
+	
+	--ring: 0 0% 3.9%;  */
+
+	--info: oklch(0.7 0.15 240);
+	--info-foreground: oklch(0.2 0.05 240);
+	--success: oklch(0.7 0.15 140);
+	--success-foreground: oklch(0.2 0.05 140);
+	--warning: oklch(0.75 0.15 85);
+	--warning-foreground: oklch(0.25 0.05 85);
+	--error: oklch(0.55 0.22 25);
+	--error-foreground: oklch(0.98 0.01 25);
+	--outline: oklch(0.5 0.05 263.26);
+
+	--radius: 1rem;
+	--sidebar-background: 0 0% 98%;
+	--sidebar-foreground: 240 5.3% 26.1%;
+	--sidebar-primary: 240 5.9% 10%;
+	--sidebar-primary-foreground: 0 0% 98%;
+	--sidebar-accent: 240 4.8% 95.9%;
+	--sidebar-accent-foreground: 240 5.9% 10%;
+	--sidebar-border: 220 13% 91%;
+
+	--transition-standard: all 0.3s ease;
+
+	--transition-ease-out: all 0.3 ease-out;
+
+	/* Reveal animation settings (for smooth content fade-in) */
+	--animation-reveal-duration: 0.4s;
+	--animation-reveal-easing: cubic-bezier(0.4, 0, 0.2, 1);
+	--animation-reveal: fadeIn var(--animation-reveal-duration)
+		var(--animation-reveal-easing);
+
+	/* Section horizontal padding - standardized across the project */
+	/* Mobile default */
+	--section-padding-x: 1rem;
+
+	/* Section top padding for first H1 - standardized across the project */
+	/* Mobile default */
+	--section-padding-top: 0.4rem;
+
+	/* Fluid Typography Scale - using clamp() for responsive sizing */
+	--fluid-base: clamp(1rem, 2vw + 0.1rem, 1.15rem);
+	--fluid-xs: clamp(0.8rem, 2vw + 0.35rem, 0.95rem);
+	--fluid-sm: clamp(0.85rem, 2vw + 0.4rem, 1rem);
+	--fluid-md: clamp(1rem, 2vw + 0.5rem, 1.125rem);
+	--fluid-lg: clamp(1.15rem, 2vw + 0.6rem, 1.35rem);
+	--fluid-xl: clamp(1.25rem, 2vw + 0.75rem, 1.75rem);
+	--fluid-2xl: clamp(1.5rem, 2vw + 1rem, 2rem);
+	--fluid-3xl: clamp(2rem, 3vw + 1.4rem, 5rem);
+	--fluid-4xl: clamp(3rem, 5vw + 1.5rem, 7rem);
+	--fluid-5xl: clamp(2.25rem, 2vw + 1.5rem, 3.5rem);
+}
+
+@media (width >= 640px) {
+	:root {
+		/* Desktop padding */
+		--section-padding-x: 1.5rem;
+		/* Desktop top padding */
+		--section-padding-top: 0.7rem;
+	}
+}
+
+.dark {
+	--background: oklch(0.15 0.02 263.26);
+	--foreground: oklch(0.95 0.01 263.26);
+
+	--primary: oklch(0.5 0.15 263.26);
+	--primary-foreground: oklch(0.98 0.01 263.26);
+
+	--muted: oklch(0.25 0.05 263.26);
+	--muted-foreground: oklch(0.6 0.05 263.26);
+
+	--secondary: oklch(0.3 0.08 263.26);
+
+	--border: oklch(0.3 0.05 263.26);
+	
+	--info: oklch(0.6 0.12 240);
+	--info-foreground: oklch(0.95 0.01 240);
+	--success: oklch(0.6 0.12 140);
+	--success-foreground: oklch(0.95 0.01 140);
+	--warning: oklch(0.65 0.12 85);
+	--warning-foreground: oklch(0.95 0.01 85);
+	--error: oklch(0.5 0.18 25);
+	--error-foreground: oklch(0.98 0.01 25);
+	--outline: oklch(0.4 0.04 263.26);
+}
+
+@layer base {
+	* {
+		@apply border-border outline-outline/50;
+	}
+
+	body {
+		@apply bg-background text-foreground;
+		background-color: var(--background);
+		color: var(--foreground);
+	}
+
+}
+
+@layer utilities {
+	section {
+		background-color: var(--background);
+		padding-bottom: 6rem;
+		padding-left: var(--section-padding-x);
+		z-index: 1;
+		padding-right: var(--section-padding-x);
+		position: relative;
+	}
+
+	section.no-padding {
+		padding-left: 0;
+		padding-right: 0;
+	}
+
+	/* Add padding to titles and controls in sections with no-padding */
+	section.no-padding > h2 {
+		padding-left: var(--section-padding-x);
+		padding-right: var(--section-padding-x);
+	}
+
+	/* Add top padding to first H1 in first section of a page */
+	/* This uses CSS :has() to handle both direct and nested h1 cases efficiently */
+
+	/* Direct child case: section > h1 */
+	section:first-of-type > h1:first-child {
+		padding-top: var(--section-padding-top);
+	}
+
+	/* Nested case: when section doesn't have direct h1 child, target first nested h1 */
+	/* Uses :has() to check for direct h1, and only applies to nested h1s if none exists */
+	section:first-of-type:not(:has(> h1)) h1:first-of-type {
+		padding-top: var(--section-padding-top);
+	}
+}
+
+/* Typography - Fluid Responsive System with clamp() */
+
+html {
+	font-size: var(--fluid-base);
+	scroll-behavior: smooth;
+	overflow-x: hidden;
+}
+
+h1 {
+	font-size: var(--fluid-5xl);
+	font-weight: 500;
+	line-height: 1;
+	letter-spacing: 1.2%;
+	color: var(--foreground);
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+h2 {
+	font-size: var(--fluid-4xl);
+	font-weight: 400;
+	line-height: 0.95;
+	letter-spacing: 1.2%;
+	color: var(--foreground);
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+h3 {
+	font-size: var(--fluid-3xl);
+	line-height: 1;
+	font-weight: 300;
+	letter-spacing: 1.2%;
+	color: var(--foreground);
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+h4 {
+	font-size: var(--fluid-2xl);
+	line-height: 1;
+	font-weight: 600;
+	letter-spacing: 1.2%;
+	color: var(--foreground);
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+h5 {
+	font-size: var(--fluid-lg);
+	line-height: 1;
+	font-weight: 600;
+	letter-spacing: 1.2%;
+	color: var(--foreground);
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+h6 {
+	font-size: var(--fluid-md);
+	line-height: 1;
+	font-weight: 500;
+	letter-spacing: 1.2%;
+	color: var(--foreground);
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+p {
+	font-size: var(--fluid-md);
+	line-height: 1.5;
+	color: var(--foreground);
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+span {
+	color: var(--foreground);
+}
+
+.largeDescription {
+	font-size: var(--fluid-xl);
+	line-height: 1.1;
+	font-weight: 100;
+	max-width: 45ch;
+}
+
+.smallerText {
+	font-size: var(--fluid-sm);
+}
+
+/* ----------------------------------------------------------------------------
+   View Transition CSS Variables
+   ---------------------------------------------------------------------------- */
+:root {
+	/* Page fade timing (root element background cross-fade) */
+	--vt-page-duration: 0.34s;
+	--vt-page-easing: cubic-bezier(0.4, 0, 0.2, 1);
+	
+	/* Element morph timing (images/text flying between pages) */
+	--vt-element-duration: 0.34s;
+	--vt-element-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ----------------------------------------------------------------------------
+   Base View Transition Configuration
+   ---------------------------------------------------------------------------- */
+::view-transition {
+	z-index: 100;
+}
+
+/* Page fade timing - controls the cross-fade of the root/background */
+::view-transition-group(root) {
+	animation-duration: var(--vt-page-duration);
+	animation-timing-function: var(--vt-page-easing);
+}
+
+/* Element morph timing - controls position/size morphing for all named elements */
+::view-transition-group(*) {
+	animation-duration: var(--vt-element-duration);
+	animation-timing-function: var(--vt-element-easing);
+}
+
+/* ----------------------------------------------------------------------------
+   Splash Logo Morph (initial page load → navbar)
+   ---------------------------------------------------------------------------- */
+::view-transition-group(site-logo) {
+	animation-duration: 0.6s;
+	animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+::view-transition-old(site-logo),
+::view-transition-new(site-logo) {
+	animation-duration: 0.6s;
+	mix-blend-mode: normal;
+}
+
+/* ----------------------------------------------------------------------------
+   Splash Logotype Morph (initial page load → hero)
+   ---------------------------------------------------------------------------- */
+::view-transition-group(site-logotype) {
+	animation-duration: 0.6s;
+	animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+::view-transition-old(site-logotype),
+::view-transition-new(site-logotype) {
+	animation-duration: 0.6s;
+	mix-blend-mode: normal;
+}
+
+/* Delay the cross-fade of ALL named groups so the entire page appears as
+   one unit behind the fading splash background. Without the wildcard,
+   elements with their own view-transition-name animate at the default 0.34s
+   with no delay and "peek through" before the splash background finishes fading.
+   Scoped via .splash-dismissing class — does not affect route transitions. */
+html.splash-dismissing::view-transition-old(*),
+html.splash-dismissing::view-transition-new(*) {
+	animation-delay: 0.25s;
+	animation-duration: 0.45s;
+	animation-fill-mode: both;
+}
+
+/* The splash → navbar logo and logotype morphs should start immediately (no delay).
+   Specificity ties with the wildcard rule above, so order matters. */
+html.splash-dismissing::view-transition-old(site-logo),
+html.splash-dismissing::view-transition-new(site-logo),
+html.splash-dismissing::view-transition-old(site-logotype),
+html.splash-dismissing::view-transition-new(site-logotype) {
+	animation-delay: 0s;
+	animation-duration: 0.6s;
+}

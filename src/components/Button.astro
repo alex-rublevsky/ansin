@@ -12,11 +12,12 @@ const { variant, size, class: className, ...rest } = Astro.props;
 
 export const button = tv({
   base: [
-    "inline-flex items-center justify-center gap-1.5 rounded-md font-medium whitespace-nowrap",
+    "inline-flex items-center justify-center gap-1.5 rounded-md font-medium whitespace-nowrap cursor-pointer",
     "[&_svg]:pointer-events-none [&_svg]:shrink-0",
     "transition-all outline-none focus-visible:ring-3",
     "disabled:pointer-events-none disabled:opacity-50",
     "aria-invalid:border-error aria-invalid:focus-visible:ring-error/40",
+    "active:scale-96 transition-transform duration-200 ease-out",
   ],
   variants: {
     variant: {

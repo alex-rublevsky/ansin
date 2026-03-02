@@ -1,0 +1,83 @@
+---
+import Link from '../components/Link.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Ансин — чайный каталог" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="min-h-screen bg-background">
+    <!-- <nav class="bg-white shadow-sm border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+          <div class="flex items-center">
+            <a href="/" class="flex items-center transition-opacity hover:opacity-90">
+              <AnimatedLogo size={48} animateOnHover={true} />
+            </a>
+          </div>
+          <div class="flex items-center space-x-8">
+            <button id="cart-button" class="relative text-gray-700 hover:text-indigo-600 transition">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <span id="cart-count" class="absolute -top-2 -right-2 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav> -->
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="mt-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="text-center text-muted">
+          <p>&copy; Все права защищены ноунейм "Ансин" {new Date().getFullYear()}</p>
+          <p>Понравился сайт? <Link href="https://t.me/alexrublevsky">Написать разработчику</Link></p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- <script>
+      // Initialize cart count on page load
+      function updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const totalItems = cart.reduce((sum: number, item: any) => sum + item.quantity, 0);
+        const cartCount = document.getElementById('cart-count');
+        const cartButton = document.getElementById('cart-button');
+        
+        if (cartCount && totalItems > 0) {
+          cartCount.textContent = totalItems.toString();
+          cartCount.classList.remove('hidden');
+        } else if (cartCount) {
+          cartCount.classList.add('hidden');
+        }
+        
+        // Navigate to cart page
+        cartButton?.addEventListener('click', () => {
+          window.location.href = '/cart';
+        });
+      }
+      
+      updateCartCount();
+      
+      // Update cart count when storage changes (for multi-tab support)
+      window.addEventListener('storage', updateCartCount);
+    </script> -->
+  </body>
+</html>

@@ -1,20 +1,20 @@
 ---
-import Button from '../components/Button.astro';
-import '../styles/global.css';
+import Button from "../components/Button.astro";
+import "../styles/global.css";
 
 interface Props {
-  title: string;
+	title: string;
 }
 
 const { title } = Astro.props;
-const user = Astro.locals.user;
+const _user = Astro.locals.user;
 
 // TODO: Re-enable authentication when ready
 // if (!user) {
 //   return Astro.redirect('/admin/login');
 // }
 
-const currentPath = Astro.url.pathname;
+const _currentPath = Astro.url.pathname;
 ---
 
 <!DOCTYPE html>
@@ -26,36 +26,43 @@ const currentPath = Astro.url.pathname;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body class="min-h-screen bg-gray-100">
-    <div class="flex">
-
-      
-        
-        <nav class="flex-1 p-4 space-y-1 gap-1 fixed bottom-0 left-0 riht-0 w-full flex items-center justify-center">
-          <Button
-            href="/admin"
-  variant="primary"
-          >
-            Главная
-          </Button>
-          <Button
-            href="/admin/products"
-  variant="primary"
-          >
-            Товары
-          </Button>
-          <Button
-            href="/admin/orders"
-  variant="primary"
-          >
-          Заказы
-          </Button>
-          <Button
-            href="/admin/categories"
-  variant="primary"
-          >
-          Категории
-          </Button>
-        </nav>
+    <main class="flex-1 overflow-y-auto">
+      <div class="p-6">
+        <slot />
+      </div>
+    </main>
+        <div class="mb-2 fixed bottom-0 left-0 riht-0 w-full flex justify-center">
+          <nav class="bg-background border border-primary rounded-lg flex items-center justify-center">
+            <Button
+              href="/admin"
+              size="sm"
+    variant="ghost"
+            >
+              Главная
+            </Button>
+            <Button
+              href="/admin/products"
+              size="sm"
+    variant="ghost"
+            >
+              Товары
+            </Button>
+            <Button
+              href="/admin/orders"
+              size="sm"
+    variant="ghost"
+            >
+            Заказы
+            </Button>
+            <Button
+              href="/admin/categories"
+              size="sm"
+    variant="ghost"
+            >
+            Категории
+            </Button>
+          </nav>
+        </div>
 
         <!-- <div class="p-4 border-t border-gray-800">
           {user && (
@@ -81,12 +88,8 @@ const currentPath = Astro.url.pathname;
         </div> -->
      
 
-      <main class="flex-1 overflow-y-auto">
-        <div class="p-8">
-          <slot />
-        </div>
-      </main>
-    </div>
+    
+    
 
     <!-- <script>
       import { signOut } from '../lib/auth-client';

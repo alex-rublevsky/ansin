@@ -1,0 +1,208 @@
+---
+interface Props {
+  size?: number;
+  className?: string;
+  animate?: boolean;
+  animateOnHover?: boolean;
+}
+
+const { size = 200, className = '', animate = false, animateOnHover = false } = Astro.props;
+
+// Scaling ratio from provided dimensions: 20.0042 / 25.931 = 0.7716
+const SCALE_RATIO = 20.0042 / 25.931;
+---
+
+<div class={`animated-logo-container ${className} ${animate ? 'animating' : ''} ${animateOnHover ? 'animate-on-hover' : ''}`} style={`width: ${size}px; height: ${size}px;`}>
+  <!-- Each layer animates through all size stages with staggered timing -->
+  <div class="logo-layer layer-1">
+    <img src="/logo.webp" alt="Logo" />
+  </div>
+  
+  <div class="logo-layer layer-2">
+    <img src="/logo.webp" alt="Logo" />
+  </div>
+  
+  <div class="logo-layer layer-3">
+    <img src="/logo.webp" alt="Logo" />
+  </div>
+  
+  <div class="logo-layer layer-4">
+    <img src="/logo.webp" alt="Logo" />
+  </div>
+</div>
+
+<style define:vars={{ scaleRatio: SCALE_RATIO }}>
+  .animated-logo-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-layer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+  }
+
+  .logo-layer img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* Static positioning when not animating */
+  .animated-logo-container:not(.animating) .layer-1 {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  
+  .animated-logo-container:not(.animating) .layer-2 {
+    transform: translate(-50%, -50%) scale(0.7716);
+  }
+  
+  .animated-logo-container:not(.animating) .layer-3 {
+    transform: translate(-50%, -50%) scale(0.5954);
+  }
+  
+  .animated-logo-container:not(.animating) .layer-4 {
+    transform: translate(-50%, -50%) scale(0.4593);
+  }
+
+  /* Animated state */
+  .animated-logo-container.animating .logo-layer {
+    animation: fractalGrow 4s linear infinite;
+  }
+
+  /* Animate on hover */
+  .animated-logo-container.animate-on-hover:hover .logo-layer {
+    animation: fractalGrow 4s linear infinite;
+  }
+
+  /* Use negative delays so layers start pre-rolled at their positions */
+  .animated-logo-container.animating .layer-1,
+  .animated-logo-container.animate-on-hover:hover .layer-1 {
+    animation-delay: 0s;
+  }
+
+  .animated-logo-container.animating .layer-2,
+  .animated-logo-container.animate-on-hover:hover .layer-2 {
+    animation-delay: -1s;
+  }
+
+  .animated-logo-container.animating .layer-3,
+  .animated-logo-container.animate-on-hover:hover .layer-3 {
+    animation-delay: -2s;
+  }
+
+  .animated-logo-container.animating .layer-4,
+  .animated-logo-container.animate-on-hover:hover .layer-4 {
+    animation-delay: -3s;
+  }
+
+  @keyframes fractalGrow {
+    /* Creation phase: smooth ease-in spawn (0-12%) */
+    0% {
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+      z-index: 100;
+    }
+    
+    /* Gradual acceleration during spawn */
+    3% {
+      transform: translate(-50%, -50%) scale(0.05);
+      opacity: 0.2;
+      z-index: 100;
+    }
+    
+    6% {
+      transform: translate(-50%, -50%) scale(0.15);
+      opacity: 0.5;
+      z-index: 100;
+    }
+    
+    9% {
+      transform: translate(-50%, -50%) scale(0.3);
+      opacity: 0.8;
+      z-index: 100;
+    }
+    
+    12% {
+      transform: translate(-50%, -50%) scale(0.4593);
+      opacity: 1;
+      z-index: 100;
+    }
+    
+    /* Linear growth phase (12-85%) - evenly distributed */
+    /* Stage 3: 59.54% */
+    35% {
+      transform: translate(-50%, -50%) scale(0.5954);
+      opacity: 1;
+      z-index: 75;
+    }
+    
+    /* Stage 2: 77.16% */
+    60% {
+      transform: translate(-50%, -50%) scale(0.7716);
+      opacity: 1;
+      z-index: 50;
+    }
+    
+    /* Stage 1: 100% (largest visible) */
+    85% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+      z-index: 25;
+    }
+    
+    /* Fade out phase: smooth ease-out (85-100%) */
+    88% {
+      transform: translate(-50%, -50%) scale(1.03);
+      opacity: 0.8;
+      z-index: 1;
+    }
+    
+    92% {
+      transform: translate(-50%, -50%) scale(1.08);
+      opacity: 0.4;
+      z-index: 1;
+    }
+    
+    96% {
+      transform: translate(-50%, -50%) scale(1.15);
+      opacity: 0.1;
+      z-index: 1;
+    }
+    
+    100% {
+      transform: translate(-50%, -50%) scale(1.2);
+      opacity: 0;
+      z-index: 1;
+    }
+  }
+
+  /* Respect user motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .animated-logo-container.animating .logo-layer {
+      animation: none;
+    }
+    
+    .animated-logo-container.animating .layer-1 {
+      transform: translate(-50%, -50%) scale(1);
+    }
+    
+    .animated-logo-container.animating .layer-2 {
+      transform: translate(-50%, -50%) scale(0.7716);
+    }
+    
+    .animated-logo-container.animating .layer-3 {
+      transform: translate(-50%, -50%) scale(0.5954);
+    }
+    
+    .animated-logo-container.animating .layer-4 {
+      transform: translate(-50%, -50%) scale(0.4593);
+    }
+  }
+</style>

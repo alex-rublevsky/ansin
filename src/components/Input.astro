@@ -5,6 +5,8 @@ import { tv, type VariantProps } from "tailwind-variants";
 type Props = HTMLAttributes<"input"> &
 	VariantProps<typeof input> & {
 		label?: string;
+		required?: boolean;
+		error?: string;
 	};
 
 export const input = tv({
@@ -26,12 +28,64 @@ export const input = tv({
 	defaultVariants: { size: "md" },
 });
 
-const { size, class: className, label, ...rest } = Astro.props;
+const {
+	size,
+	class: className,
+	label,
+	required,
+	error,
+	id,
+	placeholder,
+	...rest
+} = Astro.props;
+
+const inputId = id || `input-${crypto.randomUUID()}`;
+const hasLabel = !!label;
+
+const inputClasses = input({
+	size,
+	class: [
+		className,
+		hasLabel && "pt-4",
+		error &&
+			"border-error focus-visible:border-error focus-visible:ring-error/40",
+	],
+});
 ---
 
-{label && (
-  <label class="block text-sm font-medium text-gray-700 mb-1">
-    {label}
-  </label>
-)}
-<input class={input({ size, class: className })} {...rest} data-slot="input" />
+<div class="relative">
+	<input
+		id={inputId}
+		placeholder={placeholder || (hasLabel ? " " : undefined)}
+		class={inputClasses}
+		aria-invalid={error ? "true" : undefined}
+		{...rest}
+		data-slot="input"
+	/>
+	{
+		hasLabel && (
+			<label
+				for={inputId}
+				class:list={[
+					"pointer-events-none absolute left-3 z-10 text-muted-foreground",
+					"transition-[top,font-size,color,background-color,padding] duration-300 ease-out",
+					"peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-[0.75rem] peer-focus:px-1 peer-focus:text-foreground peer-focus:bg-background",
+					"peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:text-[0.75rem] peer-[:not(:placeholder-shown)]:px-1 peer-[:not(:placeholder-shown)]:text-foreground peer-[:not(:placeholder-shown)]:bg-background",
+					"peer-placeholder-shown:peer-[:not(:focus)]:top-1/2 peer-placeholder-shown:peer-[:not(:focus)]:-translate-y-1/2 peer-placeholder-shown:peer-[:not(:focus)]:text-base peer-placeholder-shown:peer-[:not(:focus)]:px-0",
+				]}
+			>
+				<span class="flex items-center gap-1">
+					{label}
+					{required && <span class="text-error">*</span>}
+				</span>
+			</label>
+		)
+	}
+	{
+		error && (
+			<span class="absolute -bottom-5 left-0 text-xs font-medium text-error">
+				{error}
+			</span>
+		)
+	}
+</div>

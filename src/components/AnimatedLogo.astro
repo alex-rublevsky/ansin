@@ -1,12 +1,17 @@
 ---
 interface Props {
-  size?: number;
-  className?: string;
-  animate?: boolean;
-  animateOnHover?: boolean;
+	size?: number;
+	className?: string;
+	animate?: boolean;
+	animateOnHover?: boolean;
 }
 
-const { size = 200, className = '', animate = false, animateOnHover = false } = Astro.props;
+const {
+	size = 200,
+	className = "",
+	animate = false,
+	animateOnHover = false,
+} = Astro.props;
 
 // Scaling ratio from provided dimensions: 20.0042 / 25.931 = 0.7716
 const SCALE_RATIO = 20.0042 / 25.931;

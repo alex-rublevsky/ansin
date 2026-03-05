@@ -17,8 +17,14 @@ pnpm-debug.log*
 .env
 .env.production
 
+# deployment cache and generated files
+.yandex-cache
+yandex-api-gateway.yaml
+
 # macOS-specific files
 .DS_Store
 
 # jetbrains setting folder
 .idea/
+
+TODO

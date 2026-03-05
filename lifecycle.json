@@ -1,0 +1,14 @@
+{
+	"lifecycleRules": [
+		{
+			"id": "CleanupOldStaging",
+			"enabled": true,
+			"filter": {
+				"prefix": "images/staging/"
+			},
+			"expiration": {
+				"days": "1"
+			}
+		}
+	]
+}

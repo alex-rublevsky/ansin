@@ -1,0 +1,19 @@
+node_modules
+# dist - KEEP dist/ so Docker can copy pre-built artifacts
+.astro
+.env
+.env.local
+.env.production
+.git
+.gitignore
+README.md
+.vscode
+.cursor
+*.log
+drizzle
+public/uploads
+scripts
+.github
+*.md
+!package.json
+!pnpm-lock.yaml

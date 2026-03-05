@@ -1,0 +1,1035 @@
+---
+import CloudUploadIcon from "@tabler/icons/outline/cloud-upload.svg";
+import LoaderIcon from "@tabler/icons/outline/loader-2.svg";
+import type { HTMLAttributes } from "astro/types";
+import { STORAGE_BASE_URL } from "../../lib/constants";
+import Button from "../Button.astro";
+import { dropzone } from "./variants";
+
+type Props = HTMLAttributes<"div"> & {
+	id?: string;
+	name?: string;
+	accept?: string;
+	multiple?: boolean;
+	/**
+	 * Initial images as comma-separated string of relative paths
+	 */
+	initialImages?: string;
+	/**
+	 * Product ID for view transitions
+	 * When provided, first image is server-rendered with transition:name for smooth morphing
+	 */
+	productId?: number | string;
+};
+
+const {
+	class: className,
+	id = "image-upload",
+	name = "images",
+	accept = "image/jpeg,image/jpg,image/png,image/webp,image/svg+xml,.svg",
+	multiple = true,
+	initialImages = "",
+	productId,
+	...rest
+} = Astro.props;
+
+// Parse initial images
+const initialImagePaths = initialImages
+	? initialImages
+			.split(",")
+			.map((p) => p.trim())
+			.filter(Boolean)
+	: [];
+const bucket = import.meta.env.YANDEX_STORAGE_BUCKET || "ansin-static";
+const getImageUrl = (path: string) => `${STORAGE_BASE_URL}/${bucket}/${path}`;
+---
+
+<div
+	id={id}
+	class:list={[
+		"image-upload-container",
+		className,
+	]}
+	data-initial-images={initialImages}
+	data-product-id={productId}
+	{...rest}
+>
+	<div class="flex items-center justify-between mb-2">
+		<label class="block font-medium text-sm" data-label>
+			Изображения товара <span data-count></span>
+		</label>
+		<Button
+			type="button"
+			variant="outline"
+			size="sm"
+			data-toggle-textarea
+		>
+			<span data-toggle-text>Редактировать текстом</span>
+		</Button>
+	</div>
+
+	<input
+		type="file"
+		id={`${id}-input`}
+		name={name}
+		accept={accept}
+		multiple={multiple}
+		class="sr-only"
+	/>
+
+	<!-- Textarea Editor (hidden by default) -->
+	<textarea
+		class="hidden h-32 resize-none font-mono text-xs w-full px-3 py-2 border border-border rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent"
+		placeholder="image1.jpg, image2.jpg, image3.jpg"
+		rows="4"
+		data-textarea-editor
+	></textarea>
+
+	<!-- Upload Area with Grid -->
+	<section
+		class="image-upload-area rounded-lg border border-border bg-muted/30 p-2 transition-colors"
+		data-drag-active="false"
+	>
+		<!-- Grid for images + upload button -->
+		<div class="grid grid-cols-2 gap-2 sm:grid-cols-3" data-images-grid>
+			<!-- Server-render ONLY first image for view transitions -->
+			{initialImagePaths.length > 0 && productId && (
+				<div class="group relative overflow-hidden rounded-lg border border-border bg-background" data-image-item="true" data-image-path={initialImagePaths[0]} draggable="true" data-server-rendered="true">
+					<div class="relative w-full">
+						<img
+							src={getImageUrl(initialImagePaths[0])}
+							alt={initialImagePaths[0].split("/").pop() || ""}
+							class="w-full h-auto rounded-lg object-contain aspect-square"
+							loading="eager"
+							decoding="sync"
+							fetchpriority="high"
+							transition:name={`product-image-${productId}`}
+						/>
+						<button
+							type="button"
+							class="drag-handle absolute top-1 left-1 cursor-grab rounded bg-primary p-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 active:cursor-grabbing"
+							title="Перетащите для перемещения"
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-background" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+							</svg>
+						</button>
+						<button
+							type="button"
+							class="js-remove-image absolute top-1 right-1 cursor-pointer rounded bg-red-600 text-white p-1.5 opacity-100 transition-opacity hover:bg-red-700 md:opacity-0 md:group-hover:opacity-100"
+							title="Удалить изображение"
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+							</svg>
+						</button>
+					</div>
+					<div class="bg-background p-2">
+						<p class="image-filename" title={initialImagePaths[0].split("/").pop()} data-filename>
+							{initialImagePaths[0].split("/").pop()}
+						</p>
+						<p class="image-filesize" data-filesize style="display: none;"></p>
+					</div>
+				</div>
+			)}
+			<!-- JS renders remaining images here -->
+			<button
+				type="button"
+				class="upload-btn group flex aspect-square cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-border/50 border-dashed bg-background text-muted-foreground transition-all duration-200 hover:border-primary/50 hover:bg-primary/5 hover:text-foreground"
+				data-upload-button
+			>
+				<CloudUploadIcon class="size-12 text-primary transition-transform group-hover:scale-110" aria-hidden="true" />
+				<span class="px-2 text-center text-xs">Выбрать файлы</span>
+			</button>
+		</div>
+
+		<p class="mt-3 text-center text-muted-foreground/60! text-xs!">
+			Перетащите файлы, вставьте (Ctrl+V) или нажмите на кнопку загрузки
+		</p>
+
+		<!-- Error display -->
+		<div
+			class="mt-3 hidden rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/50 dark:text-red-200"
+			data-upload-error
+			role="alert"
+		>
+			<p data-upload-error-text></p>
+			<button
+				type="button"
+				class="mt-2 text-xs underline hover:no-underline"
+				data-dismiss-error
+			>
+				Закрыть
+			</button>
+		</div>
+	</section>
+</div>
+
+<script>
+	// Constants from lib/constants
+	const STORAGE_BASE_URL = "https://storage.yandexcloud.net";
+	const ASSETS_BASE_URL = `${STORAGE_BASE_URL}/ansin-static`;
+
+	interface ImageData {
+		path: string; // Relative path (e.g., "images/products/file.webp" or "staging/session-xxx/file.webp")
+		previewUrl: string; // Base64 for instant preview or full URL
+		size?: number;
+		isUploading: boolean;
+		status?: string; // Human-readable processing stage
+	}
+
+	class ImageUploadHandler {
+		private container: HTMLElement;
+		private input: HTMLInputElement;
+		private grid: HTMLElement;
+		private uploadBtn: HTMLButtonElement;
+		private uploadArea: HTMLElement;
+		private images: ImageData[] = [];
+		private sessionId: string;
+		private draggedIndex: number | null = null;
+		private toggleBtn: HTMLButtonElement;
+		private toggleText: HTMLElement;
+		private textarea: HTMLTextAreaElement;
+		private uploadSection: HTMLElement;
+		private countSpan: HTMLElement;
+		private showTextarea: boolean = false;
+		private productId: string | null = null;
+		private isProcessingPaste: boolean = false;
+		private errorEl: HTMLElement | null = null;
+		private errorTextEl: HTMLElement | null = null;
+
+		// Constants
+		private readonly TARGET_MAX_BYTES = 700 * 1024; // 700KB
+		private readonly MAX_DIMENSION = 2000;
+		private readonly MIN_QUALITY = 0.4;
+		private readonly MAX_QUALITY = 0.85;
+
+		constructor(container: HTMLElement) {
+			this.container = container;
+			this.input = container.querySelector<HTMLInputElement>(`#${container.id}-input`)!;
+			this.grid = container.querySelector<HTMLElement>("[data-images-grid]")!;
+			this.uploadBtn = container.querySelector<HTMLButtonElement>("[data-upload-button]")!;
+			this.uploadArea = container.querySelector<HTMLElement>(".image-upload-area")!;
+			this.toggleBtn = container.querySelector<HTMLButtonElement>("[data-toggle-textarea]")!;
+			this.toggleText = container.querySelector<HTMLElement>("[data-toggle-text]")!;
+			this.textarea = container.querySelector<HTMLTextAreaElement>("[data-textarea-editor]")!;
+			this.uploadSection = this.uploadArea;
+			this.countSpan = container.querySelector<HTMLElement>("[data-count]")!;
+			this.productId = container.dataset.productId || null;
+			this.errorEl = container.querySelector<HTMLElement>("[data-upload-error]");
+			this.errorTextEl = container.querySelector<HTMLElement>("[data-upload-error-text]");
+
+			// Generate session ID
+			this.sessionId = `session-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+			// Load initial images from data attribute
+			const initialImages = container.dataset.initialImages;
+			if (initialImages) {
+				this.loadInitialImages(initialImages);
+			}
+
+			this.setupEventListeners();
+			this.updateCountDisplay();
+		}
+		
+		private async loadInitialImages(imagesString: string) {
+			const paths = imagesString
+				.split(",")
+				.map((p) => p.trim())
+				.filter(Boolean);
+
+			for (const path of paths) {
+				const fullUrl = `${ASSETS_BASE_URL}/${path}`;
+				this.images.push({
+					path,
+					previewUrl: fullUrl,
+					isUploading: false,
+				});
+			}
+
+			this.renderImages();
+			this.fetchMetadataForAllImages();
+			
+			// Attach listeners to server-rendered first image if it exists
+			const serverRendered = this.grid.querySelector('[data-server-rendered="true"]');
+			if (serverRendered) {
+				this.attachListenersToServerImage(serverRendered as HTMLElement);
+			}
+		}
+		
+		private attachListenersToServerImage(item: HTMLElement) {
+			// Drag handlers are handled by event delegation, just need to ensure it's draggable
+			item.draggable = true;
+		}
+
+		private async fetchMetadataForAllImages() {
+			for (let i = 0; i < this.images.length; i++) {
+				const image = this.images[i];
+				if (!image.size) {
+					try {
+						const response = await fetch("/api/admin/images/metadata", {
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify({ filename: image.path }),
+						});
+
+						if (response.ok) {
+							const data = await response.json();
+							if (data.success && data.metadata) {
+								this.images[i].size = data.metadata.size;
+								const domItem = this.grid.querySelector(`[data-image-path="${image.path}"]`) as HTMLElement | null;
+								if (domItem) {
+									const sizeEl = domItem.querySelector('[data-filesize]') as HTMLElement | null;
+									if (sizeEl) {
+										sizeEl.textContent = this.formatFileSize(data.metadata.size);
+										sizeEl.style.display = '';
+									}
+								} else {
+									this.renderImages();
+								}
+							}
+						}
+					} catch (error) {
+						console.warn(`Failed to fetch metadata for ${image.path}:`, error);
+					}
+				}
+			}
+		}
+
+		private toggleTextareaMode() {
+			this.showTextarea = !this.showTextarea;
+
+			if (this.showTextarea) {
+				// Switch to textarea mode
+				const currentPaths = this.images
+					.filter((img) => !img.isUploading && !img.path.startsWith("temp-"))
+					.map((img) => img.path)
+					.join(", ");
+				this.textarea.value = currentPaths;
+				this.textarea.classList.remove("hidden");
+				this.uploadSection.classList.add("hidden");
+				this.toggleText.textContent = "Скрыть";
+			} else {
+				// Switch to grid mode - rebuild from textarea
+				const textareaPaths = this.textarea.value
+					.split(",")
+					.map((p) => p.trim())
+					.filter(Boolean);
+
+				// Update images array
+				this.images = textareaPaths.map((path) => {
+					const existing = this.images.find((img) => img.path === path);
+					if (existing) {
+						return existing;
+					}
+					return {
+						path,
+						previewUrl: `${ASSETS_BASE_URL}/${path}`,
+						isUploading: false,
+					};
+				});
+
+				this.textarea.classList.add("hidden");
+				this.uploadSection.classList.remove("hidden");
+				this.toggleText.textContent = "Редактировать текстом";
+				this.renderImages();
+				this.dispatchChangeEvent();
+			}
+		}
+
+		private showError(message: string) {
+			if (this.errorEl && this.errorTextEl) {
+				this.errorTextEl.textContent = message;
+				this.errorEl.classList.remove("hidden");
+			}
+		}
+
+		private hideError() {
+			if (this.errorEl) {
+				this.errorEl.classList.add("hidden");
+			}
+		}
+
+		private updateCountDisplay() {
+			if (this.countSpan) {
+				const count = this.images.filter(
+					(img) => !img.isUploading && !img.path.startsWith("temp-"),
+				).length;
+				this.countSpan.textContent = count > 0 ? `(${count})` : "";
+			}
+		}
+
+		private setupEventListeners() {
+			// Event delegation for remove buttons and drag handlers
+			this.grid.addEventListener("click", (e) => {
+				const target = e.target as HTMLElement;
+				const removeBtn = target.closest(".js-remove-image");
+				if (removeBtn) {
+					e.preventDefault();
+					e.stopPropagation();
+					const item = removeBtn.closest('[data-image-item="true"]') as HTMLElement;
+					if (item) {
+						const path = item.dataset.imagePath;
+						const index = this.images.findIndex(img => img.path === path);
+						if (index !== -1) {
+							this.removeImage(index);
+						}
+					}
+				}
+			});
+			
+			// Drag and drop for reordering (event delegation)
+			this.grid.addEventListener("dragstart", (e) => {
+				const item = (e.target as HTMLElement).closest('[data-image-item="true"]') as HTMLElement;
+				if (!item) return;
+				const path = item.dataset.imagePath;
+				this.draggedIndex = this.images.findIndex(img => img.path === path);
+				item.style.opacity = "0.5";
+				if (e.dataTransfer) {
+					e.dataTransfer.effectAllowed = "move";
+				}
+			});
+
+			this.grid.addEventListener("dragend", (e) => {
+				const item = (e.target as HTMLElement).closest('[data-image-item="true"]') as HTMLElement;
+				if (item) {
+					this.draggedIndex = null;
+					item.style.opacity = "1";
+				}
+			});
+
+			this.grid.addEventListener("dragover", (e) => {
+				const item = (e.target as HTMLElement).closest('[data-image-item="true"]') as HTMLElement;
+				if (!item) return;
+				e.preventDefault();
+				const path = item.dataset.imagePath;
+				const targetIndex = this.images.findIndex(img => img.path === path);
+				if (this.draggedIndex === null || this.draggedIndex === targetIndex) return;
+				item.style.borderColor = "hsl(var(--primary))";
+			});
+
+			this.grid.addEventListener("dragleave", (e) => {
+				const item = (e.target as HTMLElement).closest('[data-image-item="true"]') as HTMLElement;
+				if (item) {
+					item.style.borderColor = "";
+				}
+			});
+
+			this.grid.addEventListener("drop", (e) => {
+				const item = (e.target as HTMLElement).closest('[data-image-item="true"]') as HTMLElement;
+				if (!item) return;
+				e.preventDefault();
+				item.style.borderColor = "";
+
+				const path = item.dataset.imagePath;
+				const targetIndex = this.images.findIndex(img => img.path === path);
+				if (this.draggedIndex === null || this.draggedIndex === targetIndex) return;
+
+				// Reorder images array
+				const draggedImage = this.images[this.draggedIndex];
+				this.images.splice(this.draggedIndex, 1);
+				this.images.splice(targetIndex, 0, draggedImage);
+
+				// Re-render and dispatch change
+				this.renderImages();
+				this.dispatchChangeEvent();
+			});
+			
+			// Toggle textarea mode
+			this.toggleBtn.addEventListener("click", (e) => {
+				e.preventDefault();
+				this.toggleTextareaMode();
+			});
+
+			// Textarea change handler
+			this.textarea.addEventListener("input", () => {
+				this.dispatchChangeEvent();
+			});
+
+			// Click to upload
+			this.uploadBtn.addEventListener("click", () => {
+				this.input.click();
+			});
+
+			// File input change
+			this.input.addEventListener("change", () => {
+				if (this.input.files) {
+					this.handleFiles(Array.from(this.input.files));
+				}
+			});
+
+			// Drag and drop
+			this.uploadArea.addEventListener("dragover", (e) => {
+				e.preventDefault();
+				this.uploadArea.dataset.dragActive = "true";
+			});
+
+			this.uploadArea.addEventListener("dragleave", () => {
+				this.uploadArea.dataset.dragActive = "false";
+			});
+
+			this.uploadArea.addEventListener("drop", (e) => {
+				e.preventDefault();
+				this.uploadArea.dataset.dragActive = "false";
+				if (e.dataTransfer?.files) {
+					this.handleFiles(Array.from(e.dataTransfer.files));
+				}
+			});
+
+			// Dismiss error button
+			this.container.querySelector("[data-dismiss-error]")?.addEventListener("click", () => {
+				this.hideError();
+			});
+
+			// Paste support with double-processing guard
+			window.addEventListener("paste", async (e) => {
+				if (this.isProcessingPaste) {
+					console.log("Skipping paste - already processing");
+					return;
+				}
+
+				// Check if we're in the image upload context
+				const isInContext =
+					this.container.contains(document.activeElement) ||
+					document.activeElement?.closest(".image-upload-area");
+
+				if (!isInContext) return;
+
+				const items = e.clipboardData?.items;
+				if (!items) return;
+
+				const imageFiles: File[] = [];
+				for (let i = 0; i < items.length; i++) {
+					const item = items[i];
+					if (item.type.startsWith("image/")) {
+						const file = item.getAsFile();
+						if (file) imageFiles.push(file);
+					}
+				}
+
+				if (imageFiles.length > 0) {
+					e.preventDefault();
+					e.stopPropagation();
+					this.isProcessingPaste = true;
+
+					try {
+						await this.handleFiles(imageFiles);
+					} finally {
+						// Reset guard after a short delay
+						setTimeout(() => {
+							this.isProcessingPaste = false;
+						}, 100);
+					}
+				}
+			});
+		}
+
+		private async handleFiles(files: File[]) {
+			if (files.length === 0) return;
+
+			// Don't block multiple uploads - each file shows its own loading state
+			for (const file of files) {
+				await this.uploadFile(file);
+			}
+
+			this.input.value = ""; // Reset input
+		}
+
+		private async uploadFile(file: File) {
+			try {
+				this.hideError();
+
+				// Validate file type
+				const allowedTypes = [
+					"image/jpeg",
+					"image/jpg",
+					"image/png",
+					"image/webp",
+					"image/svg+xml",
+				];
+				const isSvg = file.type === "image/svg+xml" || file.name.toLowerCase().endsWith(".svg");
+				// Clipboard paste can yield empty type or application/octet-stream
+				const isClipboardUnknown =
+					(!file.type || file.type === "application/octet-stream") &&
+					/\.(jpe?g|png|webp|gif|bmp)$/i.test(file.name);
+
+				if (!allowedTypes.includes(file.type) && !isSvg && !isClipboardUnknown) {
+					this.showError(`Неподдерживаемый формат: ${file.type || "неизвестно"}. Используйте JPEG, PNG, WebP или SVG.`);
+					return;
+				}
+
+				const skipCompression = isSvg || isClipboardUnknown;
+				const tempPath = `temp-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+				// Show preview immediately with original image (instant feedback)
+				const originalBlobUrl = URL.createObjectURL(file);
+				this.images.push({
+					path: tempPath,
+					previewUrl: originalBlobUrl,
+					size: file.size,
+					isUploading: true,
+					status: skipCompression ? 'Загрузка...' : 'Подготовка...',
+				});
+				this.renderImages();
+
+				// Compress with live status updates in the overlay
+				let processedFile: File;
+				if (skipCompression) {
+					processedFile = file;
+				} else {
+					processedFile = await this.compressToWebP(file, (status) => {
+						this.updateItemStatus(tempPath, status);
+					});
+					URL.revokeObjectURL(originalBlobUrl);
+
+					if (processedFile.size > this.TARGET_MAX_BYTES) {
+						this.images = this.images.filter((img) => img.path !== tempPath);
+						this.renderImages();
+						this.showError(
+							`Изображение слишком большое после сжатия (~${(this.TARGET_MAX_BYTES / 1024).toFixed(0)} КБ макс.). Используйте изображение меньшего размера.`,
+						);
+						return;
+					}
+
+					// Update preview to compressed version
+					let base64: string;
+					try {
+						base64 = await this.fileToBase64(processedFile);
+					} catch {
+						base64 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23ddd' width='100' height='100'/%3E%3Ctext x='50' y='55' text-anchor='middle' fill='%23999' font-size='12'%3E?%3C/text%3E%3C/svg%3E";
+					}
+					this.updateItemPreview(tempPath, base64, processedFile.size);
+				}
+
+				this.updateItemStatus(tempPath, 'Загрузка...');
+
+				try {
+					// 1. Get presigned URL (small request, bypasses API Gateway payload limits)
+					const urlResponse = await fetch("/api/admin/products/upload-staging-url", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({
+							filename: processedFile.name,
+							sessionId: this.sessionId,
+							contentType: processedFile.type || "image/jpeg",
+						}),
+					});
+
+					if (!urlResponse.ok) {
+						const errorData = await urlResponse.json().catch(() => ({}));
+						let msg = errorData.error || errorData.details;
+						if (!msg) {
+							msg =
+								urlResponse.status === 403
+									? "Доступ запрещён (403). Проверьте настройки."
+									: `Ошибка загрузки (${urlResponse.status})`;
+						}
+						throw new Error(msg);
+					}
+
+					const { uploadUrl, imagePath } = await urlResponse.json();
+					if (!uploadUrl || !imagePath) {
+						throw new Error("Invalid response from server");
+					}
+
+					// 2. Upload file directly to Object Storage (bypasses API Gateway)
+					const putResponse = await fetch(uploadUrl, {
+						method: "PUT",
+						body: processedFile,
+						headers: {
+							"Content-Type": processedFile.type || "image/jpeg",
+						},
+					});
+
+					if (!putResponse.ok) {
+						throw new Error(`Ошибка загрузки в хранилище (${putResponse.status})`);
+					}
+
+					// Update path in data + DOM, then fade out overlay
+					const imageIndex = this.images.findIndex((img) => img.path === tempPath);
+					if (imageIndex !== -1) {
+						this.images[imageIndex].path = imagePath;
+						this.images[imageIndex].size = processedFile.size;
+						this.images[imageIndex].isUploading = false;
+						const domItem = this.grid.querySelector(`[data-image-path="${tempPath}"]`) as HTMLElement | null;
+						if (domItem) domItem.dataset.imagePath = imagePath;
+						await this.fadeOutOverlay(imagePath);
+						this.updateCountDisplay();
+						this.dispatchChangeEvent();
+					}
+				} catch (uploadError) {
+					// Remove failed upload
+					this.images = this.images.filter((img) => img.path !== tempPath);
+					this.renderImages();
+					let errMsg = uploadError instanceof Error ? uploadError.message : "Ошибка загрузки";
+					if (uploadError instanceof TypeError && uploadError.message.includes("fetch")) {
+						errMsg = "Ошибка сети. Проверьте подключение.";
+					}
+					this.showError(`${file.name}: ${errMsg}`);
+				}
+			} catch (error) {
+				console.error("Error processing file:", error);
+			}
+		}
+
+		private async compressToWebP(file: File, onStatus?: (status: string) => void): Promise<File> {
+			// Skip SVG files (by type or extension)
+			if (file.type === "image/svg+xml" || file.name.toLowerCase().endsWith(".svg")) {
+				return file;
+			}
+
+			// Skip already optimized WebP files under the target size
+			if (file.type === "image/webp" && file.size <= this.TARGET_MAX_BYTES) {
+				return file;
+			}
+
+			return new Promise((resolve) => {
+				const img = new Image();
+				const blobUrl = URL.createObjectURL(file);
+
+				img.onload = async () => {
+					URL.revokeObjectURL(blobUrl);
+
+					try {
+						let { width, height } = img;
+
+						// Resize if too large
+						if (width > this.MAX_DIMENSION || height > this.MAX_DIMENSION) {
+							onStatus?.('Изменение размера...');
+							const ratio = Math.min(this.MAX_DIMENSION / width, this.MAX_DIMENSION / height);
+							width = Math.round(width * ratio);
+							height = Math.round(height * ratio);
+						}
+
+						const canvas = document.createElement("canvas");
+						canvas.width = width;
+						canvas.height = height;
+						const ctx = canvas.getContext("2d");
+						
+						if (!ctx) {
+							resolve(file);
+							return;
+						}
+
+						ctx.drawImage(img, 0, 0, width, height);
+
+						// Compress with iterative quality reduction
+						onStatus?.('Сжатие...');
+						let quality = this.MAX_QUALITY;
+						let blob = await this.canvasToBlob(canvas, quality);
+
+						while (blob.size > this.TARGET_MAX_BYTES && quality > this.MIN_QUALITY) {
+							quality -= 0.05;
+							blob = await this.canvasToBlob(canvas, quality);
+						}
+
+						const ext = ".webp";
+						const baseName = (
+							file.name.includes(".")
+								? file.name.slice(0, file.name.lastIndexOf("."))
+								: file.name
+						).replace(/\.+$/, "");
+						const newName = `${baseName}${ext}`;
+						
+						resolve(new File([blob], newName, { type: "image/webp" }));
+					} catch (error) {
+						console.error("Compression failed:", error);
+						resolve(file);
+					}
+				};
+
+				img.onerror = () => {
+					URL.revokeObjectURL(blobUrl);
+					resolve(file);
+				};
+
+				img.src = blobUrl;
+			});
+		}
+
+		private updateItemStatus(path: string, status: string) {
+			const item = this.grid.querySelector(`[data-image-path="${path}"]`);
+			if (!item) return;
+			const statusEl = item.querySelector('[data-status-text]');
+			if (statusEl) statusEl.textContent = status;
+		}
+
+		private updateItemPreview(path: string, src: string, size?: number) {
+			const item = this.grid.querySelector(`[data-image-path="${path}"]`) as HTMLElement | null;
+			if (!item) return;
+			const imgEl = item.querySelector('img') as HTMLImageElement | null;
+			if (imgEl) imgEl.src = src;
+			if (size !== undefined) {
+				const idx = this.images.findIndex(img => img.path === path);
+				if (idx !== -1) this.images[idx].size = size;
+				const sizeEl = item.querySelector('[data-filesize]') as HTMLElement | null;
+				if (sizeEl) {
+					sizeEl.textContent = this.formatFileSize(size);
+					sizeEl.style.display = '';
+				}
+			}
+		}
+
+		private fadeOutOverlay(path: string): Promise<void> {
+			return new Promise((resolve) => {
+				const item = this.grid.querySelector(`[data-image-path="${path}"]`);
+				if (!item) { resolve(); return; }
+				const overlay = item.querySelector('[data-upload-overlay]') as HTMLElement | null;
+				if (!overlay) { resolve(); return; }
+				overlay.classList.add('upload-overlay-fadeout');
+				overlay.addEventListener('transitionend', () => {
+					overlay.remove();
+					resolve();
+				}, { once: true });
+				// Fallback in case transitionend doesn't fire
+				setTimeout(() => { overlay.remove(); resolve(); }, 600);
+			});
+		}
+
+		private canvasToBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob> {
+			return new Promise((resolve, reject) => {
+				canvas.toBlob(
+					(blob) => {
+						if (!blob) {
+							reject(new Error("Failed to create blob"));
+							return;
+						}
+						resolve(blob);
+					},
+					"image/webp",
+					quality
+				);
+			});
+		}
+
+		private fileToBase64(file: File): Promise<string> {
+			return new Promise((resolve, reject) => {
+				const reader = new FileReader();
+				reader.onloadend = () => resolve(reader.result as string);
+				reader.onerror = reject;
+				reader.readAsDataURL(file);
+			});
+		}
+
+		private async removeImage(index: number) {
+			const image = this.images[index];
+			if (!image) return;
+
+			// Remove from array (optimistic update)
+			this.images.splice(index, 1);
+			this.renderImages();
+			this.dispatchChangeEvent();
+
+			// Delete from storage if not still uploading
+			if (!image.isUploading && !image.path.startsWith("temp-")) {
+				try {
+					const currentPaths = this.images.map((img) => img.path).join(",");
+					await fetch("/api/admin/images/delete", {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({
+							filename: image.path,
+							currentImages: currentPaths,
+						}),
+					});
+				} catch (error) {
+					console.error("Failed to delete image:", error);
+				}
+			}
+		}
+		
+		private renderImages() {
+			// Remove all JS-rendered image items (keep server-rendered first image and upload button)
+			const imageItems = this.grid.querySelectorAll('[data-image-item]:not([data-server-rendered])');
+			imageItems.forEach(item => item.remove());
+
+			// Get reference to upload button and server-rendered first image
+			const uploadButton = this.grid.querySelector("[data-upload-button]");
+			const serverRenderedFirst = this.grid.querySelector('[data-server-rendered="true"]');
+
+			// Start index based on whether first image is server-rendered
+			let startIndex = 0;
+			if (serverRenderedFirst && this.images.length > 0) {
+				const serverPath = (serverRenderedFirst as HTMLElement).dataset.imagePath;
+				if (serverPath === this.images[0].path) {
+					startIndex = 1; // Skip first image, already server-rendered
+				} else {
+					// First image changed, remove server-rendered one
+					serverRenderedFirst.remove();
+					startIndex = 0;
+				}
+			}
+
+			// Insert remaining images before upload button
+			for (let i = startIndex; i < this.images.length; i++) {
+				const item = this.createImageItem(this.images[i], i);
+				if (uploadButton) {
+					this.grid.insertBefore(item, uploadButton);
+				} else {
+					this.grid.appendChild(item);
+				}
+			}
+
+			this.updateCountDisplay();
+		}
+
+		private createImageItem(image: ImageData, index: number): HTMLElement {
+			const item = document.createElement("div");
+			item.className = "group relative overflow-hidden rounded-lg border border-border bg-background";
+			item.setAttribute("data-image-item", "true");
+			item.setAttribute("data-image-path", image.path);
+			item.draggable = true;
+
+			const filename = image.path.split("/").pop() || "";
+			const sizeText = image.size ? this.formatFileSize(image.size) : "";
+			const isFirstImage = index === 0 && this.productId;
+			const viewTransitionStyle = isFirstImage ? `view-transition-name: product-image-${this.productId};` : "";
+
+			item.innerHTML = `
+				<div class="relative w-full">
+					<img
+						src="${image.previewUrl}"
+						alt="${filename}"
+						class="w-full h-auto rounded-lg object-contain aspect-square"
+						loading="${isFirstImage ? "eager" : "lazy"}"
+						decoding="${isFirstImage ? "sync" : "async"}"
+						fetchpriority="${isFirstImage ? "high" : "auto"}"
+						style="${viewTransitionStyle}"
+					/>
+					${image.isUploading ? `
+						<div class="upload-overlay absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-muted/50 rounded-lg" data-upload-overlay>
+							<span class="animate-spin text-2xl">⏳</span>
+							<span class="text-xs font-medium text-foreground/80 px-2 text-center" data-status-text>${image.status ?? 'Загрузка...'}</span>
+						</div>
+					` : ""}
+					<button
+						type="button"
+						class="drag-handle absolute top-1 left-1 cursor-grab rounded bg-primary p-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 active:cursor-grabbing"
+						title="Перетащите для перемещения"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-background" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+						</svg>
+					</button>
+					<button
+						type="button"
+						class="js-remove-image absolute top-1 right-1 cursor-pointer rounded bg-red-600 text-white p-1.5 opacity-100 transition-opacity hover:bg-red-700 md:opacity-0 md:group-hover:opacity-100"
+						title="Удалить изображение"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						</svg>
+					</button>
+				</div>
+				<div class="bg-background p-2">
+					<p class="image-filename" title="${filename}" data-filename>
+						${filename}
+					</p>
+					<p class="image-filesize" data-filesize${sizeText ? "" : ' style="display:none"'}>${sizeText}</p>
+				</div>
+			`;
+
+			return item;
+		}
+
+		private formatFileSize(bytes: number): string {
+			if (bytes < 1024) return `${bytes} B`;
+			if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+			return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+		}
+
+		private dispatchChangeEvent() {
+			// If in textarea mode, use textarea value directly
+			if (this.showTextarea) {
+				const paths = this.textarea.value;
+				const event = new CustomEvent("images-changed", {
+					detail: { images: paths },
+					bubbles: true,
+				});
+				this.container.dispatchEvent(event);
+				return;
+			}
+
+			// Otherwise, emit comma-separated string of relative paths (excluding temp and uploading)
+			const paths = this.images
+				.filter((img) => !img.isUploading && !img.path.startsWith("temp-"))
+				.map((img) => img.path)
+				.join(", ");
+
+			const event = new CustomEvent("images-changed", {
+				detail: { images: paths },
+				bubbles: true,
+			});
+			this.container.dispatchEvent(event);
+		}
+
+		public getImages(): string {
+			// If in textarea mode, return textarea value
+			if (this.showTextarea) {
+				return this.textarea.value;
+			}
+
+			return this.images
+				.filter((img) => !img.isUploading && !img.path.startsWith("temp-"))
+				.map((img) => img.path)
+				.join(", ");
+		}
+	}
+
+	// Initialize all image upload handlers
+	// Store handlers in WeakMap to avoid type hacks
+	const handlerMap = new WeakMap<HTMLElement, ImageUploadHandler>();
+	
+	function initializeImageUploads() {
+		document.querySelectorAll<HTMLElement>(".image-upload-container").forEach((container) => {
+			if (!handlerMap.has(container)) {
+				const handler = new ImageUploadHandler(container);
+				handlerMap.set(container, handler);
+				// Expose for ProductForm access
+				(container as any)._imageUploadHandler = handler;
+			}
+		});
+	}
+
+	// Initialize immediately on load and before view transition swap
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initializeImageUploads);
+	} else {
+		initializeImageUploads();
+	}
+
+	// Re-initialize after Astro page transitions
+	document.addEventListener("astro:after-swap", initializeImageUploads);
+</script>
+
+<style is:global>
+	.image-upload-area[data-drag-active="true"] {
+		border-color: hsl(var(--primary));
+		background-color: hsl(var(--primary) / 0.05);
+	}
+
+	.image-filename {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+		font-size: 0.75rem;
+		line-height: 1rem;
+		color: color-mix(in oklch, var(--muted-foreground) 65%, transparent);
+	}
+
+	.image-filesize {
+		margin-top: 0.125rem;
+		font-size: 0.75rem;
+		line-height: 1rem;
+		color: color-mix(in oklch, var(--muted-foreground) 65%, transparent);
+	}
+
+	.upload-overlay {
+		transition: opacity 0.4s ease-out;
+	}
+
+	.upload-overlay-fadeout {
+		opacity: 0;
+	}
+</style>

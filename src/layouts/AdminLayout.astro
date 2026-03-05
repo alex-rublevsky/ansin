@@ -1,6 +1,8 @@
 ---
-import Button from "../components/Button.astro";
+import { ClientRouter } from "astro:transitions";
 import "../styles/global.css";
+import "../styles/pill-nav.css";
+import Button from "../components/Button.astro";
 
 interface Props {
 	title: string;
@@ -13,8 +15,6 @@ const _user = Astro.locals.user;
 // if (!user) {
 //   return Astro.redirect('/admin/login');
 // }
-
-const _currentPath = Astro.url.pathname;
 ---
 
 <!DOCTYPE html>
@@ -24,45 +24,42 @@ const _currentPath = Astro.url.pathname;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title} Ансин — админка</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <ClientRouter />
   </head>
-  <body class="min-h-screen bg-gray-100">
-    <main class="flex-1 overflow-y-auto">
-      <div class="p-6">
+  <body class="min-h-screen bg-background">
+    <main class="flex-1">
+      <div class="pb-24">
         <slot />
       </div>
     </main>
-        <div class="mb-2 fixed bottom-0 left-0 riht-0 w-full flex justify-center">
-          <nav class="bg-background border border-primary rounded-lg flex items-center justify-center">
-            <Button
-              href="/admin"
-              size="sm"
-    variant="ghost"
-            >
-              Главная
-            </Button>
-            <Button
-              href="/admin/products"
-              size="sm"
-    variant="ghost"
-            >
-              Товары
-            </Button>
-            <Button
-              href="/admin/orders"
-              size="sm"
-    variant="ghost"
-            >
-            Заказы
-            </Button>
-            <Button
-              href="/admin/categories"
-              size="sm"
-    variant="ghost"
-            >
-            Категории
-            </Button>
-          </nav>
+        <div class="mb-2 fixed bottom-0 left-0 right-0 w-full flex justify-center z-50" transition:persist="admin-nav">
+          <div class="pill-container">
+            <div class="pill-bubble active"></div>
+            <div class="pill-bubble hover"></div>
+            <nav class="pill-nav-links">
+              <Button href="/admin" variant="pill" data-nav-link data-text="Главная">Главная</Button>
+              <Button href="/admin/products" variant="pill" data-nav-link data-text="Товары">Товары</Button>
+              <Button href="/admin/orders" variant="pill" data-nav-link data-text="Заказы">Заказы</Button>
+              <Button href="/admin/categories" variant="pill" data-nav-link data-text="Категории">Категории</Button>
+            </nav>
+          </div>
         </div>
+
+        <script>
+          function updateActiveNav() {
+            const path = window.location.pathname;
+            document.querySelectorAll('[data-nav-link]').forEach((link) => {
+              const href = link.getAttribute('href');
+              const isActive = href === '/admin'
+                ? path === '/admin' || path === '/admin/'
+                : path.startsWith(href!);
+              link.classList.toggle('active', isActive);
+            });
+          }
+
+          updateActiveNav();
+          document.addEventListener('astro:after-swap', updateActiveNav);
+        </script>
 
         <!-- <div class="p-4 border-t border-gray-800">
           {user && (

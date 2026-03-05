@@ -1,0 +1,189 @@
+/* Reusable pill-style navigation components */
+
+/* Base pill container styling */
+.pill-container {
+  position: relative;
+  width: fit-content;
+  font-weight: 450;
+  border: 1px solid var(--border);
+  border-radius: 500px;
+  box-shadow: inset 5px 0 5px color-mix(in oklch, var(--muted) 30%, transparent);
+  backdrop-filter: blur(8px);
+  transition:
+    border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    font-weight 0.3s ease-out;
+  background: linear-gradient(
+    0deg,
+    color-mix(in oklch, var(--background) 15%, transparent),
+    color-mix(in oklch, var(--background) 80%, transparent)
+  );
+}
+
+/* Outer glow effect */
+.pill-container::after {
+  content: "";
+  display: block;
+  position: absolute;
+  inset: -5px;
+  background: linear-gradient(
+    180deg,
+    var(--border),
+    color-mix(in oklch, var(--primary) 0%, var(--background) 0%)
+  );
+  border-radius: 500px;
+  z-index: -1;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1;
+}
+
+/* Minimal state - hide pill styling at top of page */
+.nav-minimal .pill-container {
+  border-color: transparent;
+  box-shadow: none;
+  background: transparent;
+}
+
+.nav-minimal .pill-container::after {
+  opacity: 0;
+}
+
+/* Navigation links container */
+.pill-nav-links {
+  width: fit-content;
+  anchor-name: --nav;
+  margin: 4px;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 2px;
+  position: relative;
+}
+
+/* Navigation link items */
+.pill-nav-link {
+  z-index: 10;
+  position: relative;
+  display: inline-block;
+  padding: clamp(0.3rem, 2vw + 0.05rem, 0.4rem) clamp(0.55rem, 2vw + 0.25rem, 0.85rem);
+  color: var(--foreground);
+  text-decoration: none;
+  font-size: var(--fluid-xs);
+  white-space: nowrap;
+  text-align: center;
+  transition: color 0.4s ease-out;
+}
+
+.pill-nav-link::before {
+  content: "";
+  display: block;
+  position: absolute;
+  inset: 0;
+  opacity: 0.2;
+}
+
+/* Font weight trick for width stability */
+.pill-nav-link::after {
+  content: attr(data-text);
+  content: attr(data-text) / "";
+  font-weight: 600;
+  height: 0;
+  visibility: hidden;
+  overflow: hidden;
+  user-select: none;
+  pointer-events: none;
+  display: block;
+}
+
+.pill-nav-link.active {
+  anchor-name: --active;
+  color: var(--background);
+  font-weight: 600;
+}
+
+.pill-nav-link:hover::before {
+  anchor-name: --nav;
+}
+
+/* Animated bubbles for active/hover states */
+.pill-bubble {
+  background: var(--background);
+  top: anchor(top);
+  right: anchor(right);
+  bottom: anchor(bottom);
+  left: anchor(left);
+  position: absolute;
+  transition:
+    all 0.2s ease,
+    opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 500px;
+  opacity: 1;
+}
+
+.pill-bubble.active {
+  position-anchor: --active;
+  z-index: 2;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--primary) 85%, white),
+    color-mix(in oklch, var(--primary) 90%, black)
+  );
+  box-shadow:
+    inset 0 1px 2px color-mix(in oklch, white 20%, transparent),
+    inset 0 -1px 3px color-mix(in oklch, black 25%, transparent),
+    0 2px 4px color-mix(in oklch, var(--primary) 25%, transparent);
+}
+
+.pill-bubble.hover {
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    var(--border),
+    color-mix(in oklch, var(--background) 25%, var(--background) 25%)
+  );
+  box-shadow: inset 0 2px 7px color-mix(in oklch, var(--primary) 15%, transparent);
+  position-anchor: --nav;
+}
+
+/* Hide bubbles in minimal state but keep interactivity */
+.nav-minimal .pill-bubble.hover {
+  opacity: 0;
+}
+
+/* Keep active bubble visible but minimal in minimal state */
+.nav-minimal .pill-bubble.active {
+  background: transparent;
+  box-shadow: none;
+  opacity: 1;
+}
+
+/* Restore text color in minimal state */
+.nav-minimal .pill-nav-link.active {
+  color: var(--foreground);
+}
+
+/* ----------------------------------------------------------------------------
+   Action button intent — hover bubble color by data-intent attribute
+   Uses CSS :has() to change the shared hover bubble color based on which
+   action button is being hovered.
+   ---------------------------------------------------------------------------- */
+
+.pill-container:has([data-intent="success"]:hover) .pill-bubble.hover {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--success) 42%, transparent),
+    color-mix(in oklch, var(--success) 24%, transparent)
+  );
+  box-shadow: inset 0 2px 7px color-mix(in oklch, var(--success) 35%, transparent);
+}
+
+.pill-container:has([data-intent="destructive"]:hover) .pill-bubble.hover {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--error) 42%, transparent),
+    color-mix(in oklch, var(--error) 24%, transparent)
+  );
+  box-shadow: inset 0 2px 7px color-mix(in oklch, var(--error) 35%, transparent);
+}

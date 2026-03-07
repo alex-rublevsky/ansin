@@ -8,13 +8,13 @@ interface Props {
 const { title } = Astro.props;
 ---
 
-<header class="sticky top-0 z-20 flex items-center justify-between pt-2 pb-3 mb-6 gap-4">
+<header class="page-header sticky top-0 z-20 flex items-center justify-between pt-6 md:pt-2 pb-3 mb-6 gap-4">
 	<div class="pill-container">
 		<div class="pill-nav-links">
 			<span class="title-text">{title}</span>
 		</div>
 	</div>
-	<div class="pill-container">
+	<div class="page-header-actions pill-container">
 		<div class="pill-bubble hover"></div>
 		<div class="pill-nav-links">
 			<slot />
@@ -30,5 +30,23 @@ const { title } = Astro.props;
 		font-size: var(--fluid-xs);
 		font-weight: 500;
 		white-space: nowrap;
+	}
+
+	@media (max-width: 768px) {
+		.pill-container:has(.title-text) {
+			border: none;
+			background: none;
+			box-shadow: none;
+			backdrop-filter: none;
+		}
+
+		.title-text {
+			font-size: var(--fluid-2xl);
+			font-weight: 600;
+		}
+
+		.pill-container:has(.title-text)::after {
+			display: none;
+		}
 	}
 </style>

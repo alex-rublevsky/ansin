@@ -17,6 +17,9 @@ pnpm-debug.log*
 .env
 .env.production
 
+# local constants (copy constants.example.ts to constants.ts)
+src/lib/constants.ts
+
 # deployment cache and generated files
 .yandex-cache
 yandex-api-gateway.yaml
@@ -28,3 +31,4 @@ yandex-api-gateway.yaml
 .idea/
 
 TODO
+.vscode

@@ -1,0 +1,1 @@
+ALTER TABLE `products` ADD `volume` integer DEFAULT 0 NOT NULL;

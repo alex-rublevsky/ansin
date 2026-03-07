@@ -1,0 +1,146 @@
+---
+import { getOrderById } from "../../../db/repositories/orders";
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+export const prerender = false;
+
+const id = parseInt(Astro.params.id!, 10);
+const order = await getOrderById(id);
+
+if (!order) {
+	return Astro.redirect("/admin/orders");
+}
+---
+
+<AdminLayout title={`Order ${order.orderNumber}`}>
+  <div class="mb-8">
+    <a href="/admin/orders" class="text-indigo-600 hover:text-indigo-700 text-sm mb-2 inline-block">
+      ← Back to Orders
+    </a>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Order {order.orderNumber}</h1>
+    <p class="text-gray-600">Placed on {new Date(order.createdAt).toLocaleDateString()}</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Order Items</h2>
+        <div class="space-y-4">
+          {order.items.map((item) => (
+            <div class="flex justify-between items-start p-4 border border-gray-200 rounded-lg">
+              <div>
+                <div class="font-semibold text-gray-900">{item.productName}</div>
+                <div class="text-sm text-gray-500">Quantity: {item.quantity}</div>
+                <div class="text-sm text-gray-500">Price: ${item.price.toFixed(2)}</div>
+              </div>
+              <div class="text-right">
+                <div class="font-semibold text-gray-900">
+                  ${(item.price * item.quantity).toFixed(2)}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div class="mt-6 pt-6 border-t border-gray-200">
+          <div class="flex justify-between items-center">
+            <span class="text-lg font-semibold text-gray-900">Total</span>
+            <span class="text-2xl font-bold text-indigo-600">
+              ${order.totalAmount.toFixed(2)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {order.notes && (
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold text-gray-900 mb-4">Customer Notes</h2>
+          <p class="text-gray-700">{order.notes}</p>
+        </div>
+      )}
+    </div>
+
+    <div class="space-y-6">
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Customer Information</h2>
+        <div class="space-y-3">
+          <div>
+            <div class="text-sm text-gray-500">Name</div>
+            <div class="font-medium text-gray-900">{order.customerName}</div>
+          </div>
+          <div>
+            <div class="text-sm text-gray-500">Email</div>
+            <div class="font-medium text-gray-900">{order.customerEmail}</div>
+          </div>
+          {order.customerPhone && (
+            <div>
+              <div class="text-sm text-gray-500">Phone</div>
+              <div class="font-medium text-gray-900">{order.customerPhone}</div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Order Status</h2>
+        <div class="mb-4">
+          <span class:list={[
+            "inline-block px-3 py-1 text-sm font-medium rounded-full",
+            order.status === 'pending' && "bg-orange-100 text-orange-700",
+            order.status === 'confirmed' && "bg-green-100 text-green-700",
+            order.status === 'cancelled' && "bg-red-100 text-red-700",
+          ]}>
+            {order.status}
+          </span>
+        </div>
+        
+        <div class="space-y-2">
+          <button
+            data-order-id={order.id}
+            data-status="confirmed"
+            class="status-btn w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+          >
+            Mark as Confirmed
+          </button>
+          <button
+            data-order-id={order.id}
+            data-status="cancelled"
+            class="status-btn w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+          >
+            Mark as Cancelled
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const statusButtons = document.querySelectorAll('.status-btn');
+    
+    statusButtons.forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        const target = e.target as HTMLElement;
+        const orderId = target.getAttribute('data-order-id');
+        const status = target.getAttribute('data-status');
+        
+        if (!orderId || !status || !confirm(`Mark this order as ${status}?`)) {
+          return;
+        }
+
+        try {
+          const response = await fetch(`/api/admin/orders/${orderId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status }),
+          });
+
+          if (response.ok) {
+            window.location.reload();
+          } else {
+            alert('Failed to update order status');
+          }
+        } catch (error) {
+          alert('An error occurred');
+        }
+      });
+    });
+  </script>
+</AdminLayout>

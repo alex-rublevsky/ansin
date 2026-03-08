@@ -1,11 +1,75 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import AnimatedLogo from "../components/AnimatedLogo.astro";
+import ProductCard from "../components/ProductCard.astro";
+import SearchBar from "../components/SearchBar.astro";
+import { getActiveCategories } from "../db/repositories/categories";
+import { getActiveProducts } from "../db/repositories/products";
+import { getVariationsByProductId } from "../db/repositories/variations";
+import PublicLayout from "../layouts/PublicLayout.astro";
+export const prerender = true;
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const products = await getActiveProducts();
+const categories = await getActiveCategories();
+
+// Create a map of categoryId to slug for filtering
+const categoryMap = new Map(categories.map((cat) => [cat.id, cat.slug]));
+
+// Load variations for all products
+const variationsMap = new Map(
+	await Promise.all(
+		products.map(
+			async (p) => [p.id, await getVariationsByProductId(p.id)] as const,
+		),
+	),
+);
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<PublicLayout title="Ансин — чайный каталог" description="Много чая не бывет">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Hero section with animated logo -->
+    <div class="mb-16 text-center">
+      <div class="flex justify-center mb-8">
+        <AnimatedLogo size={300} animate={true} />
+      </div>
+      <h1 class="mb-4">
+        Ансин
+      </h1>
+      <p class="text-lg text-gray-600">
+        Много чая не бывет
+      </p>
+    </div>
+
+    <div class="mb-8">
+      <SearchBar />
+    </div>
+
+    <div class="mb-8">
+    <!--  <CategoryFilter categories={categories} /> -->
+    </div>
+
+    {products.length === 0 ? (
+      <div class="text-center py-12">
+        <p class="text-gray-500 text-lg">No products available at the moment.</p>
+      </div>
+    ) : (
+      <div 
+        class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
+        data-product-grid
+      >
+        {products.map((product) => {
+          const categorySlug = product.categoryId ? categoryMap.get(product.categoryId) : null;
+          return (
+            <div
+              data-product
+              data-product-name={product.name}
+              data-product-description={product.description}
+              data-product-categories={categorySlug || ''}
+            >
+              <ProductCard product={{...product, variations: variationsMap.get(product.id) || []}} />
+            </div>
+          );
+        })}
+      </div>
+    )}
+  </div>
+</PublicLayout>

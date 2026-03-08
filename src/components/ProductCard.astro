@@ -1,0 +1,354 @@
+---
+import Image from "astro/components/Image.astro";
+import type { ProductVariation } from "../db/schema";
+import { ASSETS_BASE_URL } from "../lib/constants";
+import type { Product } from "../types/store";
+import Badge from "./Badge.astro";
+import Link from "./Link.astro";
+
+interface ProductCardProps {
+	product: Product & {
+		variations?: ProductVariation[];
+		categorySlug?: string;
+		teaCategories?: Array<{ slug: string; name: string }>;
+		isFeatured?: boolean;
+		discount?: number;
+	};
+}
+
+const { product } = Astro.props as ProductCardProps;
+
+const imageArray = Array.isArray(product.images) ? product.images : [];
+const firstImage = imageArray[0] || null;
+const secondImage = imageArray[1] || null;
+
+const firstImageUrl = firstImage ? `${ASSETS_BASE_URL}/${firstImage}` : null;
+const secondImageUrl = secondImage ? `${ASSETS_BASE_URL}/${secondImage}` : null;
+
+// Calculate price display — show largest weight (first after reverse) by default
+const hasVariations = product.variations && product.variations.length > 0;
+const reversedVariations = hasVariations
+	? [...product.variations!].reverse()
+	: [];
+let displayPrice = product.price;
+if (hasVariations) {
+	displayPrice = reversedVariations[0].price;
+}
+
+const finalPrice = product.discount
+	? displayPrice * (1 - product.discount / 100)
+	: displayPrice;
+---
+
+<div 
+	class="product-card group relative" 
+	data-product-id={product.id}
+	data-product-slug={product.slug}
+	data-category={product.categorySlug}
+>
+	<Link href={`/product/${product.slug}`} class="block" disableAnimation data-product-link>
+		<!-- Image Section -->
+		<div class="relative aspect-square overflow-hidden bg-muted mb-3" data-image-container>
+			{firstImageUrl ? (
+				<>
+					<div data-image-wrapper="0" transition:name={`product-image-${product.slug}`} class="absolute inset-0">
+						<Image
+							src={firstImageUrl}
+							alt={product.name}
+							width={500}
+							height={500}
+							loading="lazy"
+							class="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-300"
+							data-image-index="0"
+						/>
+					</div>
+					{secondImageUrl && (
+						<div data-image-wrapper="1" class="absolute inset-0">
+							<Image
+								src={secondImageUrl}
+								alt={product.name}
+								width={500}
+								height={500}
+								loading="lazy"
+								class="absolute inset-0 w-full h-full object-cover object-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:block"
+								data-image-index="1"
+							/>
+						</div>
+					)}
+				</>
+			) : (
+				<div class="absolute inset-0 flex items-center justify-center text-muted-foreground">
+					No image
+				</div>
+			)}
+			
+			{product.isFeatured && (
+				<div class="absolute top-2 right-2">
+					<Badge variant="default">Recommended</Badge>
+				</div>
+			)}
+		</div>
+		
+		<!-- Info Section -->
+		<div class="space-y-2">
+			<!-- Price -->
+			<div class="flex items-center gap-2">
+				{product.discount ? (
+					<>
+						<span class="text-xl font-light whitespace-nowrap">
+							{finalPrice.toFixed(0)}&nbsp;<span class="text-xs text-muted-foreground">₽</span>
+						</span>
+					<span class="text-sm line-through text-muted-foreground ml-auto whitespace-nowrap">
+						{displayPrice.toFixed(0)}
+					</span>
+					<Badge variant="success">-{product.discount}%</Badge>
+					</>
+				) : (
+					<>
+						<span class="text-xl font-light whitespace-nowrap" transition:name={`product-price-${product.slug}`} data-card-price>
+							{displayPrice.toFixed(0)}&nbsp;<span class="text-xs text-muted-foreground">₽</span>
+						</span>
+					</>
+				)}
+				{!hasVariations && product.volume > 0 && (
+					<span class="text-sm text-muted-foreground whitespace-nowrap">{product.volume}&nbsp;г</span>
+				)}
+			</div>
+			
+			<!-- Tea Category Badges -->
+			{product.teaCategories && product.teaCategories.length > 0 && (
+				<div class="flex flex-wrap gap-1">
+					{product.teaCategories.map((category: { slug: string; name: string }) => (
+						<Badge variant="outline" size="sm">{category.name}</Badge>
+					))}
+				</div>
+			)}
+			
+			<!-- Product Name -->
+			<p class="text-base" transition:name={`product-name-${product.slug}`}>
+				{product.name}
+			</p>
+			
+			</div>
+	</Link>
+
+	<!-- Variations (outside link so they're independently clickable) -->
+	{hasVariations && (
+		<div class="flex flex-wrap gap-1 mt-2" data-variation-pills>
+			{reversedVariations.map((v, i) => (
+				<button
+					type="button"
+					class="variation-btn variation-btn--card"
+					data-selected={i === 0 ? "true" : "false"}
+					data-variation-id={v.id}
+					data-price={v.price}
+					data-weight={v.weight}
+				>
+					{v.weight}&nbsp;г
+				</button>
+			))}
+		</div>
+	)}
+
+	<!-- Add to Cart Button (will be enhanced with JS) -->
+	<button
+		type="button"
+		data-add-to-cart
+		data-product-id={product.id}
+		class="add-to-cart-btn mt-3 w-full py-2 px-4 bg-muted hover:bg-primary hover:text-primary-foreground text-center"
+	>
+		В корзину
+	</button>
+</div>
+
+<style>
+	.product-card {
+		transition:
+			transform 0.3s ease-out,
+			box-shadow 0.3s ease-out;
+	}
+
+	.product-card img {
+		transition:
+			transform 0.5s ease-out,
+			opacity 0.5s ease-out;
+	}
+
+	@media (min-width: 768px) and (hover: hover) {
+		.product-card:hover {
+			transform: scale(1.02) translateZ(1rem);
+			box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+		}
+
+		.product-card:hover img {
+			transform: scale(1.05);
+		}
+	}
+
+	.add-to-cart-btn {
+		transition:
+			opacity 0.3s ease-in-out,
+			background-color 0.3s ease-in-out,
+			color 0.3s ease-in-out;
+	}
+
+	@media (min-width: 768px) {
+		.product-card .add-to-cart-btn {
+			opacity: 0;
+		}
+
+		.product-card:hover .add-to-cart-btn {
+			opacity: 1;
+		}
+	}
+
+	@media (max-width: 767px) {
+		.product-card .add-to-cart-btn {
+			border-radius: 0;
+			margin-top: 0;
+			opacity: 1;
+		}
+	}
+
+	.add-to-cart-btn:not(:disabled):hover {
+		color: white;
+		background-color: black;
+	}
+
+	.add-to-cart-btn:not(:disabled):active {
+		color: white;
+		background-color: black;
+	}
+
+	.add-to-cart-btn:disabled {
+		cursor: not-allowed;
+	}
+
+	.add-to-cart-btn:disabled:hover {
+		color: black;
+		background-color: rgb(229 231 235 / 0.7);
+	}
+
+	.add-to-cart-btn:disabled:active {
+		color: black;
+		background-color: rgb(229 231 235 / 0.7);
+	}
+</style>
+
+<script>
+	function initProductCardImageTracking() {
+		const productCards = document.querySelectorAll('.product-card');
+		
+		productCards.forEach(card => {
+			const link = card.querySelector('[data-product-link]') as HTMLAnchorElement;
+			const imageContainer = card.querySelector('[data-image-container]');
+			const imageWrappers = Array.from(imageContainer?.querySelectorAll('[data-image-wrapper]') || []) as HTMLElement[];
+			const slug = card.getAttribute('data-product-slug');
+			
+			if (!link || !imageWrappers || imageWrappers.length === 0 || !slug) return;
+			
+			let hoveredImageIndex = 0;
+			
+			// Preload images for smooth transitions
+			const preloadImage = (wrapper: HTMLElement) => {
+				const img = wrapper.querySelector('img') as HTMLImageElement;
+				if (img?.src && !img.dataset.preloaded) {
+					const preloadImg = new Image();
+					preloadImg.src = img.src;
+					img.dataset.preloaded = 'true';
+				}
+			};
+			
+			// Track hover state - move view transition name between images
+			imageContainer?.addEventListener('mouseenter', () => {
+				if (imageWrappers.length > 1 && window.matchMedia('(min-width: 768px)').matches) {
+					hoveredImageIndex = 1;
+					
+					// Preload the second image before switching
+					preloadImage(imageWrappers[1]);
+					
+					// Move view transition name to second image wrapper
+					imageWrappers[0].removeAttribute('data-astro-transition-scope');
+					imageWrappers[1].setAttribute('data-astro-transition-scope', `product-image-${slug}`);
+					imageWrappers[1].style.viewTransitionName = `product-image-${slug}`;
+				}
+			});
+			
+			imageContainer?.addEventListener('mouseleave', () => {
+				hoveredImageIndex = 0;
+				
+				// Move view transition name back to first image wrapper
+				if (imageWrappers.length > 1) {
+					imageWrappers[1].removeAttribute('data-astro-transition-scope');
+					imageWrappers[1].style.viewTransitionName = '';
+					imageWrappers[0].setAttribute('data-astro-transition-scope', `product-image-${slug}`);
+					imageWrappers[0].style.viewTransitionName = `product-image-${slug}`;
+				}
+			});
+			
+			// Preload the currently visible image on link hover for smooth navigation
+			link.addEventListener('mouseenter', () => {
+				preloadImage(imageWrappers[hoveredImageIndex]);
+			});
+			
+			// Store image index in sessionStorage when navigating (doesn't interfere with prefetch)
+			link.addEventListener('click', () => {
+				if (hoveredImageIndex > 0) {
+					sessionStorage.setItem(`rublevsky:imgIndex:${slug}`, hoveredImageIndex.toString());
+				}
+			});
+		});
+	}
+	
+	function initVariationPills() {
+		document.querySelectorAll('[data-variation-pills]').forEach((container) => {
+			const card = container.closest('.product-card');
+			if (!card) return;
+			const priceEl = card.querySelector('[data-card-price]');
+			const link = card.querySelector('[data-product-link]') as HTMLAnchorElement | null;
+			const baseHref = link?.getAttribute('href')?.split('?')[0] || '';
+			const buttons = container.querySelectorAll('.variation-btn');
+
+			buttons.forEach((btn) => {
+				btn.addEventListener('click', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+
+					// Update selected state
+					buttons.forEach((b) => {
+						(b as HTMLElement).dataset.selected = 'false';
+					});
+					(btn as HTMLElement).dataset.selected = 'true';
+
+					// Update price display
+					const price = (btn as HTMLElement).dataset.price;
+					if (priceEl && price) {
+						priceEl.textContent = '';
+						const priceValue = document.createTextNode(`${Math.round(parseFloat(price))}\u00A0`);
+						const currencySpan = document.createElement('span');
+						currencySpan.className = 'text-xs text-muted-foreground';
+						currencySpan.textContent = '\u20BD';
+						priceEl.append(priceValue, currencySpan);
+					}
+
+					// Update product link to include selected weight
+					const weight = (btn as HTMLElement).dataset.weight;
+					if (link && weight) {
+						link.href = `${baseHref}?weight=${weight}`;
+					}
+				});
+			});
+		});
+	}
+
+	// Initialize on page load
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', () => { initProductCardImageTracking(); initVariationPills(); });
+	} else {
+		initProductCardImageTracking();
+		initVariationPills();
+	}
+
+	// Re-initialize on navigation (for SPAs with view transitions)
+	document.addEventListener('astro:page-load', () => { initProductCardImageTracking(); initVariationPills(); });
+</script>

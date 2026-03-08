@@ -1,0 +1,47 @@
+---
+export const prerender = true;
+
+import PublicLayout from "../layouts/PublicLayout.astro";
+
+/** Astro global (see https://docs.astro.build/reference/api-reference/#astro-global) */
+declare const Astro: { url: URL };
+const orderNumber = Astro.url.searchParams.get("orderNumber");
+---
+
+<PublicLayout title="Order Confirmation">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="bg-white rounded-lg shadow-lg p-8 text-center">
+      <div class="mb-6">
+        <div class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+          <svg class="w-10 h-10 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+        </div>
+      </div>
+
+      <h1 class="text-3xl font-bold text-gray-900 mb-4">
+        Order Confirmed!
+      </h1>
+
+      {orderNumber && (
+        <p class="text-lg text-gray-600 mb-6">
+          Your order number is: <span class="font-mono font-bold text-indigo-600">{orderNumber}</span>
+        </p>
+      )}
+
+      <p class="text-gray-600 mb-8">
+        Thank you for your order! We've sent a confirmation email with your order details.
+        We'll be in touch soon to confirm and process your order.
+      </p>
+
+      <div class="space-y-4">
+        <a
+          href="/"
+          class="inline-block w-full sm:w-auto px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition"
+        >
+          Continue Shopping
+        </a>
+      </div>
+    </div>
+  </div>
+</PublicLayout>

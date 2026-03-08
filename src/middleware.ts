@@ -1,10 +1,9 @@
 import { defineMiddleware } from "astro:middleware";
 import { getAuth, isAdmin } from "./lib/auth";
 
-const ALLOWED_ORIGINS = new Set([
-	process.env.BETTER_AUTH_URL || "",
-	"http://localhost:4321",
-].filter(Boolean));
+const ALLOWED_ORIGINS = new Set(
+	[process.env.BETTER_AUTH_URL || "", "http://localhost:4321"].filter(Boolean),
+);
 
 function getCorsHeaders(origin: string | null): Record<string, string> {
 	const allowedOrigin = origin && ALLOWED_ORIGINS.has(origin) ? origin : "";
@@ -15,7 +14,11 @@ function getCorsHeaders(origin: string | null): Record<string, string> {
 	};
 }
 
-function jsonError(message: string, status: number, corsHeaders: Record<string, string>) {
+function jsonError(
+	message: string,
+	status: number,
+	corsHeaders: Record<string, string>,
+) {
 	return new Response(JSON.stringify({ error: message }), {
 		status,
 		headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -64,7 +67,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
 			context.locals.session = session.session;
 		} catch (error) {
 			console.error("Auth middleware error:", error);
-			if (isAdminApi) return jsonError("Authentication error", 500, corsHeaders);
+			if (isAdminApi)
+				return jsonError("Authentication error", 500, corsHeaders);
 			return context.redirect("/admin/login");
 		}
 	}

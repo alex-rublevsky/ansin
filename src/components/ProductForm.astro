@@ -1,0 +1,466 @@
+---
+import type { Category, Product } from "../db/schema";
+import Checkbox from "././Checkbox.astro";
+import { Dropzone } from "./dropzone";
+import Input from "./Input.astro";
+import Label from "./input/Label.astro";
+
+interface Props {
+	product?: Product;
+	categories: Category[];
+	mode: "create" | "edit";
+}
+
+const { product, categories, mode } = Astro.props;
+---
+
+<form id="product-form" class="w-full mx-auto max-w-6xl space-y-6" data-mode={mode} data-product-id={product?.id} novalidate>
+	<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+		<!-- Left: Images -->
+		<div>
+			<Dropzone
+				id="images"
+				name="images"
+				multiple
+				accept="image/*"
+				initialImages={product?.images ? (Array.isArray(product.images) ? product.images.join(", ") : product.images) : ""}
+				productId={product?.id}
+			/>
+		</div>
+
+		<!-- Right: General info -->
+		<div class="space-y-6">
+			<div class="space-y-2">
+				<Input
+					label="Название"
+					type="text"
+					id="name"
+					name="name"
+					value={product?.name || ""}
+					required
+				/>
+			</div>
+
+			<div class="space-y-2">
+				<div class="flex items-center justify-between mb-2">
+					<Label for="slug">Ярлык (ссылка)</Label>
+					<div class="flex items-center gap-2">
+						<Checkbox
+							label="Авто-генерация"
+							id="auto-slug-toggle"
+							size="sm"
+							variant="secondary"
+							checked={true}
+						/>
+					</div>
+				</div>
+				<Input
+					type="text"
+					id="slug"
+					name="slug"
+					value={product?.slug || ""}
+					required
+				/>
+			</div>
+
+			<div class="space-y-2 pb-2">
+				<Input
+					as="textarea"
+					label="Описание"
+					id="description"
+					name="description"
+					rows={4}
+					value={product?.description || ""}
+					required
+				/>
+			</div>
+
+			<div class="grid grid-cols-2 gap-4">
+				<div class="space-y-2">
+					<Input
+						label="Цена за 100 г ₽"
+						type="number"
+						id="price"
+						name="price"
+						step="1"
+						min="0"
+						value={product?.price?.toString() || ""}
+						required
+					/>
+				</div>
+				<div class="space-y-2">
+					<Input
+						label="Объём г"
+						type="number"
+						id="volume"
+						name="volume"
+						min="0"
+						value={product?.volume?.toString() || "0"}
+						step="1"
+						required
+					/>
+				</div>
+			</div>
+
+			<div class="space-y-2">
+				<Checkbox
+					label="Малый объём дороже за грамм"
+					id="priceUp"
+					name="priceUp"
+					checked={product?.priceUp !== false}
+					size="sm"
+					variant="secondary"
+				/>
+			</div>
+
+			<!-- Variations preview -->
+			<div id="variations-preview" class="hidden">
+				<Label for="variations-preview">Вариации</Label>
+				<div id="variations-list" class="mt-2 rounded-lg border border-gray-200 overflow-hidden">
+					<table class="w-full text-sm">
+						<thead class="bg-gray-50">
+							<tr>
+								<th class="px-3 py-2 text-left font-medium text-gray-600">Вес</th>
+								<th class="px-3 py-2 text-right font-medium text-gray-600">Цена</th>
+								<th class="px-3 py-2 text-right font-medium text-gray-600">&#8381;/г</th>
+							</tr>
+						</thead>
+						<tbody id="variations-tbody"></tbody>
+					</table>
+				</div>
+			</div>
+
+			<div class="space-y-2">
+				<Label for="categoryId">Категория</Label>
+				<select
+					id="categoryId"
+					name="categoryId"
+					class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+				>
+					<option value="">Выберите категорию</option>
+					{
+						categories.map((category) => (
+							<option
+								value={category.id}
+								selected={product?.categoryId === category.id}
+							>
+								{category.name}
+							</option>
+						))
+					}
+				</select>
+			</div>
+
+			<div class="space-y-2">
+				<Checkbox
+					label="Активен"
+					id="isActive"
+					name="isActive"
+					checked={product?.isActive !== false}
+					class="mr-2"
+				/>
+			</div>
+		</div>
+	</div>
+
+</form>
+
+<script>
+	import { navigate } from "astro:transitions/client";
+	import { generateWeightSteps, getSmallQuantityMultiplier } from "../lib/variations";
+
+	// Transliteration map for Russian to English
+	const CYRILLIC_TO_LATIN: Record<string, string> = {
+		а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "yo", ж: "zh",
+		з: "z", и: "i", й: "y", к: "k", л: "l", м: "m", н: "n", о: "o",
+		п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "kh", ц: "ts",
+		ч: "ch", ш: "sh", щ: "shch", ъ: "", ы: "y", ь: "", э: "e", ю: "yu", я: "ya",
+	};
+
+	// Generate URL-friendly slug from text with Cyrillic support
+	function generateSlug(text: string): string {
+		return text
+			.toLowerCase()
+			.split("")
+			.map((char) => CYRILLIC_TO_LATIN[char] ?? char)
+			.join("")
+			.replace(/[^\w\s-]/g, "")
+			.replace(/\s+/g, "-")
+			.replace(/-+/g, "-")
+			.replace(/^-|-$/g, "");
+	}
+
+	function generateVariationsPreview(pricePer100g: number, totalWeight: number, smallerCostsMore: boolean) {
+		const steps = generateWeightSteps(totalWeight);
+		const basePricePerGram = pricePer100g / 100;
+		const maxWeight = steps[steps.length - 1];
+		return steps.map((weight) => {
+			let ppg = basePricePerGram;
+			if (smallerCostsMore && weight < maxWeight) ppg *= getSmallQuantityMultiplier(weight);
+			return { weight, price: Math.round(ppg * weight), pricePerGram: ppg };
+		});
+	}
+
+	function init() {
+		const form = document.getElementById("product-form") as HTMLFormElement | null;
+		if (!form) return;
+
+		const mode = form.dataset.mode as "create" | "edit" | undefined;
+		const productId = form.dataset.productId ? parseInt(form.dataset.productId, 10) : undefined;
+
+		const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement | null;
+		const imageUploadContainer = document.querySelector(".image-upload-container") as (HTMLElement & { _imageUploadHandler?: any }) | null;
+		const deleteBtn = document.getElementById("delete-btn") as HTMLButtonElement | null;
+
+		const submitOriginalLabel = submitBtn?.querySelector<HTMLElement>(".btn-label")?.textContent?.trim() ?? "";
+		const deleteOriginalLabel = deleteBtn?.querySelector<HTMLElement>(".btn-label")?.textContent?.trim() ?? "";
+
+		// Slug auto-generation setup
+		const nameInput = document.getElementById("name") as HTMLInputElement | null;
+		const slugInput = document.getElementById("slug") as HTMLInputElement | null;
+		const autoSlugToggle = document.getElementById("auto-slug-toggle") as HTMLInputElement | null;
+
+		// Set initial state: auto-slug ON by default for both create and edit modes
+		let isAutoSlug = true;
+
+		// Update slug input visual state based on auto-generation toggle
+		function updateSlugInputState() {
+			if (!slugInput) return;
+			if (isAutoSlug) {
+				slugInput.readOnly = true;
+				slugInput.classList.add("cursor-not-allowed", "opacity-50");
+			} else {
+				slugInput.readOnly = false;
+				slugInput.classList.remove("cursor-not-allowed", "opacity-50");
+			}
+		}
+
+		if (autoSlugToggle && slugInput) {
+			autoSlugToggle.checked = isAutoSlug;
+			updateSlugInputState();
+		}
+
+		// Auto-generate slug from name when typing
+		nameInput?.addEventListener("input", (e) => {
+			if (isAutoSlug && slugInput) {
+				slugInput.value = generateSlug((e.target as HTMLInputElement).value);
+			}
+		});
+
+		// Toggle auto-generation on/off
+		autoSlugToggle?.addEventListener("change", (e) => {
+			isAutoSlug = (e.target as HTMLInputElement).checked;
+			updateSlugInputState();
+			if (isAutoSlug && nameInput && slugInput) {
+				slugInput.value = generateSlug(nameInput.value);
+			}
+		});
+
+		// --- Variations preview ---
+		const priceInput = document.getElementById("price") as HTMLInputElement | null;
+		const volumeInput = document.getElementById("volume") as HTMLInputElement | null;
+		const smallerQtyCheckbox = document.getElementById("priceUp") as HTMLInputElement | null;
+		const variationsPreview = document.getElementById("variations-preview");
+		const variationsTbody = document.getElementById("variations-tbody");
+
+		function updateVariationsPreview() {
+			if (!priceInput || !volumeInput || !variationsPreview || !variationsTbody) return;
+
+			const price = parseFloat(priceInput.value);
+			const volume = parseInt(volumeInput.value, 10);
+			const smallerCostsMore = smallerQtyCheckbox?.checked ?? true;
+
+			if (!price || price <= 0 || !volume || volume <= 0) {
+				variationsPreview.classList.add("hidden");
+				return;
+			}
+
+			const variations = generateVariationsPreview(price, volume, smallerCostsMore);
+
+			if (variations.length === 0) {
+				variationsPreview.classList.add("hidden");
+				return;
+			}
+
+			variationsPreview.classList.remove("hidden");
+			variationsTbody.innerHTML = '';
+			for (const v of variations) {
+				const tr = document.createElement('tr');
+				tr.className = 'border-t border-gray-100';
+				const tdWeight = document.createElement('td');
+				tdWeight.className = 'px-3 py-1.5 text-gray-800';
+				tdWeight.textContent = `${v.weight} г`;
+				const tdPrice = document.createElement('td');
+				tdPrice.className = 'px-3 py-1.5 text-right text-gray-800';
+				tdPrice.textContent = `${v.price} \u20BD`;
+				const tdPpg = document.createElement('td');
+				tdPpg.className = 'px-3 py-1.5 text-right text-gray-500';
+				tdPpg.textContent = v.pricePerGram.toFixed(2);
+				tr.append(tdWeight, tdPrice, tdPpg);
+				variationsTbody.appendChild(tr);
+			}
+		}
+
+		priceInput?.addEventListener("input", updateVariationsPreview);
+		volumeInput?.addEventListener("input", updateVariationsPreview);
+		smallerQtyCheckbox?.addEventListener("change", updateVariationsPreview);
+
+		// Generate preview on load if values exist
+		updateVariationsPreview();
+
+		// --- Validation ---
+		function showError(inputId: string, message: string) {
+			const el = document.querySelector(`[data-error-for="${inputId}"]`);
+			if (el) {
+				el.textContent = message;
+				el.classList.remove("hidden");
+			}
+		}
+
+		function clearError(inputId: string) {
+			const el = document.querySelector(`[data-error-for="${inputId}"]`);
+			if (el) {
+				el.textContent = "";
+				el.classList.add("hidden");
+			}
+		}
+
+		function validateField(id: string): boolean {
+			const el = document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement | null;
+			if (!el) return true;
+			const value = el.value.trim();
+
+			if (!value) {
+				showError(id, "Обязательное поле");
+				return false;
+			}
+			if (id === "price") {
+				const num = parseFloat(value);
+				if (isNaN(num) || num < 0) {
+					showError(id, "Введите корректную цену");
+					return false;
+				}
+			}
+			if (id === "volume") {
+				const num = parseInt(value, 10);
+				if (isNaN(num) || num < 0) {
+					showError(id, "Введите корректный объём");
+					return false;
+				}
+			}
+			clearError(id);
+			return true;
+		}
+
+		function validateAll(): boolean {
+			const fields = ["name", "slug", "description", "price", "volume"];
+			return fields.map(validateField).every(Boolean);
+		}
+
+		// Clear errors on input
+		["name", "slug", "description", "price", "volume"].forEach((id) => {
+			document.getElementById(id)?.addEventListener("input", () => clearError(id));
+			document.getElementById(id)?.addEventListener("blur", () => validateField(id));
+		});
+
+		form.addEventListener("submit", async (e) => {
+			e.preventDefault();
+			if (!submitBtn) return;
+
+			if (!validateAll()) return;
+
+			(submitBtn as any).setState( "loading");
+
+			try {
+				const formData = new FormData(form);
+
+				// Get current images from Dropzone
+				const imageUploadHandler = imageUploadContainer?._imageUploadHandler;
+				if (!imageUploadHandler) {
+					throw new Error("Image upload handler not initialized");
+				}
+				const finalImages = imageUploadHandler.getImages();
+
+				const productData = {
+					name: formData.get("name"),
+					slug: (slugInput?.value ?? (formData.get("slug") as string)).trim(),
+					description: formData.get("description"),
+					price: parseFloat(formData.get("price") as string),
+					volume: parseInt(formData.get("volume") as string, 10),
+					categoryId: formData.get("categoryId")
+						? parseInt(formData.get("categoryId") as string, 10)
+						: null,
+					isActive: formData.get("isActive") === "on",
+					priceUp: smallerQtyCheckbox?.checked ?? true,
+					images: finalImages,
+				};
+
+				const url =
+					mode === "create"
+						? "/api/admin/products"
+						: `/api/admin/products/${productId}`;
+				const method = mode === "create" ? "POST" : "PUT";
+
+				console.log("Submitting product data:", productData);
+
+				const response = await fetch(url, {
+					method,
+					credentials: "same-origin",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(productData),
+				});
+
+				if (!response.ok) {
+					const errorBody = await response.text();
+					console.error("Server response:", response.status, errorBody);
+					throw new Error(`Failed to save product: ${response.status} ${errorBody}`);
+				}
+
+				(submitBtn as any).setState( "success", "Сохранено");
+
+				setTimeout(() => {
+					navigate("/admin/products");
+				}, 300);
+			} catch (error) {
+				console.error("Error:", error);
+				(submitBtn as any).setState( "error", "Ошибка");
+
+				setTimeout(() => {
+					(submitBtn as any).setState( "", submitOriginalLabel);
+				}, 2000);
+			}
+		});
+
+		deleteBtn?.addEventListener("click", async () => {
+			if (!deleteBtn) return;
+
+			(deleteBtn as any).setState( "loading");
+
+			try {
+				const response = await fetch(`/api/admin/products/${productId}`, {
+					method: "DELETE",
+					credentials: "same-origin",
+				});
+
+				if (!response.ok) {
+					throw new Error("Failed to delete product");
+				}
+
+				(deleteBtn as any).setState( "success", "Удалено");
+
+				setTimeout(() => {
+					navigate("/admin/products");
+				}, 900);
+			} catch (error) {
+				console.error("Error:", error);
+				(deleteBtn as any).setState( "error", "Ошибка");
+
+				setTimeout(() => {
+					(deleteBtn as any).setState( "", deleteOriginalLabel);
+				}, 2000);
+			}
+		});
+	}
+
+	document.addEventListener("astro:page-load", init);
+</script>

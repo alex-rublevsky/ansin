@@ -64,15 +64,36 @@ jobs:
       - name: Mark deployment as completed
         if: success()
         run: |
-          curl -s -X POST "${{ secrets.DEPLOY_CALLBACK_URL }}/api/admin/deploy/complete" \
-            -H "Authorization: Bearer ${{ secrets.DEPLOY_SECRET }}" \
-            -H "Content-Type: application/json" \
-            -d "{\"deployment_id\": \"${{ inputs.deployment_id }}\", \"status\": \"completed\"}"
+          for i in 1 2 3; do
+            RESPONSE=$(curl -s --max-time 15 -w "\n%{http_code}" -X POST "${{ secrets.DEPLOY_CALLBACK_URL }}/api/admin/deploy/complete" \
+              -H "Authorization: Bearer ${{ secrets.DEPLOY_SECRET }}" \
+              -H "Content-Type: application/json" \
+              -d "{\"deployment_id\": \"${{ inputs.deployment_id }}\", \"status\": \"completed\"}")
+            HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "Deployment marked as completed"
+              exit 0
+            fi
+            echo "Attempt $i failed (HTTP $HTTP_CODE), retrying in 5s..."
+            sleep 5
+          done
+          echo "WARNING: Could not mark deployment as completed after 3 attempts"
+          exit 1
 
       - name: Mark deployment as failed
-        if: failure()
+        if: failure() || cancelled()
         run: |
-          curl -s -X POST "${{ secrets.DEPLOY_CALLBACK_URL }}/api/admin/deploy/complete" \
-            -H "Authorization: Bearer ${{ secrets.DEPLOY_SECRET }}" \
-            -H "Content-Type: application/json" \
-            -d "{\"deployment_id\": \"${{ inputs.deployment_id }}\", \"status\": \"failed\"}"
+          for i in 1 2 3; do
+            RESPONSE=$(curl -s --max-time 15 -w "\n%{http_code}" -X POST "${{ secrets.DEPLOY_CALLBACK_URL }}/api/admin/deploy/complete" \
+              -H "Authorization: Bearer ${{ secrets.DEPLOY_SECRET }}" \
+              -H "Content-Type: application/json" \
+              -d "{\"deployment_id\": \"${{ inputs.deployment_id }}\", \"status\": \"failed\"}")
+            HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "Deployment marked as failed"
+              exit 0
+            fi
+            echo "Attempt $i failed (HTTP $HTTP_CODE), retrying in 5s..."
+            sleep 5
+          done
+          echo "WARNING: Could not mark deployment as failed after 3 attempts"

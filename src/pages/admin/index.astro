@@ -255,8 +255,35 @@ const recentOrders = allOrders.slice(0, 5);
       });
     }
 
-    document.addEventListener('astro:page-load', () => { initDeployButton(); initCancelButton(); });
+    let pollInterval: ReturnType<typeof setInterval> | null = null;
+
+    function initDeployPolling() {
+      // Only poll if there's an active deployment shown on the page
+      const cancelBtn = document.getElementById('cancel-deploy-btn');
+      if (!cancelBtn) {
+        if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+        return;
+      }
+      if (pollInterval) return; // already polling
+
+      pollInterval = setInterval(async () => {
+        try {
+          const res = await fetch('/api/admin/deploy/status', { credentials: 'include' });
+          if (!res.ok) return;
+          const data = await res.json();
+          // Reload when deployment is no longer active (completed, failed, or expired)
+          if (!data.activeDeployment) {
+            clearInterval(pollInterval!);
+            pollInterval = null;
+            window.location.reload();
+          }
+        } catch { /* ignore network errors, retry on next interval */ }
+      }, 5000);
+    }
+
+    document.addEventListener('astro:page-load', () => { initDeployButton(); initCancelButton(); initDeployPolling(); });
     initDeployButton();
     initCancelButton();
+    initDeployPolling();
   </script>
 </AdminLayout>

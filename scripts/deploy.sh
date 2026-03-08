@@ -520,15 +520,28 @@ echo ""
 DEPLOY_SECRET=$(read_secret DEPLOY_SECRET)
 if [ -n "$DEPLOY_SECRET" ] && [ -n "$GATEWAY_URL" ]; then
   echo -e "${YELLOW}Marking deployment as completed...${NC}"
-  DEPLOY_RESPONSE=$(curl -s -X POST "https://$GATEWAY_URL/api/admin/deploy/complete" \
-    -H "Authorization: Bearer $DEPLOY_SECRET" \
-    -H "Content-Type: application/json" \
-    -d '{"source": "local"}' \
-    2>/dev/null)
 
-  if echo "$DEPLOY_RESPONSE" | grep -q '"success"'; then
-    echo -e "${GREEN}✓ Deployment marked as completed${NC}"
-  else
-    echo -e "${YELLOW}Warning: Could not mark deployment (non-critical)${NC}"
+  DEPLOY_MARKED=false
+  for ATTEMPT in 1 2 3; do
+    # Wait for the new container revision to become ready
+    [ "$ATTEMPT" -gt 1 ] && echo -e "${YELLOW}Retry $ATTEMPT/3 (waiting 10s for container to start)...${NC}" && sleep 10
+
+    DEPLOY_RESPONSE=$(curl -s --max-time 15 -X POST "https://$GATEWAY_URL/api/admin/deploy/complete" \
+      -H "Authorization: Bearer $DEPLOY_SECRET" \
+      -H "Content-Type: application/json" \
+      -d '{"source": "local"}' \
+      2>/dev/null)
+
+    if echo "$DEPLOY_RESPONSE" | grep -q '"success"'; then
+      echo -e "${GREEN}✓ Deployment marked as completed${NC}"
+      DEPLOY_MARKED=true
+      break
+    fi
+  done
+
+  if [ "$DEPLOY_MARKED" = false ]; then
+    echo -e "${YELLOW}Warning: Could not mark deployment after 3 attempts${NC}"
+    echo -e "${YELLOW}  Pending changes will remain visible in the admin dashboard.${NC}"
+    echo -e "${YELLOW}  Response: $DEPLOY_RESPONSE${NC}"
   fi
 fi

@@ -2,13 +2,12 @@
 	"CORSRules": [
 		{
 			"AllowedOrigins": [
-				"http://localhost:4321",
-				"http://localhost:4322",
 				"https://d5dlmoeh5bvrbgn8dnuv.akta928u.apigw.yandexcloud.net/"
 			],
 			"AllowedMethods": ["GET", "PUT", "HEAD"],
 			"AllowedHeaders": ["*"],
-			"ExposeHeaders": ["ETag"]
+			"ExposeHeaders": ["ETag"],
+			"MaxAgeSeconds": ["3600"]
 		}
 	]
 }

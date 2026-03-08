@@ -31,6 +31,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
 	const isAdminPage =
 		pathname.startsWith("/admin") && !pathname.startsWith("/admin/login");
 	const isAdminApi = pathname.startsWith("/api/admin/");
+	// Deploy complete endpoint uses its own Bearer token auth (called by GitHub Actions / deploy.sh)
+	const isDeployCallback = pathname === "/api/admin/deploy/complete";
 
 	// Skip header access for prerendered public pages
 	if (!isApiRoute && !isAdminPage) {
@@ -57,7 +59,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 	}
 
 	// Auth: Protect /admin pages and /api/admin/* routes
-	if (isAdminPage || isAdminApi) {
+	if (isAdminPage || (isAdminApi && !isDeployCallback)) {
 		try {
 			const auth = getAuth();
 			const session = await auth.api.getSession({

@@ -64,13 +64,10 @@ export const POST: APIRoute = async ({ request }) => {
 
 		const id = parseInt(deployment_id, 10);
 		if (Number.isNaN(id)) {
-			return new Response(
-				JSON.stringify({ error: "Invalid deployment_id" }),
-				{
-					status: 400,
-					headers: { "Content-Type": "application/json" },
-				},
-			);
+			return new Response(JSON.stringify({ error: "Invalid deployment_id" }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" },
+			});
 		}
 
 		const deployment = await updateDeploymentStatus(id, status);

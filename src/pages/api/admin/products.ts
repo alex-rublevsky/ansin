@@ -7,7 +7,10 @@ import {
 import { replaceVariationsForProduct } from "../../../db/repositories/variations";
 import { requireAdmin } from "../../../lib/auth";
 import { productSchema } from "../../../lib/schemas/product";
-import { deleteProductImage, moveStagingToFinalBatch } from "../../../lib/storage";
+import {
+	deleteProductImage,
+	moveStagingToFinalBatch,
+} from "../../../lib/storage";
 import { generateVariations } from "../../../lib/variations";
 
 export const prerender = false;
@@ -26,7 +29,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			return new Response(
 				JSON.stringify({
 					error: "Validation failed",
-					details: parsed.error.flatten().fieldErrors,
+					details: parsed.error.issues,
 				}),
 				{ status: 400, headers: { "Content-Type": "application/json" } },
 			);

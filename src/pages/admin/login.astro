@@ -3,6 +3,8 @@ import "../../styles/global.css";
 
 export const prerender = false;
 
+/** Astro global (see https://docs.astro.build/reference/api-reference/#astro-global) */
+declare const Astro: { url: URL };
 const error = Astro.url.searchParams.get("error");
 ---
 

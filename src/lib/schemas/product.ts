@@ -31,7 +31,10 @@ export const productSchema = z.object({
 		.trim()
 		.min(1, "Ярлык обязателен")
 		.max(200, "Ярлык слишком длинный")
-		.regex(SLUG_REGEX, "Ярлык должен содержать только строчные латинские буквы, цифры и дефисы"),
+		.regex(
+			SLUG_REGEX,
+			"Ярлык должен содержать только строчные латинские буквы, цифры и дефисы",
+		),
 	description: z
 		.string()
 		.trim()
@@ -46,12 +49,7 @@ export const productSchema = z.object({
 		.int("Объём должен быть целым числом")
 		.nonnegative("Объём не может быть отрицательным")
 		.default(0),
-	categoryId: z
-		.number()
-		.int()
-		.positive()
-		.nullable()
-		.default(null),
+	categoryId: z.number().int().positive().nullable().default(null),
 	images: imagesSchema,
 	isActive: z.boolean().default(true),
 	priceUp: z.boolean().default(true),

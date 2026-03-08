@@ -1,0 +1,211 @@
+openapi: 3.0.0
+info:
+  title: Ansin Catalog API Gateway
+  version: 1.0.0
+  description: API Gateway routing for Ansin tea catalog - routes static pages to Object Storage and dynamic routes to Serverless Container
+
+x-yc-apigateway:
+  service_account_id: <SERVICE_ACCOUNT_ID>
+
+paths:
+  # Root homepage - static
+  /:
+    get:
+      summary: Homepage
+      operationId: getHomepage
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: <BUCKET_NAME>
+        object: index.html
+        error_object:
+          object: 404.html
+          statusCode: 404
+        service_account_id: <SERVICE_ACCOUNT_ID>
+
+  # Static assets from Astro build
+  /_astro/{file+}:
+    get:
+      summary: Serve Astro static assets
+      operationId: getAstroAssets
+      parameters:
+        - name: file
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: <BUCKET_NAME>
+        object: '_astro/{file}'
+        service_account_id: <SERVICE_ACCOUNT_ID>
+
+  # Favicon files
+  /favicon.svg:
+    get:
+      summary: Serve favicon SVG
+      operationId: getFaviconSvg
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: <BUCKET_NAME>
+        object: favicon.svg
+        service_account_id: <SERVICE_ACCOUNT_ID>
+
+  /favicon.ico:
+    get:
+      summary: Serve favicon ICO
+      operationId: getFaviconIco
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: <BUCKET_NAME>
+        object: favicon.ico
+        service_account_id: <SERVICE_ACCOUNT_ID>
+
+  # Static logo and images
+  /logo.webp:
+    get:
+      summary: Serve logo
+      operationId: getLogo
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: <BUCKET_NAME>
+        object: logo.webp
+        service_account_id: <SERVICE_ACCOUNT_ID>
+
+  # Product detail pages - static (pre-rendered)
+  /product/{slug}:
+    get:
+      summary: Product detail page
+      operationId: getProduct
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: <BUCKET_NAME>
+        object: 'product/{slug}/index.html'
+        error_object:
+          object: 404.html
+          statusCode: 404
+        service_account_id: <SERVICE_ACCOUNT_ID>
+
+  # Category pages - static (pre-rendered)
+  /categories/{slug}:
+    get:
+      summary: Category page
+      operationId: getCategory
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: <BUCKET_NAME>
+        object: 'categories/{slug}/index.html'
+        error_object:
+          object: 404.html
+          statusCode: 404
+        service_account_id: <SERVICE_ACCOUNT_ID>
+
+  # Cart page - static
+  /cart:
+    get:
+      summary: Shopping cart
+      operationId: getCart
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: <BUCKET_NAME>
+        object: cart/index.html
+        error_object:
+          object: 404.html
+          statusCode: 404
+        service_account_id: <SERVICE_ACCOUNT_ID>
+
+  # Checkout page - static
+  /checkout:
+    get:
+      summary: Checkout page
+      operationId: getCheckout
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: <BUCKET_NAME>
+        object: checkout/index.html
+        error_object:
+          object: 404.html
+          statusCode: 404
+        service_account_id: <SERVICE_ACCOUNT_ID>
+
+  # Order confirmation page - static
+  /order-confirmation:
+    get:
+      summary: Order confirmation
+      operationId: getOrderConfirmation
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: <BUCKET_NAME>
+        object: order-confirmation/index.html
+        error_object:
+          object: 404.html
+          statusCode: 404
+        service_account_id: <SERVICE_ACCOUNT_ID>
+
+  # API routes - all dynamic, proxy to Serverless Container
+  /api/{proxy+}:
+    x-yc-apigateway-any-method:
+      summary: Proxy all API requests to container
+      operationId: proxyApiRequests
+      parameters:
+        - name: proxy
+          in: path
+          required: false
+          schema:
+            type: string
+            default: '-'
+          style: simple
+          explode: false
+      x-yc-apigateway-integration:
+        type: serverless_containers
+        container_id: <CONTAINER_ID>
+        service_account_id: <SERVICE_ACCOUNT_ID>
+
+  # Admin routes - all dynamic, proxy to Serverless Container
+  /admin/{proxy+}:
+    x-yc-apigateway-any-method:
+      summary: Proxy all admin requests to container
+      operationId: proxyAdminRequests
+      parameters:
+        - name: proxy
+          in: path
+          required: false
+          schema:
+            type: string
+            default: '-'
+          style: simple
+          explode: false
+      x-yc-apigateway-integration:
+        type: serverless_containers
+        container_id: <CONTAINER_ID>
+        service_account_id: <SERVICE_ACCOUNT_ID>
+
+  # Exact /admin route (with and without trailing slash)
+  /admin:
+    x-yc-apigateway-any-method:
+      summary: Admin dashboard root
+      operationId: adminRoot
+      x-yc-apigateway-integration:
+        type: serverless_containers
+        container_id: <CONTAINER_ID>
+        service_account_id: <SERVICE_ACCOUNT_ID>
+
+  /admin/:
+    x-yc-apigateway-any-method:
+      summary: Admin dashboard root (trailing slash)
+      operationId: adminRootSlash
+      x-yc-apigateway-integration:
+        type: serverless_containers
+        container_id: <CONTAINER_ID>
+        service_account_id: <SERVICE_ACCOUNT_ID>

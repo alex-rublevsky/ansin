@@ -3,6 +3,14 @@
 @plugin "@tailwindcss/forms";
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Squircle corners globally — only takes effect where border-radius is set */
+*,
+*::before,
+*::after {
+	corner-shape: squircle;
+}
+
+
 ::selection {
 	background: var(--primary);
 	color: var(--primary-foreground);
@@ -102,31 +110,20 @@
 
 
 :root {
+	--hue: 263.26;
 
-	--background: oklch(0.9735 0.013 263.26);
-	--foreground: oklch(0.1148 0.06 263.26);
+	--background: oklch(0.98 0.005 var(--hue));
+	--foreground: oklch(0.12 0.03 var(--hue));
 
-	--primary: oklch(0.3333 0.1133 263.26);
-	--primary-foreground: oklch(0.9441 0.026 263.26);
+	--primary: oklch(0.06 0.03 var(--hue));
+	--primary-foreground: oklch(0.97 0.005 var(--hue));
 
-	--muted: oklch(0.6977 0.1133 263.26);
-	--muted-foreground: oklch(0.304 0.1133 263.26);
+	--muted: oklch(0.7 0.02 var(--hue));
+	--muted-foreground: oklch(0.35 0.02 var(--hue));
 
-	/* make sure border is the same as secondary but with 50% opacity */
-	
-	--secondary: oklch(0.8052 0.1269 91.98);
-	/* --secondary-hover: oklch(0.5072 0.2029 var(--hue) calc(l_ * _0 0.9)); */
+	--secondary: oklch(0.92 0.01 var(--hue));
 
-	/* --accent: oklch(0.6921 0.1318 334.41);
-	--accent-foreground: var(--background); */
-
-	/* --destructive: oklch(0.6368 0.2078 25.33);
-	--destructive-foreground: oklch(0.9779 0.0112 var(--hue)); */
-
-	--border: oklch(0.6977 0.1133 263.26 / 0.3);
-	/* --input: oklch(0.8895 0.1033 var(--beige-hue));
-	
-	--ring: 0 0% 3.9%;  */
+	--border: oklch(0.7 0.02 var(--hue) / 0.3);
 
 	--info: oklch(0.7 0.15 240);
 	--info-foreground: oklch(0.2 0.05 240);
@@ -136,9 +133,9 @@
 	--warning-foreground: oklch(0.25 0.05 85);
 	--error: oklch(0.55 0.22 25);
 	--error-foreground: oklch(0.98 0.01 25);
-	--outline: oklch(0.5 0.05 263.26);
+	--outline: oklch(0.5 0.03 var(--hue));
 
-	--radius: 1rem;
+	--radius: var(--radius-md);
 	--sidebar-background: 0 0% 98%;
 	--sidebar-foreground: 240 5.3% 26.1%;
 	--sidebar-primary: 240 5.9% 10%;
@@ -200,7 +197,7 @@
 	--secondary: oklch(0.3 0.08 263.26);
 
 	--border: oklch(0.3 0.05 263.26);
-	
+
 	--info: oklch(0.6 0.12 240);
 	--info-foreground: oklch(0.95 0.01 240);
 	--success: oklch(0.6 0.12 140);
@@ -222,7 +219,6 @@
 		background-color: var(--background);
 		color: var(--foreground);
 	}
-
 }
 
 @layer utilities {
@@ -359,7 +355,7 @@ span {
 	/* Page fade timing (root element background cross-fade) */
 	--vt-page-duration: 0.34s;
 	--vt-page-easing: cubic-bezier(0.4, 0, 0.2, 1);
-	
+
 	/* Element morph timing (images/text flying between pages) */
 	--vt-element-duration: 0.34s;
 	--vt-element-easing: cubic-bezier(0.4, 0, 0.2, 1);

@@ -1,0 +1,355 @@
+---
+import Button from "../../../components/Button.astro";
+import Dialog from "../../../components/dialog/Dialog.astro";
+import DialogContent from "../../../components/dialog/DialogContent.astro";
+import DialogDescription from "../../../components/dialog/DialogDescription.astro";
+import DialogFooter from "../../../components/dialog/DialogFooter.astro";
+import DialogHeader from "../../../components/dialog/DialogHeader.astro";
+import DialogTitle from "../../../components/dialog/DialogTitle.astro";
+import DialogTrigger from "../../../components/dialog/DialogTrigger.astro";
+import Input from "../../../components/Input.astro";
+import { getAllCategories } from "../../../db/repositories/categories";
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+
+export const prerender = false;
+
+const categories = await getAllCategories();
+---
+
+<AdminLayout title="Categories">
+  <div class="mb-8">
+    <h1 class="mb-2">Категории<sup class="text-muted! text-base inline-block -translate-y-2">{categories.length}</sup></h1>
+  </div>
+
+  <div class="max-w-4xl">
+    <form id="category-form" class="mb-8 p-6 bg-muted/30 border border-border rounded-lg">
+      <h4 class="mb-4">Создать категорию</h4>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <Input
+            type="text"
+            id="name"
+            name="name"
+            label="Название категории"
+            required
+          />
+        </div>
+        <div>
+          <Input
+            type="text"
+            id="slug"
+            name="slug"
+            label="Ярлык (ссылка)"
+            required
+            pattern="[a-z0-9-]+"
+          />
+        </div>
+        <div class="flex items-end">
+          <Button
+            type="submit"
+            variant="primary"
+            id="create-btn"
+          >
+            Создать
+          </Button>
+        </div>
+      </div>
+      <div class="mt-4">
+        <Input
+          type="text"
+          id="description"
+          name="description"
+          label="Описание (опционально)"
+        />
+      </div>
+      <div id="form-error" class="hidden mt-3 p-3 bg-red-50 text-red-700 rounded-lg text-sm"></div>
+    </form>
+
+    {categories.length === 0 ? (
+      <p class="text-muted text-center py-8">Пока нет категорий</p>
+    ) : (
+      <div class="divide-y divide-border">
+        {categories.map((category) => (
+          <div
+            class="category-item flex items-center gap-3 py-3 px-2 sm:px-4 hover:bg-muted/20 transition-colors duration-100 ease-out relative"
+            data-category-id={category.id}
+          >
+            <div class="flex-1 min-w-0">
+              <div class="font-medium text-gray-900">{category.name}</div>
+              <div class="text-sm text-foreground/50">{category.slug}</div>
+              {category.description && (
+                <div class="text-sm text-foreground/60 mt-1">{category.description}</div>
+              )}
+            </div>
+            <div class="flex items-center gap-1">
+              <Button
+                href={`/categories/${category.slug}`}
+                target="_blank"
+                variant="ghost"
+                size="icon-sm"
+                class="text-gray-600 hover:text-gray-900"
+                title="Просмотр"
+              >
+                &#x1f441;&#xfe0f;
+              </Button>
+
+              <Dialog id={`edit-dialog-${category.id}`}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    class="text-gray-600 hover:text-gray-900"
+                    title="Редактировать"
+                  >
+                    &#x270f;&#xfe0f;
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Редактировать категорию</DialogTitle>
+                  </DialogHeader>
+                  <form class="edit-form space-y-4" data-edit-id={category.id}>
+                    <Input
+                      type="text"
+                      name="name"
+                      label="Название"
+                      value={category.name}
+                      required
+                    />
+                    <Input
+                      type="text"
+                      name="slug"
+                      label="Ярлык"
+                      value={category.slug}
+                      required
+                      pattern="[a-z0-9-]+"
+                    />
+                    <Input
+                      type="text"
+                      name="description"
+                      label="Описание"
+                      value={category.description ?? ""}
+                    />
+                    <div class="edit-error hidden p-3 bg-red-50 text-red-700 rounded-lg text-sm"></div>
+                    <DialogFooter>
+                      <Button variant="ghost" class="starwind-dialog-close">
+                        Отмена
+                      </Button>
+                      <Button
+                        type="submit"
+                        variant="primary"
+                        class="edit-save-btn"
+                      >
+                        Сохранить
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+
+              <Dialog id={`delete-dialog-${category.id}`}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    class="text-red-600 hover:text-red-900"
+                    title="Удалить"
+                  >
+                    &#x1f5d1;&#xfe0f;
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Удалить категорию?</DialogTitle>
+                    <DialogDescription>
+                      Вы уверены, что хотите удалить категорию "{category.name}"? Категорию можно удалить только если в ней нет товаров.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div class="delete-error hidden p-3 bg-red-50 text-red-700 rounded-lg text-sm"></div>
+                  <DialogFooter>
+                    <Button variant="ghost" class="starwind-dialog-close">
+                      Отмена
+                    </Button>
+                    <Button
+                      variant="error"
+                      class="delete-confirm-btn"
+                      data-delete-id={category.id}
+                    >
+                      Удалить
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+
+  <script>
+    import { navigate } from "astro:transitions/client";
+
+    function initCategoriesPage() {
+      // --- Auto-generate slug from name ---
+      const nameInput = document.getElementById('name') as HTMLInputElement;
+      const slugInput = document.getElementById('slug') as HTMLInputElement;
+
+      let slugManuallyEdited = false;
+
+      slugInput?.addEventListener('input', () => {
+        slugManuallyEdited = slugInput.value !== '';
+      });
+
+      nameInput?.addEventListener('input', () => {
+        if (slugManuallyEdited) return;
+        slugInput.value = nameInput.value
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+      });
+
+      // --- Create category ---
+      const form = document.getElementById('category-form') as HTMLFormElement;
+      const formError = document.getElementById('form-error') as HTMLElement;
+      const createBtn = form?.querySelector('#create-btn') as HTMLButtonElement;
+
+      form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        formError.classList.add('hidden');
+
+        const formData = new FormData(form);
+        const data = {
+          name: formData.get('name'),
+          slug: formData.get('slug'),
+          description: formData.get('description') || null,
+          displayOrder: 0,
+        };
+
+        (createBtn as any).setState('loading');
+
+        try {
+          const response = await fetch('/api/admin/categories', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          });
+
+          if (response.ok) {
+            (createBtn as any).setState('success', 'Создано');
+            setTimeout(() => {
+              navigate(window.location.pathname, { history: 'replace' });
+            }, 600);
+          } else {
+            const result = await response.json();
+            formError.textContent = result.error || 'Не удалось создать категорию';
+            formError.classList.remove('hidden');
+            (createBtn as any).setState('error', 'Ошибка');
+            setTimeout(() => (createBtn as any).setState('', 'Создать'), 2000);
+          }
+        } catch {
+          formError.textContent = 'Произошла ошибка';
+          formError.classList.remove('hidden');
+          (createBtn as any).setState('error', 'Ошибка');
+          setTimeout(() => (createBtn as any).setState('', 'Создать'), 2000);
+        }
+      });
+
+      // --- Edit category ---
+      document.querySelectorAll<HTMLFormElement>('.edit-form').forEach((editForm) => {
+        editForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const id = editForm.dataset.editId;
+          if (!id) return;
+
+          const errorEl = editForm.querySelector('.edit-error') as HTMLElement;
+          const saveBtn = editForm.querySelector('.edit-save-btn') as HTMLButtonElement;
+          errorEl?.classList.add('hidden');
+
+          const formData = new FormData(editForm);
+          const data = {
+            name: formData.get('name'),
+            slug: formData.get('slug'),
+            description: formData.get('description') || null,
+          };
+
+          (saveBtn as any).setState('loading');
+
+          try {
+            const response = await fetch(`/api/admin/categories/${id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+              (saveBtn as any).setState('success', 'Сохранено');
+              setTimeout(() => {
+                navigate(window.location.pathname, { history: 'replace' });
+              }, 600);
+            } else {
+              const result = await response.json();
+              if (errorEl) {
+                errorEl.textContent = result.error || 'Не удалось обновить категорию';
+                errorEl.classList.remove('hidden');
+              }
+              (saveBtn as any).setState('error', 'Ошибка');
+              setTimeout(() => (saveBtn as any).setState('', 'Сохранить'), 2000);
+            }
+          } catch {
+            if (errorEl) {
+              errorEl.textContent = 'Произошла ошибка';
+              errorEl.classList.remove('hidden');
+            }
+            (saveBtn as any).setState('error', 'Ошибка');
+            setTimeout(() => (saveBtn as any).setState('', 'Сохранить'), 2000);
+          }
+        });
+      });
+
+      // --- Delete category ---
+      document.querySelectorAll<HTMLButtonElement>('.delete-confirm-btn').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.deleteId;
+          if (!id) return;
+
+          const dialog = btn.closest('[data-slot="dialog-content"]')?.parentElement;
+          const errorEl = dialog?.querySelector('.delete-error') as HTMLElement;
+          errorEl?.classList.add('hidden');
+
+          (btn as any).setState('loading');
+
+          try {
+            const response = await fetch(`/api/admin/categories/${id}`, {
+              method: 'DELETE',
+            });
+
+            if (response.ok) {
+              (btn as any).setState('success', 'Удалено');
+              setTimeout(() => {
+                navigate(window.location.pathname, { history: 'replace' });
+              }, 600);
+            } else {
+              const result = await response.json();
+              if (errorEl) {
+                errorEl.textContent = result.error || 'Не удалось удалить категорию';
+                errorEl.classList.remove('hidden');
+              }
+              (btn as any).setState('error', 'Ошибка');
+              setTimeout(() => (btn as any).setState('', 'Удалить'), 2000);
+            }
+          } catch {
+            if (errorEl) {
+              errorEl.textContent = 'Произошла ошибка';
+              errorEl.classList.remove('hidden');
+            }
+            (btn as any).setState('error', 'Ошибка');
+            setTimeout(() => (btn as any).setState('', 'Удалить'), 2000);
+          }
+        });
+      });
+    }
+
+    document.addEventListener("astro:page-load", initCategoriesPage);
+  </script>
+</AdminLayout>

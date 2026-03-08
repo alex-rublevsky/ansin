@@ -1,0 +1,469 @@
+---
+import Button from "../../../components/Button.astro";
+import Dialog from "../../../components/dialog/Dialog.astro";
+import DialogContent from "../../../components/dialog/DialogContent.astro";
+import DialogDescription from "../../../components/dialog/DialogDescription.astro";
+import DialogFooter from "../../../components/dialog/DialogFooter.astro";
+import DialogHeader from "../../../components/dialog/DialogHeader.astro";
+import DialogTitle from "../../../components/dialog/DialogTitle.astro";
+import DialogTrigger from "../../../components/dialog/DialogTrigger.astro";
+import { getAllCategories } from "../../../db/repositories/categories";
+import { getAllProducts } from "../../../db/repositories/products";
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { STORAGE_BASE_URL } from "../../../lib/constants";
+
+export const prerender = false;
+
+const products = await getAllProducts();
+const categories = await getAllCategories();
+
+const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
+
+const activeProducts = products.filter((p) => p.isActive !== false);
+const inactiveProducts = products.filter((p) => p.isActive === false);
+
+// Helper to get full image URL
+const getImageUrl = (relativePath: string) => {
+	if (!relativePath) return "";
+	if (
+		relativePath.startsWith("http://") ||
+		relativePath.startsWith("https://")
+	) {
+		return relativePath;
+	}
+	const bucket = import.meta.env.YANDEX_STORAGE_BUCKET || "ansin-static";
+	return `${STORAGE_BASE_URL}/${bucket}/${relativePath}`;
+};
+---
+
+<AdminLayout title="Products">
+  <div class="mb-8 flex justify-between items-center">
+    <div class="mt-4">
+      <h1 class="mb-2">Товары<sup class="text-muted! text-base inline-block -translate-y-2">{products.length}</sup></h1>
+    </div>
+    <div class="flex items-center gap-2">
+      {products.length > 0 && (
+        <>
+          <div class="pill-container view-toggle">
+            <div class="pill-bubble active"></div>
+            <div class="pill-bubble hover"></div>
+            <div class="pill-nav-links">
+              <button
+                type="button"
+                data-view="list"
+                class="pill-nav-link view-btn active"
+                title="Список"
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                  <line x1="3" y1="5" x2="17" y2="5" />
+                  <line x1="3" y1="10" x2="17" y2="10" />
+                  <line x1="3" y1="15" x2="17" y2="15" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                data-view="grid"
+                class="pill-nav-link view-btn"
+                title="Сетка"
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="5.5" height="5.5" rx="1.25" />
+                  <rect x="11.5" y="3" width="5.5" height="5.5" rx="1.25" />
+                  <rect x="3" y="11.5" width="5.5" height="5.5" rx="1.25" />
+                  <rect x="11.5" y="11.5" width="5.5" height="5.5" rx="1.25" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <Button
+            href="/admin/products/new"
+            variant="primary"
+          >
+            + Создать товар
+          </Button>
+        </>
+      )}
+    </div>
+  </div>
+
+  {products.length === 0 ? (
+    <div class="p-12 text-center">
+      <p class="text-muted text-lg mb-4">Пока нет товаров</p>
+      <Button
+        href="/admin/products/new"
+        variant="primary"
+      >
+        + Создать товар
+      </Button>
+    </div>
+  ) : (
+    <div class="product-feed divide-y divide-border" data-view="list" style="view-transition-name: product-feed">
+      {activeProducts.map((product, i) => (
+        <div
+          class="product-item flex items-center gap-3 py-3 px-2 sm:px-4 hover:bg-muted/20 transition-colors duration-100 ease-out cursor-pointer relative"
+        >
+          <a href={`/admin/products/${product.id}/edit`} class="product-link flex items-center gap-3 flex-1 min-w-0 after:absolute after:inset-0">
+            <div class="product-thumb shrink-0 size-12 rounded overflow-hidden">
+              {product.images && product.images.length > 0 ? (
+                <img
+                  src={getImageUrl(product.images[0])}
+                  alt={product.name}
+                  class="h-full w-full object-cover"
+                  transition:name={`product-image-${product.id}`}
+                />
+              ) : (
+                <div class="h-full w-full flex items-center justify-center text-gray-400 bg-muted/30">
+                  <span class="text-lg leading-none">&#x1f4e6;</span>
+                </div>
+              )}
+            </div>
+            <div class="product-info flex-1 min-w-0">
+              <div class="product-name text-sm font-medium text-gray-900 truncate">{product.name}</div>
+              <div class="product-category text-xs text-foreground/50 truncate">
+                {product.categoryId ? categoryMap.get(product.categoryId) : ''}
+              </div>
+            </div>
+          </a>
+          <div class="product-price shrink-0 text-right">
+            <span class="text-sm font-semibold text-gray-900">{product.price.toFixed(0)}</span><span class="text-xs text-foreground/50">&nbsp;₽</span>
+          </div>
+          <div class="product-volume shrink-0 text-right">
+            <span class="text-sm text-gray-600">{product.volume ? `${product.volume}` : '-'}</span><span class="text-xs text-foreground/50">&nbsp;г</span>
+          </div>
+          <div class="product-actions shrink-0 flex items-center gap-1 relative z-10">
+            <Button
+              href={`/product/${product.slug}`}
+              target="_blank"
+              variant="ghost"
+              size="icon-sm"
+              class="text-gray-600 hover:text-gray-900"
+              title="View"
+            >
+              &#x1f441;&#xfe0f;
+            </Button>
+            <Dialog id={`delete-dialog-${product.id}`}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  class="text-red-600 hover:text-red-900"
+                  title="Delete"
+                >
+                  &#x1f5d1;&#xfe0f;
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Удалить товар?</DialogTitle>
+                  <DialogDescription>
+                    Вы уверены, что хотите удалить товар "{product.name}"? Это действие нельзя отменить.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button variant="ghost" class="starwind-dialog-close">
+                    Отмена
+                  </Button>
+                  <Button
+                    variant="error"
+                    class="delete-confirm-btn"
+                    data-delete-id={product.id}
+                  >
+                    Удалить
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      ))}
+      {inactiveProducts.length > 0 && (
+        <div class="bg-gray-50 px-2 sm:px-4 py-2 text-xs font-medium text-foreground/40 uppercase tracking-wider">
+          Неактивные
+        </div>
+      )}
+      {inactiveProducts.map((product) => (
+        <div
+          class="product-item inactive flex items-center gap-3 py-3 px-2 sm:px-4 hover:bg-gray-50 cursor-pointer relative opacity-50"
+        >
+          <a href={`/admin/products/${product.id}/edit`} class="product-link flex items-center gap-3 flex-1 min-w-0 after:absolute after:inset-0">
+            <div class="product-thumb shrink-0 size-12 bg-gray-200 rounded overflow-hidden">
+              {product.images && product.images.length > 0 ? (
+                <img
+                  src={getImageUrl(product.images[0])}
+                  alt={product.name}
+                  class="h-full w-full object-cover grayscale"
+                  transition:name={`product-image-${product.id}`}
+                />
+              ) : (
+                <div class="h-full w-full flex items-center justify-center text-gray-400">
+                  <span class="text-lg leading-none">&#x1f4e6;</span>
+                </div>
+              )}
+            </div>
+            <div class="product-info flex-1 min-w-0">
+              <div class="product-name text-sm font-medium text-gray-900 truncate">{product.name}</div>
+              <div class="product-category text-xs text-foreground/50 truncate">
+                {product.categoryId ? categoryMap.get(product.categoryId) : ''}
+              </div>
+            </div>
+          </a>
+          <div class="product-price shrink-0 text-right">
+            <span class="text-sm font-semibold text-gray-900">{product.price.toFixed(0)}</span><span class="text-xs text-foreground/50">&nbsp;₽</span>
+          </div>
+          <div class="product-volume shrink-0 text-right">
+            <span class="text-sm text-gray-600">{product.volume ? `${product.volume}` : '-'}</span><span class="text-xs text-foreground/50">&nbsp;г</span>
+          </div>
+          <div class="product-actions shrink-0 flex items-center gap-1 relative z-10">
+            <Button
+              href={`/product/${product.slug}`}
+              target="_blank"
+              variant="ghost"
+              size="icon-sm"
+              class="text-gray-600 hover:text-gray-900"
+              title="View"
+            >
+              &#x1f441;&#xfe0f;
+            </Button>
+            <Dialog id={`delete-dialog-inactive-${product.id}`}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  class="text-red-600 hover:text-red-900"
+                  title="Delete"
+                >
+                  &#x1f5d1;&#xfe0f;
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Удалить товар?</DialogTitle>
+                  <DialogDescription>
+                    Вы уверены, что хотите удалить товар "{product.name}"? Это действие нельзя отменить.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button variant="ghost" class="starwind-dialog-close">
+                    Отмена
+                  </Button>
+                  <Button
+                    variant="error"
+                    class="delete-confirm-btn"
+                    data-delete-id={product.id}
+                  >
+                    Удалить
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+
+  <style>
+    /* --- View toggle (pill overrides for icon-only buttons) --- */
+    .view-toggle .pill-nav-link {
+      padding: 0.45rem 0.55rem;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-size: 0;
+    }
+    .view-toggle .pill-nav-link > svg {
+      display: block;
+    }
+    .view-toggle .pill-nav-link::after {
+      display: none;
+    }
+
+    /* --- Feed: list (default) --- */
+    .product-feed[data-view="list"] {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- Feed: grid --- */
+    .product-feed[data-view="grid"] {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1px;
+      border: none;
+    }
+
+    /* Remove dividers in grid mode */
+    .product-feed[data-view="grid"] > * {
+      border-top: none !important;
+      border-bottom: none !important;
+    }
+
+    .product-feed[data-view="grid"] .product-item {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin: 0.375rem;
+    }
+
+    .product-feed[data-view="grid"] .product-link {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+    }
+
+    .product-feed[data-view="grid"] .product-thumb {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1;
+      border-radius: var(--radius-md);
+    }
+
+    .product-feed[data-view="grid"] .product-info {
+      min-width: 0;
+    }
+
+    .product-feed[data-view="grid"] .product-name {
+      font-size: 0.8125rem;
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .product-feed[data-view="grid"] .product-price,
+    .product-feed[data-view="grid"] .product-volume {
+      width: auto;
+      text-align: left;
+    }
+
+    .product-feed[data-view="grid"] .product-actions {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    .product-feed[data-view="grid"] .product-item:hover .product-actions {
+      opacity: 1;
+    }
+
+    /* --- View transition: scoped to view-switching class --- */
+
+    /* Skip root animation during view switch */
+    :global(html.view-switching)::view-transition-group(root) {
+      animation: none !important;
+    }
+    :global(html.view-switching)::view-transition-old(root),
+    :global(html.view-switching)::view-transition-new(root) {
+      animation: none !important;
+    }
+
+    /* Feed container: crossfade for text/layout (images are extracted and morph on their own) */
+    :global(html.view-switching)::view-transition-group(product-feed) {
+      animation: none !important;
+    }
+    :global(html.view-switching)::view-transition-old(product-feed) {
+      animation: vt-fade-out 0.25s ease both;
+    }
+    :global(html.view-switching)::view-transition-new(product-feed) {
+      animation: vt-fade-in 0.25s ease 0.05s both;
+    }
+
+    /* Images keep their view-transition-names and morph automatically
+       (default browser behavior: animate position + size between snapshots) */
+
+    @keyframes vt-fade-out {
+      to { opacity: 0; }
+    }
+    @keyframes vt-fade-in {
+      from { opacity: 0; }
+    }
+  </style>
+
+  <script>
+    import { navigate } from "astro:transitions/client";
+
+    function initProductsPage() {
+      // --- View toggle ---
+      const feed = document.querySelector<HTMLElement>('.product-feed');
+      const viewBtns = document.querySelectorAll<HTMLButtonElement>('.view-btn');
+
+      if (feed && viewBtns.length) {
+        // Restore saved view
+        const saved = sessionStorage.getItem('admin-products-view');
+        if (saved === 'grid' || saved === 'list') {
+          feed.dataset.view = saved;
+          viewBtns.forEach(b => b.classList.toggle('active', b.dataset.view === saved));
+        }
+
+        viewBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const next = btn.dataset.view;
+            if (!next || feed.dataset.view === next) return;
+
+            viewBtns.forEach(b => b.classList.toggle('active', b === btn));
+
+            // Defer the view transition to the next frame so the browser
+            // renders and stabilises :hover state after the class toggle.
+            // startViewTransition() forces a synchronous style recalc that
+            // can briefly drop :hover on ::before, breaking the anchor chain.
+            requestAnimationFrame(() => {
+              if (document.startViewTransition) {
+                document.documentElement.classList.add('view-switching');
+                const t = document.startViewTransition(() => {
+                  feed.dataset.view = next;
+                });
+                t.finished.finally(() => {
+                  document.documentElement.classList.remove('view-switching');
+                });
+              } else {
+                feed.dataset.view = next;
+              }
+            });
+
+            sessionStorage.setItem('admin-products-view', next);
+          });
+        });
+      }
+
+      // --- Delete ---
+      document.querySelectorAll<HTMLButtonElement>('.delete-confirm-btn').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.deleteId;
+          if (!id) return;
+
+          const originalLabel = btn.querySelector<HTMLElement>('.btn-label')?.textContent?.trim() ?? '';
+          (btn as any).setState('loading');
+
+          try {
+            const response = await fetch(`/api/admin/products/${id}`, {
+              method: 'DELETE',
+            });
+
+            if (!response.ok) throw new Error('Failed to delete product');
+
+            (btn as any).setState('success', 'Удалено');
+
+            setTimeout(() => {
+              navigate(window.location.pathname, { history: 'replace' });
+            }, 900);
+          } catch (error) {
+            console.error('Error deleting product:', error);
+            (btn as any).setState('error', 'Ошибка');
+
+            setTimeout(() => {
+              (btn as any).setState('', originalLabel);
+            }, 2000);
+          }
+        });
+      });
+    }
+
+    document.addEventListener("astro:page-load", initProductsPage);
+  </script>
+</AdminLayout>

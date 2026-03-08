@@ -1,4 +1,4 @@
-import { and, desc, eq, like } from "drizzle-orm";
+import { and, count, desc, eq, like } from "drizzle-orm";
 import { db } from "../client";
 import { type NewProduct, type Product, products } from "../schema";
 
@@ -65,6 +65,16 @@ export async function updateProduct(
 
 export async function deleteProduct(id: number): Promise<void> {
 	await db.delete(products).where(eq(products.id, id));
+}
+
+export async function getProductCountByCategoryId(
+	categoryId: number,
+): Promise<number> {
+	const result = await db
+		.select({ count: count() })
+		.from(products)
+		.where(eq(products.categoryId, categoryId));
+	return result[0].count;
 }
 
 export async function getActiveProducts(): Promise<Product[]> {

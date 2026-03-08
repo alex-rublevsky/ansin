@@ -25,8 +25,10 @@ export async function getLastDeployment(): Promise<Deployment | null> {
 	return result[0] ?? null;
 }
 
-export async function getPendingChanges(): Promise<DeploymentChange[]> {
-	const last = await getLastDeployment();
+export async function getPendingChanges(
+	lastDeployment?: Deployment | null,
+): Promise<DeploymentChange[]> {
+	const last = lastDeployment !== undefined ? lastDeployment : await getLastDeployment();
 	const since = last?.completedAt;
 
 	if (!since) {

@@ -1,0 +1,219 @@
+---
+import Button from "./Button.astro";
+
+interface Props {
+  formPage?: boolean;
+}
+
+const { formPage = false } = Astro.props;
+---
+
+<div class="admin-bottom-nav mb-2 fixed bottom-0 left-0 right-0 w-full flex justify-center z-50" transition:persist="admin-nav">
+  <div class="pill-container">
+    <div class="pill-bubble active"></div>
+    <div class="pill-bubble hover"></div>
+    <nav class="pill-nav-links">
+      <Button href="/admin" variant="pill" data-nav-link data-text="Главная">Главная</Button>
+      <Button href="/admin/products" variant="pill" data-nav-link data-text="Товары">Товары</Button>
+      <Button href="/admin/orders" variant="pill" data-nav-link data-text="Заказы">Заказы</Button>
+      <Button href="/admin/categories" variant="pill" data-nav-link data-text="Категории">Категории</Button>
+    </nav>
+  </div>
+</div>
+
+<script>
+  function updateActiveNav() {
+    const path = window.location.pathname;
+    document.querySelectorAll('[data-nav-link]').forEach((link) => {
+      const href = link.getAttribute('href');
+      const isActive = href === '/admin'
+        ? path === '/admin' || path === '/admin/'
+        : path.startsWith(href!);
+      link.classList.toggle('active', isActive);
+    });
+  }
+
+  updateActiveNav();
+  document.addEventListener('astro:after-swap', updateActiveNav);
+</script>
+
+<script>
+  if (window.matchMedia('(hover: hover)').matches) {
+    document.addEventListener('click', (e) => {
+      const link = (e.target as HTMLElement).closest('.pill-nav-link');
+      if (link) link.classList.add('anchor-lock');
+    });
+
+    document.addEventListener('pointermove', (e) => {
+      const hoveredLink = (e.target as HTMLElement).closest('.pill-nav-link');
+      if (hoveredLink) {
+        hoveredLink.closest('.pill-container')
+          ?.querySelectorAll('.pill-nav-link.anchor-lock')
+          .forEach(el => { if (el !== hoveredLink) el.classList.remove('anchor-lock'); });
+      } else {
+        document.querySelectorAll('.pill-nav-link.anchor-lock')
+          .forEach(el => el.classList.remove('anchor-lock'));
+      }
+    });
+  }
+</script>
+
+{formPage && (
+  <>
+    <button
+      class="mobile-nav-trigger"
+      popovertarget="mobile-nav-popover"
+      aria-label="Навигация"
+    >
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <line x1="3" y1="5" x2="17" y2="5" />
+        <line x1="3" y1="10" x2="17" y2="10" />
+        <line x1="3" y1="15" x2="17" y2="15" />
+      </svg>
+    </button>
+    <nav id="mobile-nav-popover" popover="auto" class="mobile-nav-popover">
+      <a href="/admin" class="mobile-nav-link" data-nav-link>Главная</a>
+      <a href="/admin/products" class="mobile-nav-link" data-nav-link>Товары</a>
+      <a href="/admin/orders" class="mobile-nav-link" data-nav-link>Заказы</a>
+      <a href="/admin/categories" class="mobile-nav-link" data-nav-link>Категории</a>
+    </nav>
+  </>
+)}
+
+<style is:global>
+  /* --- Mobile form page layout --- */
+  .mobile-nav-trigger {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    /* Hide bottom nav on form pages */
+    body[data-form-page] .admin-bottom-nav {
+      display: none;
+    }
+
+    /* Show menu trigger button */
+    body[data-form-page] .mobile-nav-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      bottom: 0.75rem;
+      left: 0.75rem;
+      z-index: 50;
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 500px;
+      border: 1px solid var(--border);
+      background: linear-gradient(
+        0deg,
+        color-mix(in oklch, var(--background) 15%, transparent),
+        color-mix(in oklch, var(--background) 80%, transparent)
+      );
+      backdrop-filter: blur(8px);
+      color: var(--foreground);
+      cursor: pointer;
+      box-shadow:
+        inset 5px 0 5px color-mix(in oklch, var(--muted) 30%, transparent),
+        0 2px 8px color-mix(in oklch, var(--foreground) 8%, transparent);
+    }
+
+    /* Make PageHeader non-sticky on form pages */
+    body[data-form-page] .page-header {
+      position: static;
+    }
+
+    /* Reposition action buttons to bottom-right */
+    body[data-form-page] .page-header-actions {
+      position: fixed;
+      bottom: 0.75rem;
+      right: 0.75rem;
+      z-index: 50;
+    }
+  }
+
+  /* Popover menu */
+  .mobile-nav-popover[popover] {
+    position: fixed;
+    inset: auto;
+    bottom: 4rem;
+    left: 0.75rem;
+    margin: 0;
+    padding: 0.25rem;
+    min-width: 180px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(
+      0deg,
+      color-mix(in oklch, var(--background) 85%, transparent),
+      color-mix(in oklch, var(--background) 95%, transparent)
+    );
+    backdrop-filter: blur(12px);
+    box-shadow:
+      0 8px 24px color-mix(in oklch, var(--foreground) 10%, transparent),
+      0 2px 8px color-mix(in oklch, var(--foreground) 5%, transparent);
+
+    /* Animation */
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+    transition:
+      opacity 0.2s ease-out,
+      transform 0.2s ease-out,
+      display 0.2s allow-discrete,
+      overlay 0.2s allow-discrete;
+  }
+
+  .mobile-nav-popover[popover]:popover-open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  @starting-style {
+    .mobile-nav-popover[popover]:popover-open {
+      opacity: 0;
+      transform: translateY(8px) scale(0.96);
+    }
+  }
+
+  .mobile-nav-popover::backdrop {
+    background: color-mix(in oklch, var(--foreground) 5%, transparent);
+    backdrop-filter: blur(1px);
+    opacity: 0;
+    transition:
+      opacity 0.2s ease-out,
+      display 0.2s allow-discrete,
+      overlay 0.2s allow-discrete;
+  }
+
+  .mobile-nav-popover:popover-open::backdrop {
+    opacity: 1;
+  }
+
+  @starting-style {
+    .mobile-nav-popover:popover-open::backdrop {
+      opacity: 0;
+    }
+  }
+
+  .mobile-nav-link {
+    display: block;
+    padding: 0.625rem 1rem;
+    color: var(--foreground);
+    text-decoration: none;
+    font-size: var(--fluid-xs);
+    font-weight: 450;
+    border-radius: var(--radius-md);
+    transition: background-color 0.15s ease;
+  }
+
+  .mobile-nav-link:hover,
+  .mobile-nav-link:active {
+    background: color-mix(in oklch, var(--muted) 60%, transparent);
+  }
+
+  .mobile-nav-link.active {
+    font-weight: 600;
+    background: color-mix(in oklch, var(--primary) 15%, transparent);
+    color: var(--primary);
+  }
+</style>

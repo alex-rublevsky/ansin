@@ -2,19 +2,19 @@
 import { ClientRouter } from "astro:transitions";
 import "../styles/global.css";
 import "../styles/pill-nav.css";
-import Button from "../components/Button.astro";
+import AdminNav from "../components/AdminNav.astro";
 
 interface Props {
 	title: string;
+	formPage?: boolean;
 }
 
-const { title } = Astro.props;
-const _user = Astro.locals.user;
-
-// TODO: Re-enable authentication when ready
-// if (!user) {
-//   return Astro.redirect('/admin/login');
-// }
+const { title, formPage = false } = Astro.props;
+const user = Astro.locals.user;
+//TODO: re-enable auth
+if (!user) {
+	return Astro.redirect("/admin/login");
+}
 ---
 
 <!DOCTYPE html>
@@ -26,71 +26,17 @@ const _user = Astro.locals.user;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <ClientRouter />
   </head>
-  <body class="min-h-screen bg-background">
+  <body class="min-h-screen bg-background" {...formPage ? { "data-form-page": "" } : {}}>
     <main class="flex-1">
-      <div class="pb-24">
+      <section>
         <slot />
-      </div>
+      </section>
     </main>
-        <div class="mb-2 fixed bottom-0 left-0 right-0 w-full flex justify-center z-50" transition:persist="admin-nav">
-          <div class="pill-container">
-            <div class="pill-bubble active"></div>
-            <div class="pill-bubble hover"></div>
-            <nav class="pill-nav-links">
-              <Button href="/admin" variant="pill" data-nav-link data-text="Главная">Главная</Button>
-              <Button href="/admin/products" variant="pill" data-nav-link data-text="Товары">Товары</Button>
-              <Button href="/admin/orders" variant="pill" data-nav-link data-text="Заказы">Заказы</Button>
-              <Button href="/admin/categories" variant="pill" data-nav-link data-text="Категории">Категории</Button>
-            </nav>
-          </div>
-        </div>
+    <AdminNav formPage={formPage} />
 
-        <script>
-          function updateActiveNav() {
-            const path = window.location.pathname;
-            document.querySelectorAll('[data-nav-link]').forEach((link) => {
-              const href = link.getAttribute('href');
-              const isActive = href === '/admin'
-                ? path === '/admin' || path === '/admin/'
-                : path.startsWith(href!);
-              link.classList.toggle('active', isActive);
-            });
-          }
-
-          updateActiveNav();
-          document.addEventListener('astro:after-swap', updateActiveNav);
-        </script>
-
-        <!-- <div class="p-4 border-t border-gray-800">
-          {user && (
-            <div class="mb-3 text-sm text-gray-400">
-              {user.email}
-            </div>
-          )}
-          <Button
-          href="/"
-          size="sm"
-          class=""
-        >
-        👁️ Клиентский сайт
-        </Button>
-          {user && (
-            <Button
-              id="logout-btn"
-              class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-            >
-              Выйти из аккаунта
-            </Button>
-          )}
-        </div> -->
-     
-
-    
-    
-
-    <!-- <script>
+    <script>
       import { signOut } from '../lib/auth-client';
-      
+
       const logoutBtn = document.getElementById('logout-btn');
       if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
@@ -98,6 +44,6 @@ const _user = Astro.locals.user;
           window.location.href = '/admin/login';
         });
       }
-    </script> -->
+    </script>
   </body>
 </html>

@@ -11,7 +11,7 @@ const { variant, size, class: className, ...rest } = Astro.props;
 
 export const button = tv({
 	base: [
-		"inline-flex items-center justify-center gap-1.5 rounded-md font-medium whitespace-nowrap cursor-pointer",
+		"relative inline-flex items-center justify-center gap-1.5 rounded-md font-medium whitespace-nowrap cursor-pointer",
 		"[&_svg]:pointer-events-none [&_svg]:shrink-0",
 		"transition-all outline-none focus-visible:ring-3",
 		"disabled:pointer-events-none disabled:opacity-50",
@@ -37,6 +37,8 @@ export const button = tv({
 				"bg-warning text-warning-foreground hover:bg-warning/90 focus-visible:ring-warning/50",
 			error:
 				"bg-error text-error-foreground hover:bg-error/90 focus-visible:ring-error/50",
+			// Pill variant — styled entirely by pill-nav.css, no Tailwind base/size classes applied
+			pill: "",
 		},
 		size: {
 			sm: "h-9 px-4 text-sm has-[>svg]:px-3 [&_svg:not([class*='size-'])]:size-3.5",
@@ -51,8 +53,38 @@ export const button = tv({
 });
 
 const Tag = Astro.props.href ? "a" : "button";
+const resolvedVariant = variant ?? "default";
+
+// Pill variant bypasses all Tailwind base/size classes — pill-nav.css takes full control
+const tagClass =
+	resolvedVariant === "pill"
+		? ["pill-nav-link", className].filter(Boolean).join(" ")
+		: button({ variant, size, class: className });
 ---
 
-<Tag class={button({ variant, size, class: className })} data-slot="button" {...rest}>
-  <slot />
+<Tag class={tagClass} data-slot="button" data-variant={resolvedVariant} {...rest}>
+  <span class="btn-label"><slot /></span>
+  <span class="btn-dots" aria-hidden="true"><span></span><span></span><span></span></span>
 </Tag>
+
+<script>
+  function initButtonStates() {
+    document.querySelectorAll<HTMLElement>('[data-slot="button"]').forEach((el) => {
+      if ((el as any)._btnInit) return;
+      (el as any)._btnInit = true;
+
+      (el as any).setState = (state: string, labelText?: string) => {
+        el.dataset.state = state;
+        if (el instanceof HTMLButtonElement) {
+          el.disabled = state === "loading";
+        }
+        if (labelText !== undefined) {
+          const label = el.querySelector<HTMLElement>(".btn-label");
+          if (label) label.textContent = labelText;
+        }
+      };
+    });
+  }
+
+  document.addEventListener("astro:page-load", initButtonStates);
+</script>

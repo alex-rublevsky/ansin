@@ -1,0 +1,90 @@
+---
+import ProductCard from "../../components/ProductCard.astro";
+import SearchBar from "../../components/SearchBar.astro";
+import { getActiveCategories } from "../../db/repositories/categories";
+import { getProductsByCategory } from "../../db/repositories/products";
+import { getVariationsByProductId } from "../../db/repositories/variations";
+import PublicLayout from "../../layouts/PublicLayout.astro";
+export const prerender = true;
+
+export async function getStaticPaths() {
+	const categories = await getActiveCategories();
+
+	return categories.map((category) => ({
+		params: { slug: category.slug },
+		props: { category },
+	}));
+}
+
+const { category } = Astro.props;
+const products = await getProductsByCategory(category.id);
+const allCategories = await getActiveCategories();
+
+// Load variations for all products
+const variationsMap = new Map(
+	await Promise.all(
+		products.map(
+			async (p) => [p.id, await getVariationsByProductId(p.id)] as const,
+		),
+	),
+);
+---
+
+<PublicLayout 
+  title={`${category.name} - Category`}
+  description={category.description || `Browse ${category.name} products`}
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="mb-8">
+      <nav class="text-sm text-gray-500 mb-4">
+        <a href="/" class="hover:text-indigo-600">Home</a>
+        <span class="mx-2">/</span>
+        <span class="text-gray-900">{category.name}</span>
+      </nav>
+      
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">
+        {category.name}
+      </h1>
+      {category.description && (
+        <p class="text-lg text-gray-600">
+          {category.description}
+        </p>
+      )}
+      <p class="text-sm text-gray-500 mt-2">
+        {products.length} {products.length === 1 ? 'product' : 'products'}
+      </p>
+    </div>
+
+    <div class="mb-8">
+      <SearchBar />
+    </div>
+
+    <div class="mb-8">
+      <!-- <CategoryFilter categories={allCategories} currentSlug={category.slug} /> -->
+    </div>
+
+    {products.length === 0 ? (
+      <div class="text-center py-12">
+        <p class="text-gray-500 text-lg">No products in this category yet.</p>
+        <a href="/" class="text-indigo-600 hover:text-indigo-700 mt-4 inline-block">
+          Browse all products
+        </a>
+      </div>
+    ) : (
+      <div 
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        data-product-grid
+      >
+        {products.map((product) => (
+          <div
+            data-product
+            data-product-name={product.name}
+            data-product-description={product.description}
+          >
+            <ProductCard product={{...product, variations: variationsMap.get(product.id) || []}} />
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</PublicLayout>

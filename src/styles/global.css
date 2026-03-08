@@ -85,11 +85,27 @@
 	--color-error-foreground: var(--error-foreground);
 	--color-outline: var(--outline);
 
-	--radius-xl: calc(var(--radius) + 2rem);
-	--radius-lg: var(--radius);
-	--radius-md: calc(var(--radius) - 0.1rem);
-	--radius-sm: calc(var(--radius) - 3rem);
-	--radius-xs: calc(var(--radius) - 0.7rem);
+	/*
+	 * Radius scale — based on the nested-corners rule:
+	 *   outer_radius = inner_radius + gap
+	 *
+	 * The smallest interactive element (icon button in pill toggle)
+	 * defines --radius-sm. Each step up adds ~4px (0.25rem),
+	 * matching the standard pill gap (margin: 4px).
+	 *
+	 *   xs:  0.25rem  (4px)   — checkboxes, tiny chips
+	 *   sm:  0.5rem   (8px)   — small inputs, tags
+	 *   md:  0.75rem  (12px)  — buttons, inner pill items
+	 *   lg:  1rem     (16px)  — pill containers, cards  (md + 4px gap)
+	 *   xl:  1.5rem   (24px)  — modals, large panels    (lg + 8px gap)
+	 *   2xl: 2rem     (32px)  — hero sections           (xl + 8px gap)
+	 */
+	--radius-xs: 0.25rem;
+	--radius-sm: 0.5rem;
+	--radius-md: 0.75rem;
+	--radius-lg: 1rem;
+	--radius-xl: 1.5rem;
+	--radius-2xl: 2rem;
 
 	--font-family-sans: "Overused Grotesk", ui-sans-serif, system-ui, sans-serif;
 
@@ -107,7 +123,6 @@
 	--font-size-8xl: clamp(3.5rem, 2vw + 2.5rem, 6rem);
 	--font-size-9xl: clamp(4rem, 2vw + 3rem, 8rem);
 }
-
 
 :root {
 	--hue: 263.26;

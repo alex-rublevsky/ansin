@@ -1,0 +1,227 @@
+---
+import Link from "../../components/Link.astro";
+import {
+	getActiveDeployment,
+	getLastDeployment,
+	getPendingChanges,
+} from "../../db/repositories/deployments";
+import { getAllOrders, getOrdersByStatus } from "../../db/repositories/orders";
+import { getAllProducts } from "../../db/repositories/products";
+import AdminLayout from "../../layouts/AdminLayout.astro";
+export const prerender = false;
+
+// Auth check before any data fetching
+// @ts-expect-error - Astro global is available in .astro frontmatter
+const user = Astro.locals.user;
+if (!user) {
+	// @ts-expect-error
+	return Astro.redirect("/admin/login");
+}
+
+const [products, allOrders, pendingOrders, pendingChanges, lastDeployment, activeDeployment] = await Promise.all([
+	getAllProducts(),
+	getAllOrders(),
+	getOrdersByStatus("pending"),
+	getPendingChanges(),
+	getLastDeployment(),
+	getActiveDeployment(),
+]);
+
+const totalRevenue = allOrders.reduce(
+	(sum, order) => sum + order.totalAmount,
+	0,
+);
+const recentOrders = allOrders.slice(0, 5);
+---
+
+<AdminLayout title="Админ Панель">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold mb-2">Админ Панель</h1>
+    <p>Пьём и продаём!</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm font-medium">Товаров</span>
+        <span class="text-2xl">📦</span>
+      </div>
+      <div class="text-3xl font-bold">{products.length}</div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm font-medium">Заказов</span>
+        <span class="text-2xl">🛒</span>
+      </div>
+      <div class="text-3xl font-bold">{allOrders.length}</div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm font-medium">Ожидающих заказов</span>
+        <span class="text-2xl">⏳</span>
+      </div>
+      <div class="text-3xl font-bold text-orange-600">{pendingOrders.length}</div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm font-medium">Выручка</span>
+        <span class="text-2xl">💰</span>
+      </div>
+      <div class="text-3xl font-bold text-green-600">${totalRevenue.toFixed(2)}</div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white rounded-lg shadow p-6">
+      <h4 class="mb-4">Последние заказы</h4>
+      {recentOrders.length === 0 ? (
+        <p class="text-gray-500">Пока нет заказов</p>
+      ) : (
+        <div class="space-y-3">
+          {recentOrders.map((order) => (
+            <a
+              href={`/admin/orders/${order.id}`}
+              class="block p-4 border border-gray-200 rounded-lg hover:border-indigo-500 transition"
+            >
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <div class="font-semibold text-gray-900">{order.orderNumber}</div>
+                  <div class="text-sm text-gray-600">{order.customerName}</div>
+                </div>
+                <span class:list={[
+                  "px-2 py-1 text-xs font-medium rounded-full",
+                  order.status === 'pending' && "bg-orange-100 text-orange-700",
+                  order.status === 'confirmed' && "bg-green-100 text-green-700",
+                  order.status === 'cancelled' && "bg-red-100 text-red-700",
+                ]}>
+                  {order.status}
+                </span>
+              </div>
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-gray-500">
+                  {new Date(order.createdAt).toLocaleDateString()}
+                </span>
+                <span class="font-semibold text-indigo-600">
+                  ${order.totalAmount.toFixed(2)}
+                </span>
+              </div>
+            </a>
+          ))}
+        </div>
+      )}
+      <Link
+        href="/admin/orders"
+        class="block mt-4 text-center text-indigo-600 hover:text-indigo-700 font-medium"
+      >
+        Посмотреть все заказы →
+      </Link>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h4>Деплой сайта</h4>
+        {activeDeployment ? (
+          <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
+            Деплой запущен...
+          </span>
+        ) : pendingChanges.length > 0 ? (
+          <span class="px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700">
+            {pendingChanges.length} {pendingChanges.length === 1 ? "изменение" : "изменений"}
+          </span>
+        ) : (
+          <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
+            Актуально
+          </span>
+        )}
+      </div>
+
+      {lastDeployment && (
+        <p class="text-xs text-gray-500 mb-3">
+          Последний деплой: {lastDeployment.completedAt ? new Date(lastDeployment.completedAt).toLocaleString("ru-RU") : "—"}
+          ({lastDeployment.source === "local" ? "локально" : lastDeployment.source === "dashboard" ? "из панели" : "CI/CD"})
+        </p>
+      )}
+
+      {pendingChanges.length === 0 && !activeDeployment ? (
+        <p class="text-gray-500 text-sm">Все изменения опубликованы</p>
+      ) : activeDeployment ? (
+        <div class="text-sm text-blue-600">
+          <p>Сборка и публикация статических страниц...</p>
+          <p class="text-xs text-gray-400 mt-1">Страница обновится автоматически</p>
+        </div>
+      ) : (
+        <>
+          <div class="space-y-2 mb-4 max-h-48 overflow-y-auto">
+            {pendingChanges.map((change) => (
+              <div class="flex items-center gap-2 text-sm p-2 bg-gray-50 rounded">
+                <span class:list={[
+                  "w-2 h-2 rounded-full shrink-0",
+                  change.action === "create" && "bg-green-500",
+                  change.action === "update" && "bg-orange-500",
+                  change.action === "delete" && "bg-red-500",
+                ]}>
+                </span>
+                <span class="truncate">{change.description}</span>
+                <span class="text-xs text-gray-400 ml-auto shrink-0">
+                  {new Date(change.createdAt).toLocaleDateString("ru-RU")}
+                </span>
+              </div>
+            ))}
+          </div>
+          <button
+            id="deploy-btn"
+            data-slot="button"
+            class="w-full bg-foreground text-background hover:bg-foreground/90 rounded-md h-11 px-5 text-base font-medium cursor-pointer transition-all active:scale-96"
+          >
+            <span class="btn-label">Опубликовать изменения</span>
+            <span class="btn-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+          </button>
+        </>
+      )}
+    </div>
+  </div>
+
+  <script>
+    function initDeployButton() {
+      const btn = document.getElementById('deploy-btn') as HTMLElement | null;
+      if (!btn || (btn as any)._deployInit) return;
+      (btn as any)._deployInit = true;
+
+      btn.addEventListener('click', async () => {
+        if (!confirm('Опубликовать все изменения на сайт?')) return;
+
+        btn.dataset.state = 'loading';
+        if (btn instanceof HTMLButtonElement) btn.disabled = true;
+        const label = btn.querySelector('.btn-label');
+        if (label) label.textContent = 'Запуск деплоя...';
+
+        try {
+          const res = await fetch('/api/admin/deploy/trigger', { method: 'POST' });
+          const data = await res.json();
+
+          if (!res.ok) {
+            alert(data.error || 'Ошибка запуска деплоя');
+            btn.dataset.state = '';
+            if (btn instanceof HTMLButtonElement) btn.disabled = false;
+            if (label) label.textContent = 'Опубликовать изменения';
+            return;
+          }
+
+          if (label) label.textContent = 'Деплой запущен!';
+          setTimeout(() => window.location.reload(), 1500);
+        } catch {
+          alert('Ошибка сети');
+          btn.dataset.state = '';
+          if (btn instanceof HTMLButtonElement) btn.disabled = false;
+          if (label) label.textContent = 'Опубликовать изменения';
+        }
+      });
+    }
+
+    document.addEventListener('astro:page-load', initDeployButton);
+    initDeployButton();
+  </script>
+</AdminLayout>

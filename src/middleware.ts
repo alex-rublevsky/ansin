@@ -26,26 +26,37 @@ function jsonError(
 }
 
 export const onRequest = defineMiddleware(async (context, next) => {
+	const { pathname } = context.url;
+	const isApiRoute = pathname.startsWith("/api/");
+	const isAdminPage =
+		pathname.startsWith("/admin") && !pathname.startsWith("/admin/login");
+	const isAdminApi = pathname.startsWith("/api/admin/");
+
+	// Skip header access for prerendered public pages
+	if (!isApiRoute && !isAdminPage) {
+		return next();
+	}
+
 	const origin = context.request.headers.get("Origin");
 	const corsHeaders = getCorsHeaders(origin);
 
 	// CORS: Handle preflight for API routes
-	if (
-		context.url.pathname.startsWith("/api/") &&
-		context.request.method === "OPTIONS"
-	) {
+	if (isApiRoute && context.request.method === "OPTIONS") {
 		return new Response(null, {
 			status: 204,
 			headers: corsHeaders,
 		});
 	}
 
-	// Auth: Protect /admin pages and /api/admin/* routes
-	const isAdminPage =
-		context.url.pathname.startsWith("/admin") &&
-		!context.url.pathname.startsWith("/admin/login");
-	const isAdminApi = context.url.pathname.startsWith("/api/admin/");
+	// CSRF: Block state-changing requests from unknown origins
+	const method = context.request.method;
+	if (method !== "GET" && method !== "HEAD" && method !== "OPTIONS") {
+		if (origin && !ALLOWED_ORIGINS.has(origin)) {
+			return jsonError("Cross-origin request blocked", 403, corsHeaders);
+		}
+	}
 
+	// Auth: Protect /admin pages and /api/admin/* routes
 	if (isAdminPage || isAdminApi) {
 		try {
 			const auth = getAuth();
@@ -75,7 +86,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
 	const response = await next();
 
-	// Security headers
+	// Security headers for dynamic routes
 	response.headers.set("X-Content-Type-Options", "nosniff");
 	response.headers.set("X-Frame-Options", "DENY");
 	response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -83,29 +94,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
 		"Permissions-Policy",
 		"geolocation=(), microphone=(), camera=()",
 	);
-	response.headers.set(
-		"Content-Security-Policy",
-		[
-			"default-src 'self'",
-			"script-src 'self' 'unsafe-inline'",
-			"style-src 'self' 'unsafe-inline'",
-			"img-src 'self' storage.yandexcloud.net data: blob:",
-			"connect-src 'self' storage.yandexcloud.net",
-			"font-src 'self'",
-			"object-src 'none'",
-			"base-uri 'self'",
-			"form-action 'self'",
-			"frame-ancestors 'none'",
-		].join("; "),
-	);
 
 	// Prevent caching of admin pages (authenticated content must not be stale)
-	if (context.url.pathname.startsWith("/admin")) {
+	if (isAdminPage) {
 		response.headers.set("Cache-Control", "no-store");
 	}
 
 	// CORS: Add headers to API responses
-	if (context.url.pathname.startsWith("/api/")) {
+	if (isApiRoute) {
 		for (const [key, value] of Object.entries(corsHeaders)) {
 			response.headers.set(key, value);
 		}

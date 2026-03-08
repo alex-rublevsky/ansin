@@ -17,7 +17,10 @@ import AdminLayout from "../../../../layouts/AdminLayout.astro";
 
 export const prerender = false;
 
-declare const Astro: { params: { id?: string }; redirect: (url: string) => never };
+declare const Astro: {
+	params: { id?: string };
+	redirect: (url: string) => never;
+};
 const id = parseInt(Astro.params.id!, 10);
 const product = await getProductById(id);
 const categories = await getAllCategories();

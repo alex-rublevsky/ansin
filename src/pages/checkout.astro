@@ -1,0 +1,200 @@
+---
+export const prerender = true;
+
+import PublicLayout from "../layouts/PublicLayout.astro";
+---
+
+<PublicLayout title="Оформление заказа" description="Оформите ваш заказ">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Оформление заказа</h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold text-gray-900 mb-6">Контактная информация</h2>
+
+          <form id="checkout-form" class="space-y-4">
+            <div>
+              <label for="customerName" class="block text-sm font-medium text-gray-700 mb-1">
+                Имя *
+              </label>
+              <input
+                type="text"
+                id="customerName"
+                name="customerName"
+                required
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label for="customerEmail" class="block text-sm font-medium text-gray-700 mb-1">
+                Email *
+              </label>
+              <input
+                type="email"
+                id="customerEmail"
+                name="customerEmail"
+                required
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label for="customerPhone" class="block text-sm font-medium text-gray-700 mb-1">
+                Телефон
+              </label>
+              <input
+                type="tel"
+                id="customerPhone"
+                name="customerPhone"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">
+                Примечания
+              </label>
+              <textarea
+                id="notes"
+                name="notes"
+                rows="3"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              ></textarea>
+            </div>
+
+            <div id="error-message" class="hidden p-3 bg-red-50 text-red-700 rounded-lg text-sm"></div>
+
+            <button
+              type="submit"
+              class="w-full py-3 px-6 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition"
+            >
+              Оформить заказ
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-lg shadow p-6 sticky top-8">
+          <h2 class="text-xl font-bold text-gray-900 mb-4">Ваш заказ</h2>
+
+          <div id="order-items" class="space-y-3 mb-6 max-h-64 overflow-y-auto">
+            <!-- Order items will be inserted here -->
+          </div>
+
+          <div class="border-t border-gray-200 pt-4 space-y-2">
+            <div class="flex justify-between text-lg font-bold">
+              <span>Итого:</span>
+              <span id="total" class="text-indigo-600">0 &#8381;</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function renderOrderSummary() {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const orderItems = document.getElementById('order-items');
+      const total = document.getElementById('total');
+
+      if (cart.length === 0) {
+        window.location.href = '/cart';
+        return;
+      }
+
+      if (orderItems) {
+        orderItems.innerHTML = '';
+        for (const item of cart) {
+          const row = document.createElement('div');
+          row.className = 'flex justify-between text-sm';
+          const label = document.createElement('span');
+          label.className = 'text-gray-600';
+          label.textContent = `${item.name} x ${item.quantity}`;
+          const price = document.createElement('span');
+          price.className = 'font-medium';
+          price.textContent = `${Math.round(item.price * item.quantity)} \u20BD`;
+          row.append(label, price);
+          orderItems.appendChild(row);
+        }
+      }
+
+      const totalAmount = cart.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
+      if (total) total.textContent = `${Math.round(totalAmount)} \u20BD`;
+    }
+
+    const form = document.getElementById('checkout-form') as HTMLFormElement;
+    const errorMessage = document.getElementById('error-message');
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!errorMessage) return;
+      errorMessage.classList.add('hidden');
+
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+      if (cart.length === 0) {
+        errorMessage.textContent = 'Корзина пуста';
+        errorMessage.classList.remove('hidden');
+        return;
+      }
+
+      const formData = new FormData(form);
+      const totalAmount = cart.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
+
+      const orderData = {
+        customerName: formData.get('customerName'),
+        customerEmail: formData.get('customerEmail'),
+        customerPhone: formData.get('customerPhone') || null,
+        notes: formData.get('notes') || null,
+        items: cart.map((item: any) => ({
+          productId: item.productId || parseInt(item.id),
+          productName: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          variationId: item.variationId || null,
+          weight: item.weight || null,
+        })),
+        totalAmount: Math.round(totalAmount),
+      };
+
+      try {
+        const response = await fetch('/api/orders/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          localStorage.removeItem('cart');
+          window.location.href = `/order-confirmation?orderNumber=${result.orderNumber}`;
+        } else if (response.status === 409 && result.priceChanges) {
+          // Update localStorage cart with current prices and re-render
+          const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+          for (const change of result.priceChanges) {
+            const cartItem = cart.find((i: any) => i.name === change.name);
+            if (cartItem) cartItem.price = change.now;
+          }
+          localStorage.setItem('cart', JSON.stringify(cart));
+          renderOrderSummary();
+          errorMessage.textContent = 'Цены некоторых товаров изменились. Проверьте обновлённую сумму и подтвердите заказ.';
+          errorMessage.classList.remove('hidden');
+        } else {
+          errorMessage.textContent = result.error || 'Не удалось оформить заказ. Попробуйте ещё раз.';
+          errorMessage.classList.remove('hidden');
+        }
+      } catch (_error) {
+        errorMessage.textContent = 'Произошла ошибка. Попробуйте ещё раз.';
+        errorMessage.classList.remove('hidden');
+      }
+    });
+
+    renderOrderSummary();
+  </script>
+</PublicLayout>

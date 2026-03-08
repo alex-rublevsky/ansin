@@ -1,0 +1,151 @@
+---
+export const prerender = true;
+
+import Button from "../components/Button.astro";
+import PublicLayout from "../layouts/PublicLayout.astro";
+---
+
+<PublicLayout title="Корзина" description="Ваша корзина">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Корзина</h1>
+
+    <div id="cart-empty" class="hidden text-center py-12">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+      <p class="text-gray-500 text-lg mt-4">Корзина пуста</p>
+      <a href="/" class="mt-4 inline-block text-indigo-600 hover:text-indigo-700 font-medium">
+        Продолжить покупки
+      </a>
+    </div>
+
+    <div id="cart-content" class="hidden">
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div id="cart-items" class="divide-y divide-gray-200">
+          <!-- Cart items will be inserted here -->
+        </div>
+      </div>
+
+      <div class="mt-8 bg-white rounded-lg shadow p-6">
+        <div class="space-y-4">
+          <div class="flex justify-between text-lg font-semibold">
+            <span>Итого:</span>
+            <span id="cart-total" class="text-indigo-600">0 &#8381;</span>
+          </div>
+
+          <Button
+            id="checkout-button"
+          >
+            Оформить заказ
+          </Button>
+
+          <a
+            href="/"
+            class="block text-center text-gray-600 hover:text-gray-800"
+          >
+            Продолжить покупки
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <template id="cart-item-template">
+    <div class="p-6 flex items-center gap-4">
+      <div class="flex-1">
+        <h3 class="text-lg font-semibold text-gray-900" data-slot="name"></h3>
+        <p class="text-sm text-gray-500" data-slot="price-per"></p>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <button class="quantity-decrease px-3 py-1 border border-gray-300 rounded hover:bg-gray-100">-</button>
+          <span class="w-12 text-center font-medium" data-slot="quantity"></span>
+          <button class="quantity-increase px-3 py-1 border border-gray-300 rounded hover:bg-gray-100">+</button>
+        </div>
+        <div class="w-24 text-right font-semibold" data-slot="subtotal"></div>
+        <button class="remove-item text-red-600 hover:text-red-700 p-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    function renderCart() {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const cartEmpty = document.getElementById('cart-empty');
+      const cartContent = document.getElementById('cart-content');
+      const cartItems = document.getElementById('cart-items');
+      const cartTotal = document.getElementById('cart-total');
+      const template = document.getElementById('cart-item-template') as HTMLTemplateElement;
+
+      if (cart.length === 0) {
+        cartEmpty?.classList.remove('hidden');
+        cartContent?.classList.add('hidden');
+        return;
+      }
+
+      cartEmpty?.classList.add('hidden');
+      cartContent?.classList.remove('hidden');
+
+      if (cartItems && template) {
+        cartItems.innerHTML = '';
+
+        for (const item of cart) {
+          const clone = template.content.cloneNode(true) as DocumentFragment;
+          const row = clone.firstElementChild as HTMLElement;
+          const id = String(item.id);
+
+          row.dataset.itemId = id;
+          (clone.querySelector('[data-slot="name"]') as HTMLElement).textContent = item.name;
+          (clone.querySelector('[data-slot="price-per"]') as HTMLElement).textContent = `${Math.round(item.price)} \u20BD за шт.`;
+          (clone.querySelector('[data-slot="quantity"]') as HTMLElement).textContent = String(item.quantity);
+          (clone.querySelector('[data-slot="subtotal"]') as HTMLElement).textContent = `${Math.round(item.price * item.quantity)} \u20BD`;
+
+          clone.querySelector('.quantity-decrease')!.addEventListener('click', () => updateQuantity(id, -1));
+          clone.querySelector('.quantity-increase')!.addEventListener('click', () => updateQuantity(id, 1));
+          clone.querySelector('.remove-item')!.addEventListener('click', () => removeItem(id));
+
+          cartItems.appendChild(clone);
+        }
+
+        const total = cart.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
+        if (cartTotal) {
+          cartTotal.textContent = `${Math.round(total)} \u20BD`;
+        }
+      }
+    }
+
+    function updateQuantity(id: string, change: number) {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const item = cart.find((item: any) => item.id === id);
+
+      if (item) {
+        item.quantity += change;
+        if (item.quantity <= 0) {
+          removeItem(id);
+          return;
+        }
+        localStorage.setItem('cart', JSON.stringify(cart));
+        renderCart();
+        window.dispatchEvent(new Event('storage'));
+      }
+    }
+
+    function removeItem(id: string) {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const filtered = cart.filter((item: any) => item.id !== id);
+      localStorage.setItem('cart', JSON.stringify(filtered));
+      renderCart();
+      window.dispatchEvent(new Event('storage'));
+    }
+
+    document.getElementById('checkout-button')?.addEventListener('click', () => {
+      window.location.href = '/checkout';
+    });
+
+    renderCart();
+  </script>
+</PublicLayout>

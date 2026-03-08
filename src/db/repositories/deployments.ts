@@ -46,6 +46,8 @@ export async function getPendingChanges(
 		.orderBy(desc(deploymentChanges.createdAt));
 }
 
+const DEPLOY_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
+
 export async function getActiveDeployment(): Promise<Deployment | null> {
 	const result = await db
 		.select()
@@ -53,7 +55,25 @@ export async function getActiveDeployment(): Promise<Deployment | null> {
 		.where(inArray(deployments.status, ["pending", "building"]))
 		.orderBy(desc(deployments.createdAt))
 		.limit(1);
-	return result[0] ?? null;
+
+	const active = result[0] ?? null;
+
+	// Auto-expire stuck deployments
+	if (active) {
+		const elapsed = Date.now() - new Date(active.createdAt).getTime();
+		if (elapsed > DEPLOY_TIMEOUT_MS) {
+			await updateDeploymentStatus(active.id, "failed");
+			return null;
+		}
+	}
+
+	return active;
+}
+
+export async function cancelDeployment(
+	id: number,
+): Promise<Deployment | undefined> {
+	return updateDeploymentStatus(id, "failed");
 }
 
 export async function createDeployment(

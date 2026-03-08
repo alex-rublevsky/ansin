@@ -1,6 +1,8 @@
 /// <reference path="../.astro/types.d.ts" />
 /// <reference types="astro/client" />
 
+declare module "astro/jsx-runtime";
+
 interface ImportMetaEnv {
 	readonly YANDEX_STORAGE_BUCKET: string;
 	readonly YANDEX_STORAGE_ACCESS_KEY: string;

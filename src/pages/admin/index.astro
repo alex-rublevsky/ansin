@@ -206,7 +206,7 @@ const recentOrders = allOrders.slice(0, 5);
         if (label) label.textContent = 'Запуск деплоя...';
 
         try {
-          const res = await fetch('/api/admin/deploy/trigger', { method: 'POST' });
+          const res = await fetch('/api/admin/deploy/trigger', { method: 'POST', credentials: 'include' });
           const data = await res.json();
 
           if (!res.ok) {

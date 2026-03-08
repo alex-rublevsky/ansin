@@ -5,6 +5,7 @@ import { defineConfig } from "astro/config";
 
 // https://astro.build/config
 export default defineConfig({
+	site: "https://d5dlmoeh5bvrbgn8dnuv.akta928u.apigw.yandexcloud.net",
 	output: "server",
 	adapter: node({
 		mode: "standalone",

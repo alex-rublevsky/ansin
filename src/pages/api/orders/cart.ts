@@ -27,7 +27,8 @@ export const POST: APIRoute = async ({ request }) => {
 			);
 		}
 
-		const { customerName, customerEmail, customerPhone, notes, items } = parsed.data;
+		const { customerName, customerEmail, customerPhone, notes, items } =
+			parsed.data;
 
 		// Fetch all products in parallel
 		const productResults = await Promise.all(

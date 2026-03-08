@@ -18,7 +18,14 @@ if (!user) {
 	return Astro.redirect("/admin/login");
 }
 
-const [products, allOrders, pendingOrders, pendingChanges, lastDeployment, activeDeployment] = await Promise.all([
+const [
+	products,
+	allOrders,
+	pendingOrders,
+	pendingChanges,
+	lastDeployment,
+	activeDeployment,
+] = await Promise.all([
 	getAllProducts(),
 	getAllOrders(),
 	getOrdersByStatus("pending"),

@@ -24,7 +24,14 @@ export const POST: APIRoute = async ({ request }) => {
 			);
 		}
 
-		const { productId, quantity, customerName, customerEmail, customerPhone, notes } = parsed.data;
+		const {
+			productId,
+			quantity,
+			customerName,
+			customerEmail,
+			customerPhone,
+			notes,
+		} = parsed.data;
 
 		const product = await getProductById(productId);
 

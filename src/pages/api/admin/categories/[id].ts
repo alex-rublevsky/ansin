@@ -32,10 +32,10 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 	try {
 		const category = await getCategoryById(id);
 		if (!category) {
-			return new Response(
-				JSON.stringify({ error: "Категория не найдена" }),
-				{ status: 404, headers: { "Content-Type": "application/json" } },
-			);
+			return new Response(JSON.stringify({ error: "Категория не найдена" }), {
+				status: 404,
+				headers: { "Content-Type": "application/json" },
+			});
 		}
 
 		const body = await request.json();
@@ -104,10 +104,10 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 	try {
 		const category = await getCategoryById(id);
 		if (!category) {
-			return new Response(
-				JSON.stringify({ error: "Категория не найдена" }),
-				{ status: 404, headers: { "Content-Type": "application/json" } },
-			);
+			return new Response(JSON.stringify({ error: "Категория не найдена" }), {
+				status: 404,
+				headers: { "Content-Type": "application/json" },
+			});
 		}
 
 		const productCount = await getProductCountByCategoryId(id);

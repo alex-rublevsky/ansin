@@ -28,7 +28,8 @@ export async function getLastDeployment(): Promise<Deployment | null> {
 export async function getPendingChanges(
 	lastDeployment?: Deployment | null,
 ): Promise<DeploymentChange[]> {
-	const last = lastDeployment !== undefined ? lastDeployment : await getLastDeployment();
+	const last =
+		lastDeployment !== undefined ? lastDeployment : await getLastDeployment();
 	const since = last?.completedAt;
 
 	if (!since) {

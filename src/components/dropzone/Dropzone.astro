@@ -1,10 +1,7 @@
 ---
-import CloudUploadIcon from "@tabler/icons/outline/cloud-upload.svg";
-import LoaderIcon from "@tabler/icons/outline/loader-2.svg";
 import type { HTMLAttributes } from "astro/types";
 import { STORAGE_BASE_URL } from "../../lib/constants";
-import Button from "../Button.astro";
-import { dropzone } from "./variants";
+import { CloudUpload } from "../icons";
 
 type Props = HTMLAttributes<"div"> & {
 	id?: string;
@@ -58,6 +55,7 @@ const getImageUrl = (path: string) => `${STORAGE_BASE_URL}/${bucket}/${path}`;
 		<label class="block font-medium text-sm" data-label>
 			Изображения товара <span data-count></span>
 		</label>
+		<!-- TODO: textarea editing feature – commented out, may be re-enabled later
 		<Button
 			type="button"
 			variant="outline"
@@ -66,6 +64,7 @@ const getImageUrl = (path: string) => `${STORAGE_BASE_URL}/${bucket}/${path}`;
 		>
 			<span data-toggle-text>Редактировать текстом</span>
 		</Button>
+		-->
 	</div>
 
 	<input
@@ -77,13 +76,14 @@ const getImageUrl = (path: string) => `${STORAGE_BASE_URL}/${bucket}/${path}`;
 		class="sr-only"
 	/>
 
-	<!-- Textarea Editor (hidden by default) -->
+	<!-- TODO: textarea editing feature – commented out, may be re-enabled later
 	<textarea
 		class="hidden h-32 resize-none font-mono text-xs w-full px-3 py-2 border border-border rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-transparent"
 		placeholder="image1.jpg, image2.jpg, image3.jpg"
 		rows="4"
 		data-textarea-editor
 	></textarea>
+	-->
 
 	<!-- Upload Area with Grid -->
 	<section
@@ -94,7 +94,7 @@ const getImageUrl = (path: string) => `${STORAGE_BASE_URL}/${bucket}/${path}`;
 		<div class="grid grid-cols-2 gap-2 sm:grid-cols-3" data-images-grid>
 			<!-- Server-render ONLY first image for view transitions -->
 			{initialImagePaths.length > 0 && productId && (
-				<div class="group relative overflow-hidden rounded-lg border border-border bg-background" data-image-item="true" data-image-path={initialImagePaths[0]} draggable="true" data-server-rendered="true">
+				<div class="group relative overflow-hidden rounded-lg border border-border bg-background cursor-grab active:cursor-grabbing" data-image-item="true" data-image-path={initialImagePaths[0]} draggable="true" data-server-rendered="true">
 					<div class="relative w-full">
 						<img
 							src={getImageUrl(initialImagePaths[0])}
@@ -105,15 +105,6 @@ const getImageUrl = (path: string) => `${STORAGE_BASE_URL}/${bucket}/${path}`;
 							fetchpriority="high"
 							transition:name={`product-image-${productId}`}
 						/>
-						<button
-							type="button"
-							class="drag-handle absolute top-1 left-1 cursor-grab rounded bg-primary p-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 active:cursor-grabbing"
-							title="Перетащите для перемещения"
-						>
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-background" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
-							</svg>
-						</button>
 						<button
 							type="button"
 							class="js-remove-image absolute top-1 right-1 cursor-pointer rounded bg-red-600 text-white p-1.5 opacity-100 transition-opacity hover:bg-red-700 md:opacity-0 md:group-hover:opacity-100"
@@ -138,7 +129,7 @@ const getImageUrl = (path: string) => `${STORAGE_BASE_URL}/${bucket}/${path}`;
 				class="upload-btn group flex aspect-square cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-border/50 border-dashed bg-background text-muted-foreground transition-all duration-200 hover:border-primary/50 hover:bg-primary/5 hover:text-foreground"
 				data-upload-button
 			>
-				<CloudUploadIcon class="size-12 text-primary transition-transform group-hover:scale-110" aria-hidden="true" />
+				<CloudUpload class="size-12 text-primary transition-transform group-hover:scale-110" aria-hidden="true" />
 				<span class="px-2 text-center text-xs">Выбрать файлы</span>
 			</button>
 		</div>
@@ -187,12 +178,13 @@ const getImageUrl = (path: string) => `${STORAGE_BASE_URL}/${bucket}/${path}`;
 		private images: ImageData[] = [];
 		private sessionId: string;
 		private draggedIndex: number | null = null;
-		private toggleBtn: HTMLButtonElement;
-		private toggleText: HTMLElement;
-		private textarea: HTMLTextAreaElement;
-		private uploadSection: HTMLElement;
+		// TODO: textarea editing feature – commented out, may be re-enabled later
+		// private toggleBtn: HTMLButtonElement;
+		// private toggleText: HTMLElement;
+		// private textarea: HTMLTextAreaElement;
+		// private uploadSection: HTMLElement;
 		private countSpan: HTMLElement;
-		private showTextarea: boolean = false;
+		// private showTextarea: boolean = false;
 		private productId: string | null = null;
 		private isProcessingPaste: boolean = false;
 		private errorEl: HTMLElement | null = null;
@@ -210,10 +202,11 @@ const getImageUrl = (path: string) => `${STORAGE_BASE_URL}/${bucket}/${path}`;
 			this.grid = container.querySelector<HTMLElement>("[data-images-grid]")!;
 			this.uploadBtn = container.querySelector<HTMLButtonElement>("[data-upload-button]")!;
 			this.uploadArea = container.querySelector<HTMLElement>(".image-upload-area")!;
-			this.toggleBtn = container.querySelector<HTMLButtonElement>("[data-toggle-textarea]")!;
-			this.toggleText = container.querySelector<HTMLElement>("[data-toggle-text]")!;
-			this.textarea = container.querySelector<HTMLTextAreaElement>("[data-textarea-editor]")!;
-			this.uploadSection = this.uploadArea;
+			// TODO: textarea editing feature – commented out, may be re-enabled later
+			// this.toggleBtn = container.querySelector<HTMLButtonElement>("[data-toggle-textarea]")!;
+			// this.toggleText = container.querySelector<HTMLElement>("[data-toggle-text]")!;
+			// this.textarea = container.querySelector<HTMLTextAreaElement>("[data-textarea-editor]")!;
+			// this.uploadSection = this.uploadArea;
 			this.countSpan = container.querySelector<HTMLElement>("[data-count]")!;
 			this.productId = container.dataset.productId || null;
 			this.errorEl = container.querySelector<HTMLElement>("[data-upload-error]");
@@ -296,46 +289,44 @@ const getImageUrl = (path: string) => `${STORAGE_BASE_URL}/${bucket}/${path}`;
 			}
 		}
 
-		private toggleTextareaMode() {
-			this.showTextarea = !this.showTextarea;
-
-			if (this.showTextarea) {
-				// Switch to textarea mode
-				const currentPaths = this.images
-					.filter((img) => !img.isUploading && !img.path.startsWith("temp-"))
-					.map((img) => img.path)
-					.join(", ");
-				this.textarea.value = currentPaths;
-				this.textarea.classList.remove("hidden");
-				this.uploadSection.classList.add("hidden");
-				this.toggleText.textContent = "Скрыть";
-			} else {
-				// Switch to grid mode - rebuild from textarea
-				const textareaPaths = this.textarea.value
-					.split(",")
-					.map((p) => p.trim())
-					.filter(Boolean);
-
-				// Update images array
-				this.images = textareaPaths.map((path) => {
-					const existing = this.images.find((img) => img.path === path);
-					if (existing) {
-						return existing;
-					}
-					return {
-						path,
-						previewUrl: `${ASSETS_BASE_URL}/${path}`,
-						isUploading: false,
-					};
-				});
-
-				this.textarea.classList.add("hidden");
-				this.uploadSection.classList.remove("hidden");
-				this.toggleText.textContent = "Редактировать текстом";
-				this.renderImages();
-				this.dispatchChangeEvent();
-			}
-		}
+		// TODO: textarea editing feature – commented out, may be re-enabled later
+		// private toggleTextareaMode() {
+		// 	this.showTextarea = !this.showTextarea;
+		//
+		// 	if (this.showTextarea) {
+		// 		const currentPaths = this.images
+		// 			.filter((img) => !img.isUploading && !img.path.startsWith("temp-"))
+		// 			.map((img) => img.path)
+		// 			.join(", ");
+		// 		this.textarea.value = currentPaths;
+		// 		this.textarea.classList.remove("hidden");
+		// 		this.uploadSection.classList.add("hidden");
+		// 		this.toggleText.textContent = "Скрыть";
+		// 	} else {
+		// 		const textareaPaths = this.textarea.value
+		// 			.split(",")
+		// 			.map((p) => p.trim())
+		// 			.filter(Boolean);
+		//
+		// 		this.images = textareaPaths.map((path) => {
+		// 			const existing = this.images.find((img) => img.path === path);
+		// 			if (existing) {
+		// 				return existing;
+		// 			}
+		// 			return {
+		// 				path,
+		// 				previewUrl: `${ASSETS_BASE_URL}/${path}`,
+		// 				isUploading: false,
+		// 			};
+		// 		});
+		//
+		// 		this.textarea.classList.add("hidden");
+		// 		this.uploadSection.classList.remove("hidden");
+		// 		this.toggleText.textContent = "Редактировать текстом";
+		// 		this.renderImages();
+		// 		this.dispatchChangeEvent();
+		// 	}
+		// }
 
 		private showError(message: string) {
 			if (this.errorEl && this.errorTextEl) {
@@ -378,6 +369,20 @@ const getImageUrl = (path: string) => `${STORAGE_BASE_URL}/${bucket}/${path}`;
 				}
 			});
 			
+			// Prevent delete button from initiating drag
+			this.grid.addEventListener("mousedown", (e) => {
+				const target = e.target as HTMLElement;
+				if (target.closest(".js-remove-image")) {
+					const item = target.closest('[data-image-item="true"]') as HTMLElement;
+					if (item) item.draggable = false;
+				}
+			});
+			this.grid.addEventListener("mouseup", () => {
+				this.grid.querySelectorAll('[data-image-item="true"]').forEach((item) => {
+					(item as HTMLElement).draggable = true;
+				});
+			});
+
 			// Drag and drop for reordering (event delegation)
 			this.grid.addEventListener("dragstart", (e) => {
 				const item = (e.target as HTMLElement).closest('[data-image-item="true"]') as HTMLElement;
@@ -435,16 +440,14 @@ const getImageUrl = (path: string) => `${STORAGE_BASE_URL}/${bucket}/${path}`;
 				this.dispatchChangeEvent();
 			});
 			
-			// Toggle textarea mode
-			this.toggleBtn.addEventListener("click", (e) => {
-				e.preventDefault();
-				this.toggleTextareaMode();
-			});
-
-			// Textarea change handler
-			this.textarea.addEventListener("input", () => {
-				this.dispatchChangeEvent();
-			});
+			// TODO: textarea editing feature – commented out, may be re-enabled later
+			// this.toggleBtn.addEventListener("click", (e) => {
+			// 	e.preventDefault();
+			// 	this.toggleTextareaMode();
+			// });
+			// this.textarea.addEventListener("input", () => {
+			// 	this.dispatchChangeEvent();
+			// });
 
 			// Click to upload
 			this.uploadBtn.addEventListener("click", () => {
@@ -759,9 +762,12 @@ const getImageUrl = (path: string) => `${STORAGE_BASE_URL}/${bucket}/${path}`;
 			if (!item) return;
 			const imgEl = item.querySelector('img') as HTMLImageElement | null;
 			if (imgEl) imgEl.src = src;
+			const idx = this.images.findIndex(img => img.path === path);
+			if (idx !== -1) {
+				this.images[idx].previewUrl = src;
+				if (size !== undefined) this.images[idx].size = size;
+			}
 			if (size !== undefined) {
-				const idx = this.images.findIndex(img => img.path === path);
-				if (idx !== -1) this.images[idx].size = size;
 				const sizeEl = item.querySelector('[data-filesize]') as HTMLElement | null;
 				if (sizeEl) {
 					sizeEl.textContent = this.formatFileSize(size);
@@ -875,7 +881,7 @@ const getImageUrl = (path: string) => `${STORAGE_BASE_URL}/${bucket}/${path}`;
 
 		private createImageItem(image: ImageData, index: number): HTMLElement {
 			const item = document.createElement("div");
-			item.className = "group relative overflow-hidden rounded-lg border border-border bg-background";
+			item.className = "group relative overflow-hidden rounded-lg border border-border bg-background cursor-grab active:cursor-grabbing";
 			item.setAttribute("data-image-item", "true");
 			item.setAttribute("data-image-path", image.path);
 			item.draggable = true;
@@ -885,49 +891,56 @@ const getImageUrl = (path: string) => `${STORAGE_BASE_URL}/${bucket}/${path}`;
 			const isFirstImage = index === 0 && this.productId;
 			const viewTransitionStyle = isFirstImage ? `view-transition-name: product-image-${this.productId};` : "";
 
-			item.innerHTML = `
-				<div class="relative w-full">
-					<img
-						src="${image.previewUrl}"
-						alt="${filename}"
-						class="w-full h-auto rounded-lg object-contain aspect-square"
-						loading="${isFirstImage ? "eager" : "lazy"}"
-						decoding="${isFirstImage ? "sync" : "async"}"
-						fetchpriority="${isFirstImage ? "high" : "auto"}"
-						style="${viewTransitionStyle}"
-					/>
-					${image.isUploading ? `
-						<div class="upload-overlay absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-muted/50 rounded-lg" data-upload-overlay>
-							<span class="animate-spin text-2xl">⏳</span>
-							<span class="text-xs font-medium text-foreground/80 px-2 text-center" data-status-text>${image.status ?? 'Загрузка...'}</span>
-						</div>
-					` : ""}
-					<button
-						type="button"
-						class="drag-handle absolute top-1 left-1 cursor-grab rounded bg-primary p-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 active:cursor-grabbing"
-						title="Перетащите для перемещения"
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-background" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
-						</svg>
-					</button>
-					<button
-						type="button"
-						class="js-remove-image absolute top-1 right-1 cursor-pointer rounded bg-red-600 text-white p-1.5 opacity-100 transition-opacity hover:bg-red-700 md:opacity-0 md:group-hover:opacity-100"
-						title="Удалить изображение"
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-						</svg>
-					</button>
-				</div>
-				<div class="bg-background p-2">
-					<p class="image-filename" title="${filename}" data-filename>
-						${filename}
-					</p>
-					<p class="image-filesize" data-filesize${sizeText ? "" : ' style="display:none"'}>${sizeText}</p>
-				</div>
-			`;
+			const wrapper = document.createElement("div");
+			wrapper.className = "relative w-full";
+
+			const img = document.createElement("img");
+			img.src = image.previewUrl;
+			img.alt = filename;
+			img.className = "w-full h-auto rounded-lg object-contain aspect-square";
+			img.loading = isFirstImage ? "eager" : "lazy";
+			img.decoding = isFirstImage ? "sync" : "async";
+			img.setAttribute("fetchpriority", isFirstImage ? "high" : "auto");
+			if (viewTransitionStyle) img.style.cssText = viewTransitionStyle;
+			wrapper.appendChild(img);
+
+			if (image.isUploading) {
+				const overlay = document.createElement("div");
+				overlay.className = "upload-overlay absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-muted/50 rounded-lg";
+				overlay.setAttribute("data-upload-overlay", "");
+				const spinner = document.createElement("span");
+				spinner.className = "animate-spin text-2xl";
+				spinner.textContent = "\u23F3";
+				const statusText = document.createElement("span");
+				statusText.className = "text-xs font-medium text-foreground/80 px-2 text-center";
+				statusText.setAttribute("data-status-text", "");
+				statusText.textContent = image.status ?? "Загрузка...";
+				overlay.append(spinner, statusText);
+				wrapper.appendChild(overlay);
+			}
+
+			const removeBtn = document.createElement("button");
+			removeBtn.type = "button";
+			removeBtn.className = "js-remove-image absolute top-1 right-1 cursor-pointer rounded bg-red-600 text-white p-1.5 opacity-100 transition-opacity hover:bg-red-700 md:opacity-0 md:group-hover:opacity-100";
+			removeBtn.title = "Удалить изображение";
+			removeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>';
+			wrapper.appendChild(removeBtn);
+
+			const infoDiv = document.createElement("div");
+			infoDiv.className = "bg-background p-2";
+			const filenameParagraph = document.createElement("p");
+			filenameParagraph.className = "image-filename";
+			filenameParagraph.title = filename;
+			filenameParagraph.setAttribute("data-filename", "");
+			filenameParagraph.textContent = filename;
+			const filesizeParagraph = document.createElement("p");
+			filesizeParagraph.className = "image-filesize";
+			filesizeParagraph.setAttribute("data-filesize", "");
+			filesizeParagraph.textContent = sizeText;
+			if (!sizeText) filesizeParagraph.style.display = "none";
+			infoDiv.append(filenameParagraph, filesizeParagraph);
+
+			item.append(wrapper, infoDiv);
 
 			return item;
 		}
@@ -939,18 +952,18 @@ const getImageUrl = (path: string) => `${STORAGE_BASE_URL}/${bucket}/${path}`;
 		}
 
 		private dispatchChangeEvent() {
-			// If in textarea mode, use textarea value directly
-			if (this.showTextarea) {
-				const paths = this.textarea.value;
-				const event = new CustomEvent("images-changed", {
-					detail: { images: paths },
-					bubbles: true,
-				});
-				this.container.dispatchEvent(event);
-				return;
-			}
+			// TODO: textarea editing feature – commented out, may be re-enabled later
+			// if (this.showTextarea) {
+			// 	const paths = this.textarea.value;
+			// 	const event = new CustomEvent("images-changed", {
+			// 		detail: { images: paths },
+			// 		bubbles: true,
+			// 	});
+			// 	this.container.dispatchEvent(event);
+			// 	return;
+			// }
 
-			// Otherwise, emit comma-separated string of relative paths (excluding temp and uploading)
+			// Emit comma-separated string of relative paths (excluding temp and uploading)
 			const paths = this.images
 				.filter((img) => !img.isUploading && !img.path.startsWith("temp-"))
 				.map((img) => img.path)
@@ -964,10 +977,10 @@ const getImageUrl = (path: string) => `${STORAGE_BASE_URL}/${bucket}/${path}`;
 		}
 
 		public getImages(): string {
-			// If in textarea mode, return textarea value
-			if (this.showTextarea) {
-				return this.textarea.value;
-			}
+			// TODO: textarea editing feature – commented out, may be re-enabled later
+			// if (this.showTextarea) {
+			// 	return this.textarea.value;
+			// }
 
 			return this.images
 				.filter((img) => !img.isUploading && !img.path.startsWith("temp-"))
@@ -1023,6 +1036,14 @@ const getImageUrl = (path: string) => `${STORAGE_BASE_URL}/${bucket}/${path}`;
 		font-size: 0.75rem;
 		line-height: 1rem;
 		color: color-mix(in oklch, var(--muted-foreground) 65%, transparent);
+	}
+
+	[data-image-item] img {
+		pointer-events: none;
+	}
+
+	[data-image-item] .js-remove-image {
+		pointer-events: auto;
 	}
 
 	.upload-overlay {

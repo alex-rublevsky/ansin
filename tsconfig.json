@@ -4,6 +4,7 @@
 	"exclude": ["dist"],
 	"compilerOptions": {
 		"baseUrl": ".",
+		"moduleResolution": "bundler",
 		"paths": {
 			"@/*": ["src/*"]
 		}

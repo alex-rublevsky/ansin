@@ -4,10 +4,9 @@ import { tv } from "tailwind-variants";
 
 type Props = Omit<HTMLAttributes<"h2">, "id"> & {
 	/**
-	 * The content to be rendered inside the dialog title
+	 * The content to be rendered inside the dialog title (or use the default slot).
 	 */
-
-	children: any;
+	children?: any;
 };
 
 export const dialogTitle = tv({

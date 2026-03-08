@@ -1,0 +1,54 @@
+---
+import Button from "../../../../components/Button.astro";
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "../../../../components/dialog/index";
+import PageHeader from "../../../../components/PageHeader.astro";
+import ProductForm from "../../../../components/ProductForm.astro";
+import { getAllCategories } from "../../../../db/repositories/categories";
+import { getProductById } from "../../../../db/repositories/products";
+import AdminLayout from "../../../../layouts/AdminLayout.astro";
+
+export const prerender = false;
+
+declare const Astro: { params: { id?: string }; redirect: (url: string) => never };
+const id = parseInt(Astro.params.id!, 10);
+const product = await getProductById(id);
+const categories = await getAllCategories();
+
+if (!product) {
+	return Astro.redirect("/admin/products");
+}
+---
+
+<AdminLayout title="Edit Product" formPage>
+	<section>
+		<PageHeader title="Редактировать товар">
+			<Button type="submit" id="submit-btn" form="product-form" variant="pill" data-intent="success" data-text="Обновить товар">Обновить товар</Button>
+			<Button type="button" variant="pill" class="starwind-dialog-trigger" data-intent="destructive" data-dialog-for="delete-confirm-dialog" data-text="Удалить товар">Удалить товар</Button>
+		</PageHeader>
+
+		<ProductForm product={product} categories={categories} mode="edit" />
+	</section>
+
+	<Dialog id="delete-confirm-dialog">
+		<DialogContent>
+			<DialogHeader>
+				<DialogTitle>Удалить товар?</DialogTitle>
+				<DialogDescription>Это действие нельзя отменить. Товар будет удалён навсегда.</DialogDescription>
+			</DialogHeader>
+			<DialogFooter>
+				<DialogClose asChild>
+					<Button variant="outline">Отмена</Button>
+				</DialogClose>
+				<Button id="delete-btn" variant="error">Удалить</Button>
+			</DialogFooter>
+		</DialogContent>
+	</Dialog>
+</AdminLayout>

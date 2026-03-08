@@ -1,0 +1,21 @@
+---
+import Button from "../../../components/Button.astro";
+import PageHeader from "../../../components/PageHeader.astro";
+import ProductForm from "../../../components/ProductForm.astro";
+import { getAllCategories } from "../../../db/repositories/categories";
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+
+export const prerender = false;
+
+const categories = await getAllCategories();
+---
+
+<AdminLayout title="New Product" formPage>
+	<section>
+		<PageHeader title="Создать новый товар">
+			<Button type="submit" id="submit-btn" form="product-form" variant="pill" data-intent="success" data-text="Создать товар">Создать товар</Button>
+		</PageHeader>
+
+		<ProductForm categories={categories} mode="create" />
+	</section>
+</AdminLayout>

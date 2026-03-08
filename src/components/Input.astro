@@ -3,16 +3,19 @@ import type { HTMLAttributes } from "astro/types";
 import { tv, type VariantProps } from "tailwind-variants";
 
 type Props = HTMLAttributes<"input"> &
+	Pick<HTMLAttributes<"textarea">, "rows" | "cols" | "wrap"> &
 	VariantProps<typeof input> & {
 		label?: string;
 		required?: boolean;
 		error?: string;
+		as?: "input" | "textarea";
+		value?: string | number;
 	};
 
 export const input = tv({
 	base: [
 		"border-input dark:bg-input/30 text-foreground w-full rounded-md border bg-transparent shadow-xs",
-		"focus-visible:border-outline focus-visible:ring-outline/50 transition-[color,box-shadow] focus-visible:ring-3",
+		"focus-visible:border-outline focus-visible:ring-outline/50 transition-[color,box-shadow] focus-visible:ring-3 focus-visible:outline-none",
 		"file:text-foreground file:my-auto file:mr-4 file:h-full file:border-0 file:bg-transparent file:text-sm file:font-medium",
 		"disabled:cursor-not-allowed disabled:opacity-50",
 		"aria-invalid:border-error aria-invalid:focus-visible:ring-error/40",
@@ -36,32 +39,72 @@ const {
 	error,
 	id,
 	placeholder,
+	as: element = "input",
+	rows,
+	value,
+	type,
 	...rest
 } = Astro.props;
 
 const inputId = id || `input-${crypto.randomUUID()}`;
 const hasLabel = !!label;
+const isTextarea = element === "textarea";
+
+const errorClass = error
+	? "border-error focus-visible:border-error focus-visible:ring-error/40"
+	: "";
 
 const inputClasses = input({
 	size,
-	class: [
-		className,
-		hasLabel && "pt-4",
-		error &&
-			"border-error focus-visible:border-error focus-visible:ring-error/40",
-	],
+	class: [className, hasLabel && "pt-4", errorClass],
 });
+
+const textareaClasses = [
+	"border-input dark:bg-input/30 text-foreground w-full rounded-md border bg-transparent shadow-xs",
+	"focus-visible:border-outline focus-visible:ring-outline/50 transition-[color,box-shadow] focus-visible:ring-3 focus-visible:outline-none",
+	"disabled:cursor-not-allowed disabled:opacity-50",
+	"aria-invalid:border-error aria-invalid:focus-visible:ring-error/40",
+	"peer placeholder:text-muted-foreground",
+	"px-3 text-base resize-none",
+	hasLabel ? "pt-6 pb-2" : "py-2",
+	errorClass,
+	className,
+]
+	.filter(Boolean)
+	.join(" ");
+
+const labelPositionClass = isTextarea
+	? "peer-placeholder-shown:peer-[:not(:focus)]:top-4 peer-placeholder-shown:peer-[:not(:focus)]:-translate-y-1/2 peer-placeholder-shown:peer-[:not(:focus)]:text-base peer-placeholder-shown:peer-[:not(:focus)]:px-0"
+	: "peer-placeholder-shown:peer-[:not(:focus)]:top-1/2 peer-placeholder-shown:peer-[:not(:focus)]:-translate-y-1/2 peer-placeholder-shown:peer-[:not(:focus)]:text-base peer-placeholder-shown:peer-[:not(:focus)]:px-0";
 ---
 
 <div class="relative">
-	<input
-		id={inputId}
-		placeholder={placeholder || (hasLabel ? " " : undefined)}
-		class={inputClasses}
-		aria-invalid={error ? "true" : undefined}
-		{...rest}
-		data-slot="input"
-	/>
+	{
+		isTextarea ? (
+			<textarea
+				id={inputId}
+				placeholder={placeholder || (hasLabel ? " " : undefined)}
+				class={textareaClasses}
+				rows={rows ?? 4}
+				required={required}
+				aria-invalid={error ? "true" : undefined}
+				{...rest}
+				data-slot="input"
+			>{value ?? ""}</textarea>
+		) : (
+			<input
+				id={inputId}
+				type={type}
+				placeholder={placeholder || (hasLabel ? " " : undefined)}
+				class={inputClasses}
+				value={value}
+				required={required}
+				aria-invalid={error ? "true" : undefined}
+				{...rest}
+				data-slot="input"
+			/>
+		)
+	}
 	{
 		hasLabel && (
 			<label
@@ -71,21 +114,20 @@ const inputClasses = input({
 					"transition-[top,font-size,color,background-color,padding] duration-300 ease-out",
 					"peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:text-[0.75rem] peer-focus:px-1 peer-focus:text-foreground peer-focus:bg-background",
 					"peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:text-[0.75rem] peer-[:not(:placeholder-shown)]:px-1 peer-[:not(:placeholder-shown)]:text-foreground peer-[:not(:placeholder-shown)]:bg-background",
-					"peer-placeholder-shown:peer-[:not(:focus)]:top-1/2 peer-placeholder-shown:peer-[:not(:focus)]:-translate-y-1/2 peer-placeholder-shown:peer-[:not(:focus)]:text-base peer-placeholder-shown:peer-[:not(:focus)]:px-0",
+					labelPositionClass,
 				]}
 			>
-				<span class="flex items-center gap-1">
-					{label}
-					{required && <span class="text-error">*</span>}
-				</span>
+				{label}
 			</label>
 		)
 	}
-	{
-		error && (
-			<span class="absolute -bottom-5 left-0 text-xs font-medium text-error">
-				{error}
-			</span>
-		)
-	}
+	<span
+		data-error-for={inputId}
+		class:list={[
+			"absolute -bottom-5 left-0 text-xs font-medium text-error",
+			!error && "hidden",
+		]}
+	>
+		{error || ""}
+	</span>
 </div>

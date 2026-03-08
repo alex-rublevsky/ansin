@@ -1,0 +1,141 @@
+---
+interface FilterOption {
+	slug: string;
+	name: string;
+}
+
+interface Props {
+	title?: string;
+	options: FilterOption[] | string[];
+	showAllOption?: boolean;
+	allOptionLabel?: string;
+	class?: string;
+	variant?: "default" | "product";
+	selectedValue?: string | null;
+	mode?: "filter" | "variation";
+}
+
+const {
+	title,
+	options,
+	showAllOption = true,
+	allOptionLabel = "Все",
+	class: className = "",
+	variant = "default",
+	selectedValue = null,
+	mode = "filter",
+	...rest
+} = Astro.props;
+
+const getOptionValue = (option: FilterOption | string) => {
+	return typeof option === "string" ? option : option.slug;
+};
+
+const getOptionName = (option: FilterOption | string) => {
+	return typeof option === "string" ? option : option.name;
+};
+
+const dataAttrName = mode === "variation" ? "data-option" : "data-category";
+---
+
+<div class="space-y-2" {...rest}>
+	{title && (
+		<div
+			class:list={[
+				variant === "product"
+					? "mb-1 font-medium text-muted-foreground text-xs"
+					: "font-medium text-sm",
+			]}
+		>
+			{title}
+		</div>
+	)}
+	<div class={`flex flex-wrap gap-1 ${className}`} data-filter-group>
+		{showAllOption && (
+			<button
+				type="button"
+				class="filter-button"
+				data-variant={variant}
+				data-selected="true"
+				data-available="true"
+				{...{[dataAttrName]: 'all'}}
+			>
+				{allOptionLabel}
+			</button>
+		)}
+		{options.map((option) => {
+			const optionValue = getOptionValue(option);
+			const isSelected = selectedValue === optionValue;
+
+			return (
+				<button
+					type="button"
+					class="filter-button"
+					data-variant={variant}
+					data-selected={isSelected ? 'true' : 'false'}
+					data-available="true"
+					{...{[dataAttrName]: optionValue}}
+				>
+					{getOptionName(option)}
+				</button>
+			);
+		})}
+	</div>
+</div>
+
+<style>
+	.filter-button {
+		transition: all 0.2s ease;
+		border-width: 1px;
+		border-style: solid;
+		cursor: pointer;
+		white-space: nowrap;
+		flex-shrink: 0;
+	}
+
+	/* Default variant sizing */
+	.filter-button[data-variant="default"] {
+		font-size: 0.75rem;
+		padding: 0.25rem 0.5rem;
+		border-radius: 9999px;
+	}
+
+	/* Product variant sizing */
+	.filter-button[data-variant="product"] {
+		font-size: 0.75rem;
+		padding: 0.125rem 0.375rem;
+		border-radius: 9999px;
+	}
+
+	/* Selected state */
+	.filter-button[data-selected="true"] {
+		border-color: var(--primary);
+		background-color: var(--primary);
+		color: var(--primary-foreground);
+	}
+
+	/* Unselected state */
+	.filter-button[data-selected="false"][data-available="true"] {
+		border-color: var(--border);
+		background-color: color-mix(in oklch, var(--background) 80%, transparent);
+		color: inherit;
+	}
+
+	.filter-button[data-selected="false"][data-available="true"]:hover {
+		border-color: var(--primary);
+		background-color: color-mix(in oklch, var(--primary) 5%, transparent);
+	}
+
+	.filter-button[data-selected="false"][data-available="true"]:active {
+		border-color: var(--primary);
+		background-color: color-mix(in oklch, var(--primary) 5%, transparent);
+		transform: scale(0.95);
+	}
+
+	/* Disabled state */
+	.filter-button[data-available="false"] {
+		border-color: var(--border);
+		background-color: var(--muted);
+		color: var(--muted-foreground);
+	}
+</style>

@@ -6,7 +6,7 @@
   width: fit-content;
   font-weight: 450;
   border: 1px solid var(--border);
-  border-radius: 500px;
+  border-radius: var(--radius-lg);
   box-shadow: inset 5px 0 5px color-mix(in oklch, var(--muted) 30%, transparent);
   backdrop-filter: blur(8px);
   transition:
@@ -32,7 +32,7 @@
     var(--border),
     color-mix(in oklch, var(--primary) 0%, var(--background) 0%)
   );
-  border-radius: 500px;
+  border-radius: var(--radius-lg);
   z-index: -1;
   transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 1;
@@ -101,8 +101,13 @@
   font-weight: 600;
 }
 
-.pill-nav-link:hover::before {
-  anchor-name: --nav;
+/* Hover anchor on ::before — separate DOM object from the element's
+   --active anchor, so they never conflict during class toggles.
+   Scoped to hover-capable devices to avoid sticky :hover on touch. */
+@media (hover: hover) {
+  .pill-nav-link:hover::before {
+    anchor-name: --nav;
+  }
 }
 
 /* Animated bubbles for active/hover states */
@@ -118,7 +123,7 @@
     opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
     background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 500px;
+  border-radius: var(--radius-md);
   opacity: 1;
 }
 
@@ -145,6 +150,55 @@
   );
   box-shadow: inset 0 2px 7px color-mix(in oklch, var(--primary) 15%, transparent);
   position-anchor: --nav;
+}
+
+/* Lock the hover bubble to a clicked link during transitions (set via JS) */
+@media (hover: hover) {
+  .pill-nav-link.anchor-lock::before {
+    anchor-name: --nav;
+  }
+}
+
+/* Pressed (active) state — inset press effect on the hover bubble */
+.pill-container:has(.pill-nav-link:active) .pill-bubble.hover {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--border) 80%, black),
+    color-mix(in oklch, var(--background) 20%, var(--background) 20%)
+  );
+  box-shadow: inset 0 3px 8px color-mix(in oklch, var(--primary) 25%, transparent);
+  transform: scale(0.97);
+  transition:
+    all 0.2s ease,
+    transform 0.1s ease,
+    background 0.1s ease,
+    box-shadow 0.1s ease;
+}
+
+/* Pressed state on the active bubble */
+.pill-container:has(.pill-nav-link.active:active) .pill-bubble.active {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--primary) 70%, black),
+    color-mix(in oklch, var(--primary) 80%, black)
+  );
+  box-shadow:
+    inset 0 2px 4px color-mix(in oklch, black 30%, transparent),
+    inset 0 -1px 2px color-mix(in oklch, black 15%, transparent),
+    0 1px 2px color-mix(in oklch, var(--primary) 15%, transparent);
+  transform: scale(0.97);
+  transition:
+    all 0.2s ease,
+    transform 0.1s ease,
+    background 0.1s ease,
+    box-shadow 0.1s ease;
+}
+
+/* Focus-visible — keyboard navigation ring */
+.pill-nav-link:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+  border-radius: var(--radius-md);
 }
 
 /* Hide bubbles in minimal state but keep interactivity */
@@ -179,6 +233,20 @@
   box-shadow: inset 0 2px 7px color-mix(in oklch, var(--success) 35%, transparent);
 }
 
+.pill-container:has([data-intent="success"]:active) .pill-bubble.hover {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--success) 85%, transparent),
+    color-mix(in oklch, var(--success) 60%, transparent)
+  );
+  box-shadow: inset 0 3px 8px color-mix(in oklch, var(--success) 45%, transparent);
+  transform: scale(0.97);
+}
+
+[data-intent="success"]:active {
+  color: var(--success-foreground) !important;
+}
+
 .pill-container:has([data-intent="destructive"]:hover) .pill-bubble.hover {
   background: linear-gradient(
     180deg,
@@ -186,4 +254,18 @@
     color-mix(in oklch, var(--error) 24%, transparent)
   );
   box-shadow: inset 0 2px 7px color-mix(in oklch, var(--error) 35%, transparent);
+}
+
+.pill-container:has([data-intent="destructive"]:active) .pill-bubble.hover {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--error) 85%, transparent),
+    color-mix(in oklch, var(--error) 60%, transparent)
+  );
+  box-shadow: inset 0 3px 8px color-mix(in oklch, var(--error) 45%, transparent);
+  transform: scale(0.97);
+}
+
+[data-intent="destructive"]:active {
+  color: var(--error-foreground) !important;
 }

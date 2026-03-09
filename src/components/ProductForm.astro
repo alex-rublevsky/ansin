@@ -64,15 +64,44 @@ const { product, categories, mode } = Astro.props;
 			</div>
 
 			<div class="space-y-2 pb-2">
-				<Input
-					as="textarea"
-					label="Описание"
-					id="description"
-					name="description"
-					rows={4}
-					value={product?.description || ""}
-					required
-				/>
+				<label for="description" class="text-sm font-medium text-foreground">Описание</label>
+				<div class="tiptap-wrapper rounded-md border border-input shadow-xs focus-within:border-outline focus-within:ring-3 focus-within:ring-outline/50 transition-[color,box-shadow]">
+					<div id="tiptap-toolbar" class="flex flex-wrap gap-1 border-b border-input px-2 py-1.5 bg-muted/30 rounded-t-md">
+						<button type="button" data-action="bold" class="tiptap-btn" title="Жирный">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>
+						</button>
+						<button type="button" data-action="italic" class="tiptap-btn" title="Курсив">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
+						</button>
+						<button type="button" data-action="strike" class="tiptap-btn" title="Зачёркнутый">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4H9a3 3 0 0 0-2.83 4"/><path d="M14 12a4 4 0 0 1 0 8H6"/><line x1="4" y1="12" x2="20" y2="12"/></svg>
+						</button>
+						<div class="w-px bg-input mx-1 self-stretch"></div>
+						<button type="button" data-action="heading" data-level="2" class="tiptap-btn" title="Заголовок 2">H2</button>
+						<button type="button" data-action="heading" data-level="3" class="tiptap-btn" title="Заголовок 3">H3</button>
+						<div class="w-px bg-input mx-1 self-stretch"></div>
+						<button type="button" data-action="bulletList" class="tiptap-btn" title="Маркированный список">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+						</button>
+						<button type="button" data-action="orderedList" class="tiptap-btn" title="Нумерованный список">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+						</button>
+						<div class="w-px bg-input mx-1 self-stretch"></div>
+						<button type="button" data-action="blockquote" class="tiptap-btn" title="Цитата">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3z"/></svg>
+						</button>
+						<button type="button" data-action="horizontalRule" class="tiptap-btn" title="Разделитель">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="12" x2="22" y2="12"/></svg>
+						</button>
+						<div class="w-px bg-input mx-1 self-stretch"></div>
+						<button type="button" data-action="link" class="tiptap-btn" title="Ссылка (Ctrl+K)">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+						</button>
+					</div>
+					<div id="tiptap-editor" class="px-3 py-2 min-h-[120px] max-h-[400px] overflow-y-auto"></div>
+				</div>
+				<input type="hidden" id="description" name="description" value={product?.description || ""} />
+				<span data-error-for="description" class="text-xs font-medium text-error hidden"></span>
 			</div>
 
 			<div class="grid grid-cols-2 gap-4">
@@ -118,7 +147,7 @@ const { product, categories, mode } = Astro.props;
 				<Label for="variations-preview">Вариации</Label>
 				<div id="variations-list" class="mt-2 rounded-lg border border-gray-200 overflow-hidden">
 					<table class="w-full text-sm">
-						<thead class="bg-gray-50">
+						<thead >
 							<tr>
 								<th class="px-3 py-2 text-left font-medium text-gray-600">Вес</th>
 								<th class="px-3 py-2 text-right font-medium text-gray-600">Цена</th>
@@ -166,8 +195,13 @@ const { product, categories, mode } = Astro.props;
 </form>
 
 <script>
-	import { navigate } from "astro:transitions/client";
-	import { generateWeightSteps, getSmallQuantityMultiplier } from "../lib/variations";
+	import { Editor } from "@tiptap/core";
+import Link from "@tiptap/extension-link";
+import StarterKit from "@tiptap/starter-kit";
+import { navigate } from "astro:transitions/client";
+import { generateWeightSteps, getSmallQuantityMultiplier } from "../lib/variations";
+
+	type Level = 1 | 2 | 3 | 4 | 5 | 6;
 
 	// Transliteration map for Russian to English
 	const CYRILLIC_TO_LATIN: Record<string, string> = {
@@ -201,9 +235,9 @@ const { product, categories, mode } = Astro.props;
 		});
 	}
 
-	function init() {
+	function init(): Editor | null {
 		const form = document.getElementById("product-form") as HTMLFormElement | null;
-		if (!form) return;
+		if (!form) return null;
 
 		const mode = form.dataset.mode as "create" | "edit" | undefined;
 		const productId = form.dataset.productId ? parseInt(form.dataset.productId, 10) : undefined;
@@ -214,6 +248,113 @@ const { product, categories, mode } = Astro.props;
 
 		const submitOriginalLabel = submitBtn?.querySelector<HTMLElement>(".btn-label")?.textContent?.trim() ?? "";
 		const deleteOriginalLabel = deleteBtn?.querySelector<HTMLElement>(".btn-label")?.textContent?.trim() ?? "";
+
+		// --- Tiptap Editor ---
+		const editorElement = document.getElementById("tiptap-editor");
+		const descriptionInput = document.getElementById("description") as HTMLInputElement | null;
+		let editor: Editor | null = null;
+
+		if (editorElement && descriptionInput) {
+			editor = new Editor({
+				element: editorElement,
+				extensions: [
+					StarterKit,
+					Link.configure({
+						openOnClick: false,
+						defaultProtocol: "https",
+						HTMLAttributes: {
+							rel: "noopener noreferrer nofollow",
+							target: "_blank",
+						},
+					}),
+				],
+				content: descriptionInput.value || "",
+				editorProps: {
+					attributes: {
+						class: "outline-none min-h-[100px]",
+					},
+				},
+				onUpdate({ editor: ed }) {
+					descriptionInput.value = ed.isEmpty ? "" : ed.getHTML();
+					clearError("description");
+				},
+			});
+
+			// Toolbar buttons
+			const toolbar = document.getElementById("tiptap-toolbar");
+			toolbar?.addEventListener("click", (e) => {
+				const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-action]");
+				if (!btn || !editor) return;
+
+				const action = btn.dataset.action!;
+				switch (action) {
+					case "bold":
+						editor.chain().focus().toggleBold().run();
+						break;
+					case "italic":
+						editor.chain().focus().toggleItalic().run();
+						break;
+					case "strike":
+						editor.chain().focus().toggleStrike().run();
+						break;
+					case "heading":
+						editor.chain().focus().toggleHeading({ level: parseInt(btn.dataset.level!) as Level }).run();
+						break;
+					case "bulletList":
+						editor.chain().focus().toggleBulletList().run();
+						break;
+					case "orderedList":
+						editor.chain().focus().toggleOrderedList().run();
+						break;
+					case "blockquote":
+						editor.chain().focus().toggleBlockquote().run();
+						break;
+					case "horizontalRule":
+						editor.chain().focus().setHorizontalRule().run();
+						break;
+					case "link":
+						toggleLinkPrompt();
+						return;
+				}
+				updateToolbarState();
+			});
+
+			// Update active state on toolbar buttons
+			function updateToolbarState() {
+				if (!editor || !toolbar) return;
+				toolbar.querySelectorAll<HTMLButtonElement>("[data-action]").forEach((btn) => {
+					const action = btn.dataset.action!;
+					let isActive = false;
+					switch (action) {
+						case "bold": isActive = editor!.isActive("bold"); break;
+						case "italic": isActive = editor!.isActive("italic"); break;
+						case "strike": isActive = editor!.isActive("strike"); break;
+						case "heading": isActive = editor!.isActive("heading", { level: parseInt(btn.dataset.level!) }); break;
+						case "bulletList": isActive = editor!.isActive("bulletList"); break;
+						case "orderedList": isActive = editor!.isActive("orderedList"); break;
+						case "blockquote": isActive = editor!.isActive("blockquote"); break;
+						case "link": isActive = editor!.isActive("link"); break;
+					}
+					btn.classList.toggle("is-active", isActive);
+				});
+			}
+
+			function toggleLinkPrompt() {
+				if (!editor) return;
+				if (editor.isActive("link")) {
+					editor.chain().focus().unsetLink().run();
+					updateToolbarState();
+					return;
+				}
+				const href = window.prompt("URL ссылки:", "https://");
+				if (!href || href === "https://") return;
+				editor.chain().focus().setLink({ href }).run();
+				updateToolbarState();
+			}
+
+			editor.on("selectionUpdate", updateToolbarState);
+			editor.on("update", updateToolbarState);
+		}
 
 		// Slug auto-generation setup
 		const nameInput = document.getElementById("name") as HTMLInputElement | null;
@@ -328,8 +469,18 @@ const { product, categories, mode } = Astro.props;
 		function validateField(id: string): boolean {
 			const el = document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement | null;
 			if (!el) return true;
-			const value = el.value.trim();
 
+			// For description, check editor emptiness
+			if (id === "description" && editor) {
+				if (editor.isEmpty) {
+					showError(id, "Обязательное поле");
+					return false;
+				}
+				clearError(id);
+				return true;
+			}
+
+			const value = el.value.trim();
 			if (!value) {
 				showError(id, "Обязательное поле");
 				return false;
@@ -358,7 +509,7 @@ const { product, categories, mode } = Astro.props;
 		}
 
 		// Clear errors on input
-		["name", "slug", "description", "price", "volume"].forEach((id) => {
+		["name", "slug", "price", "volume"].forEach((id) => {
 			document.getElementById(id)?.addEventListener("input", () => clearError(id));
 			document.getElementById(id)?.addEventListener("blur", () => validateField(id));
 		});
@@ -460,7 +611,20 @@ const { product, categories, mode } = Astro.props;
 				}, 2000);
 			}
 		});
+
+		return editor;
 	}
 
-	document.addEventListener("astro:page-load", init);
+	// Destroy previous editor on page transition
+	let currentEditor: Editor | null = null;
+	document.addEventListener("astro:before-preparation", () => {
+		currentEditor?.destroy();
+		currentEditor = null;
+	});
+	document.addEventListener("astro:page-load", () => {
+		currentEditor?.destroy();
+		currentEditor = null;
+		const ed = init();
+		if (ed) currentEditor = ed;
+	});
 </script>

@@ -145,11 +145,7 @@ const productImages = imageArray
             </p>
           )}
 
-          <div class="prose prose-gray mb-8">
-            <p>
-              {product.description}
-            </p>
-          </div>
+          <div class="prose prose-gray mb-8" set:html={product.description} />
 
           <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <Button

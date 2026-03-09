@@ -103,13 +103,12 @@ const getImageUrl = (relativePath: string) => {
           class="product-item flex items-center gap-3 py-3 px-2 sm:px-4 hover:bg-muted/20 transition-colors duration-100 ease-out cursor-pointer relative"
         >
           <a href={`/admin/products/${product.id}/edit`} class="product-link flex items-center gap-3 flex-1 min-w-0 after:absolute after:inset-0">
-            <div class="product-thumb shrink-0 size-12 rounded overflow-hidden">
+            <div class="product-thumb shrink-0 size-12 rounded overflow-hidden" transition:name={`product-image-${product.id}`}>
               {product.images && product.images.length > 0 ? (
                 <img
                   src={getImageUrl(product.images[0])}
                   alt={product.name}
                   class="h-full w-full object-cover"
-                  transition:name={`product-image-${product.id}`}
                 />
               ) : (
                 <div class="h-full w-full flex items-center justify-center text-gray-400 bg-muted/30">
@@ -176,89 +175,84 @@ const getImageUrl = (relativePath: string) => {
           </div>
         </div>
       ))}
-      {inactiveProducts.length > 0 && (
-        <div class="bg-gray-50 px-2 sm:px-4 py-2 text-xs font-medium text-foreground/40 uppercase tracking-wider">
-          Неактивные
-        </div>
-      )}
-      {inactiveProducts.map((product) => (
-        <div
-          class="product-item inactive flex items-center gap-3 py-3 px-2 sm:px-4 hover:bg-gray-50 cursor-pointer relative opacity-50"
-        >
-          <a href={`/admin/products/${product.id}/edit`} class="product-link flex items-center gap-3 flex-1 min-w-0 after:absolute after:inset-0">
-            <div class="product-thumb shrink-0 size-12 bg-gray-200 rounded overflow-hidden">
-              {product.images && product.images.length > 0 ? (
-                <img
-                  src={getImageUrl(product.images[0])}
-                  alt={product.name}
-                  class="h-full w-full object-cover grayscale"
-                  transition:name={`product-image-${product.id}`}
-                />
-              ) : (
-                <div class="h-full w-full flex items-center justify-center text-gray-400">
-                  <span class="text-lg leading-none">&#x1f4e6;</span>
+    </div>
+
+    <div class="mt-8">
+      <h2 class="px-2 sm:px-4 mb-2 text-xs! font-medium! text-foreground/40!">Неактивные</h2>
+      {inactiveProducts.length === 0 ? (
+        <p class="px-2 sm:px-4 text-sm text-foreground/30">Нет неактивных товаров</p>
+      ) : (
+        <div class="product-feed divide-y divide-border" data-view="list">
+          {inactiveProducts.map((product) => (
+            <div
+              class="product-item inactive flex items-center gap-3 py-3 px-2 sm:px-4 hover:bg-muted/40 cursor-pointer relative"
+            >
+              <a href={`/admin/products/${product.id}/edit`} class="product-link flex items-center gap-3 flex-1 min-w-0 after:absolute after:inset-0">
+                <div class="product-thumb shrink-0 size-12 bg-gray-200 rounded overflow-hidden opacity-50" transition:name={`product-image-${product.id}`}>
+                  {product.images && product.images.length > 0 ? (
+                    <img
+                      src={getImageUrl(product.images[0])}
+                      alt={product.name}
+                      class="h-full w-full object-cover grayscale"
+                    />
+                  ) : (
+                    <div class="h-full w-full flex items-center justify-center text-gray-400">
+                      <span class="text-lg leading-none">&#x1f4e6;</span>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <div class="product-info flex-1 min-w-0">
-              <div class="product-name text-sm font-medium text-gray-900 truncate">{product.name}</div>
-              <div class="product-category text-xs text-foreground/50 truncate">
-                {product.categoryId ? categoryMap.get(product.categoryId) : ''}
+                <div class="product-info flex-1 min-w-0 opacity-50">
+                  <div class="product-name text-sm font-medium text-gray-900 truncate">{product.name}</div>
+                  <div class="product-category text-xs text-foreground/50 truncate">
+                    {product.categoryId ? categoryMap.get(product.categoryId) : ''}
+                  </div>
+                </div>
+              </a>
+              <div class="product-price shrink-0 text-right opacity-50">
+                <span class="text-sm font-semibold text-gray-900">{product.price.toFixed(0)}</span><span class="text-xs text-foreground/50">&nbsp;₽</span>
+              </div>
+              <div class="product-volume shrink-0 text-right opacity-50">
+                <span class="text-sm text-gray-600">{product.volume ? `${product.volume}` : '-'}</span><span class="text-xs text-foreground/50">&nbsp;г</span>
+              </div>
+              <div class="product-actions shrink-0 flex items-center gap-1 relative z-10 opacity-50">
+             
+                <Dialog id={`delete-dialog-inactive-${product.id}`}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      class="text-red-600 hover:text-red-900"
+                      title="Delete"
+                    >
+                      &#x1f5d1;&#xfe0f;
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Удалить товар?</DialogTitle>
+                      <DialogDescription>
+                        Вы уверены, что хотите удалить товар "{product.name}"? Это действие нельзя отменить.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button variant="ghost" class="starwind-dialog-close">
+                        Отмена
+                      </Button>
+                      <Button
+                        variant="error"
+                        class="delete-confirm-btn"
+                        data-delete-id={product.id}
+                      >
+                        Удалить
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
-          </a>
-          <div class="product-price shrink-0 text-right">
-            <span class="text-sm font-semibold text-gray-900">{product.price.toFixed(0)}</span><span class="text-xs text-foreground/50">&nbsp;₽</span>
-          </div>
-          <div class="product-volume shrink-0 text-right">
-            <span class="text-sm text-gray-600">{product.volume ? `${product.volume}` : '-'}</span><span class="text-xs text-foreground/50">&nbsp;г</span>
-          </div>
-          <div class="product-actions shrink-0 flex items-center gap-1 relative z-10">
-            <Button
-              href={`/product/${product.slug}`}
-              target="_blank"
-              variant="ghost"
-              size="icon-sm"
-              class="text-gray-600 hover:text-gray-900"
-              title="View"
-            >
-              &#x1f441;&#xfe0f;
-            </Button>
-            <Dialog id={`delete-dialog-inactive-${product.id}`}>
-              <DialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  class="text-red-600 hover:text-red-900"
-                  title="Delete"
-                >
-                  &#x1f5d1;&#xfe0f;
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Удалить товар?</DialogTitle>
-                  <DialogDescription>
-                    Вы уверены, что хотите удалить товар "{product.name}"? Это действие нельзя отменить.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <Button variant="ghost" class="starwind-dialog-close">
-                    Отмена
-                  </Button>
-                  <Button
-                    variant="error"
-                    class="delete-confirm-btn"
-                    data-delete-id={product.id}
-                  >
-                    Удалить
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   )}
 
@@ -374,8 +368,15 @@ const getImageUrl = (relativePath: string) => {
       animation: vt-fade-in 0.25s ease 0.05s both;
     }
 
-    /* Images keep their view-transition-names and morph automatically
-       (default browser behavior: animate position + size between snapshots) */
+    /* Product image thumbnails: ensure border-radius is preserved and
+       smoothly animated during the view-transition morph */
+    :global(html.view-switching)::view-transition-group(*) {
+      overflow: hidden;
+    }
+    :global(html.view-switching)::view-transition-old(*),
+    :global(html.view-switching)::view-transition-new(*) {
+      overflow: hidden;
+    }
 
     @keyframes vt-fade-out {
       to { opacity: 0; }
@@ -390,39 +391,35 @@ const getImageUrl = (relativePath: string) => {
 
     function initProductsPage() {
       // --- View toggle ---
-      const feed = document.querySelector<HTMLElement>('.product-feed');
+      const feeds = document.querySelectorAll<HTMLElement>('.product-feed');
       const viewBtns = document.querySelectorAll<HTMLButtonElement>('.view-btn');
 
-      if (feed && viewBtns.length) {
+      if (feeds.length && viewBtns.length) {
         // Restore saved view
         const saved = sessionStorage.getItem('admin-products-view');
         if (saved === 'grid' || saved === 'list') {
-          feed.dataset.view = saved;
+          feeds.forEach(f => f.dataset.view = saved);
           viewBtns.forEach(b => b.classList.toggle('active', b.dataset.view === saved));
         }
 
         viewBtns.forEach(btn => {
           btn.addEventListener('click', () => {
             const next = btn.dataset.view;
-            if (!next || feed.dataset.view === next) return;
+            if (!next || feeds[0]?.dataset.view === next) return;
 
             viewBtns.forEach(b => b.classList.toggle('active', b === btn));
 
-            // Defer the view transition to the next frame so the browser
-            // renders and stabilises :hover state after the class toggle.
-            // startViewTransition() forces a synchronous style recalc that
-            // can briefly drop :hover on ::before, breaking the anchor chain.
             requestAnimationFrame(() => {
               if (document.startViewTransition) {
                 document.documentElement.classList.add('view-switching');
                 const t = document.startViewTransition(() => {
-                  feed.dataset.view = next;
+                  feeds.forEach(f => f.dataset.view = next);
                 });
                 t.finished.finally(() => {
                   document.documentElement.classList.remove('view-switching');
                 });
               } else {
-                feed.dataset.view = next;
+                feeds.forEach(f => f.dataset.view = next);
               }
             });
 

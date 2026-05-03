@@ -1,0 +1,26 @@
+---
+import Head from "@/components/shared/Head.astro";
+import NavBar from "@/components/shared/NavBar.astro";
+import "../styles/global.css";
+
+interface Props {
+    title: string;
+    description?: string;
+}
+
+const {
+    title,
+    description = "Вся ваша жизнь может стать церемонией, а начало может быть положено в практике чая",
+} = Astro.props;
+---
+
+<html lang="en">
+    <head>
+        <Head title={title} description={description} />
+    </head>
+
+    <body>
+        <NavBar />
+        <slot />
+    </body>
+</html>

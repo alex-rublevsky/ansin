@@ -1,0 +1,23 @@
+---
+import MainLayout from "@/layouts/MainLayout.astro";
+const { error } = Astro.props;
+
+const isDev = import.meta.env.DEV;
+
+function getSafeErrorMessage(error: Error) {
+    if (!(error instanceof Error)) return "Unexpected error";
+
+    if (isDev) {
+        return error.message; // OK in dev only
+    }
+
+    return "Something went wrong. Please try again later.";
+}
+
+const message = getSafeErrorMessage(error);
+---
+
+<MainLayout title="500 - Error">
+    <h1>500 - Internal Server Error</h1>
+    <div>{message}</div>
+</MainLayout>

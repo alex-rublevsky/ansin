@@ -1,16 +1,15 @@
 // @ts-check
 import { defineConfig, envField, fontProviders } from "astro/config";
-
 import node from "@astrojs/node";
-
 import icon from "astro-icon";
-
 import tailwindcss from "@tailwindcss/vite";
+import sitemap from "@astrojs/sitemap";
 
 // https://astro.build/config
 export default defineConfig({
   site: "https://ansin.ru",
-
+  integrations: [icon(), sitemap()],
+  //output: "server",
   env: {
     schema: {
       // TODO: update these variable examples
@@ -18,15 +17,25 @@ export default defineConfig({
         context: "server",
         access: "secret",
       }),
+      TURSO_DATABASE_URL: envField.string({
+        //TODO: should this be set to client?
+        context: "server",
+        access: "public",
+      }),
+      SECRET_TURSO_AUTH_TOKEN: envField.string({
+        context: "server",
+        access: "secret",
+      }),
+      PUBLIC_ASSETS_BASE_URL: envField.string({
+        context: "client",
+        access: "public",
+        default: "https://storage.yandexcloud.net/ansin-static/",
+      }),
     },
   },
-
   adapter: node({
     mode: "standalone",
   }),
-
-  integrations: [icon()],
-
   fonts: [
     {
       provider: fontProviders.local(),
@@ -43,8 +52,17 @@ export default defineConfig({
       },
     },
   ],
-
   vite: {
     plugins: [tailwindcss()],
+  },
+  build: {
+    concurrency: 8,
+  },
+  // prefetch: {
+  //   prefetchAll: true,
+  //   defaultStrategy: "hover",
+  // },
+  image: {
+    domains: ["storage.yandexcloud.net"],
   },
 });

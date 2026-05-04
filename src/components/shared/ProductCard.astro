@@ -1,0 +1,137 @@
+---
+import { Image } from "astro:assets";
+import { Icon } from "astro-icon/components";
+import { PUBLIC_ASSETS_BASE_URL } from "astro:env/client";
+
+interface Props {
+  title: string;
+  slug: string;
+  /** Paths from DB (`products.images`). Second entry is used only at `lg` + fine-pointer hover, aligned with Gallery. */
+  images: string[];
+  price: string | number;
+}
+
+const { title, slug, images, price } = Astro.props;
+
+const urls = images
+  .filter(Boolean)
+  .map((path) => PUBLIC_ASSETS_BASE_URL + path);
+const firstUrl = urls[0] ?? null;
+const secondUrl = urls[1] ?? null;
+
+const vtName = `productImage-${slug}`;
+const priceLabel = typeof price === "number" ? String(price) : price;
+---
+
+<div class="product-card group relative" data-product-slug={slug}>
+  <div
+    class="relative mb-3 aspect-square overflow-hidden bg-[var(--background)]"
+    data-image-container
+  >
+    <a
+      href={`/product/${slug}`}
+      class="absolute inset-0 block"
+      data-product-link
+    >
+      {
+        firstUrl ? (
+          <>
+            <div
+              data-image-wrapper="0"
+              transition:name={vtName}
+              class="absolute inset-0 bg-[var(--background)]"
+            >
+              <Image
+                src={firstUrl}
+                width={600}
+                height={600}
+                alt={title}
+                loading="lazy"
+                class="absolute inset-0 h-full w-full object-cover object-center"
+                data-image-index="0"
+              />
+            </div>
+            {secondUrl ? (
+              <div
+                data-image-wrapper="1"
+                class="product-card-second-image absolute inset-0 opacity-0 bg-[var(--background)] group-hover:opacity-100"
+              >
+                <Image
+                  src={secondUrl}
+                  width={600}
+                  height={600}
+                  alt={title}
+                  loading="lazy"
+                  class="absolute inset-0 h-full w-full object-cover object-center"
+                  data-image-index="1"
+                />
+              </div>
+            ) : null}
+          </>
+        ) : (
+          <div class="absolute inset-0 flex items-center justify-center">
+            <Icon name="missingImage" title="Нет изображения" class="size-16" />
+          </div>
+        )
+      }
+    </a>
+  </div>
+
+  <a href={`/product/${slug}`} class="block">
+    <p>{priceLabel}</p>
+    <p>{title}</p>
+  </a>
+</div>
+
+<script>
+  import { initProductCardImageTracking } from "../../lib/galleryNavigation";
+
+  document.addEventListener("astro:page-load", initProductCardImageTracking);
+</script>
+
+<style>
+  .product-card {
+    transition:
+      transform 0.3s ease-out,
+      box-shadow 0.3s ease-out;
+  }
+
+  .product-card-second-image {
+    display: none;
+  }
+
+  @media (min-width: 1024px) and (hover: hover) {
+    .product-card-second-image {
+      display: block;
+    }
+  }
+
+  /* Same crossfade timing as `ansin 0.5` ProductCard (`opacity-0` → `group-hover:opacity-100`). */
+  [data-image-wrapper="1"] {
+    transition: opacity 0.3s ease-out;
+  }
+
+  .product-card img {
+    mix-blend-mode: darken;
+    transition:
+      transform 0.5s ease-out,
+      opacity 0.5s ease-out;
+  }
+
+  @media (hover: hover) {
+    .product-card:hover {
+      z-index: 1;
+      transform: scale(1.02);
+      box-shadow:
+        0 1px 1px hsl(0deg 0% 0% / 0.045),
+        0 5px 5px hsl(0deg 0% 0% / 0.0245),
+        0 10px 10px hsl(0deg 0% 0% / 0.045),
+        0 15px 15px hsl(0deg 0% 0% / 0.045),
+        0 20px 20px hsl(0deg 0% 0% / 0.045);
+    }
+
+    .product-card:hover img {
+      transform: scale(1.05);
+    }
+  }
+</style>

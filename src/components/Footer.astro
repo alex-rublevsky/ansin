@@ -2,6 +2,8 @@
 import { Image } from "astro:assets";
 import Button from "./shared/Button.astro";
 import { Icon } from "astro-icon/components";
+import Link from "@/components/shared/Link.astro";
+
 ---
 
 <footer>
@@ -16,4 +18,5 @@ import { Icon } from "astro-icon/components";
         Телеграм Канал
         <Icon name="telegram" title="Telegram" />
     </Button>
+    <p> Понравился сайт? <Link href="https://t.me/alexrublevsky">Написать разработчику</Link></p>
 </footer>

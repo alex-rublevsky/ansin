@@ -1,42 +1,80 @@
 ---
+import "@/styles/global.css";
 import { Font } from "astro:assets";
+import { ClientRouter } from "astro:transitions";
+import type { ImageMetadata } from "astro";
+//TODO: update the fallback image
+import FallbackImage from "@/assets/blog-placeholder-1.jpg";
+import { SITE_TITLE } from "@/consts";
 
-const {
-    title = "Ансин",
-    description = "Вся ваша жизнь может стать церемонией, а начало может быть положено в практике чая",
-} = Astro.props;
+interface Props {
+  title: string;
+  description: string;
+  image?: ImageMetadata;
+}
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+
+const { title, description, image = FallbackImage } = Astro.props;
 ---
 
-<link rel="sitemap" href="/sitemap-index.xml" />
-
-<title>{title}</title>
-<Font cssVariable="--font-overused-grotesk" preload />
-
+<!-- Global Metadata -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="icon" type="image/png" href="/light.png" />
 <link rel="icon" href="/favicon.ico" />
 <link rel="shortcut icon" href="/favicon.ico" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="Ansin" />
 <link rel="manifest" href="/site.webmanifest" />
+<meta name="apple-mobile-web-app-title" content="Ansin" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  title={SITE_TITLE}
+  href={new URL("rss.xml", Astro.site)}
+/>
+<meta name="generator" content={Astro.generator} />
 
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<Font cssVariable="--font-overused-grotesk" preload />
+
+<!-- Canonical URL -->
+<link rel="canonical" href={canonicalURL} />
+
+<!-- Primary Meta Tags -->
+<ClientRouter />
+<title>{title}</title>
+<meta name="title" content={title} />
 <meta name="description" content={description} />
 
 <!-- TODO: Web analytics -->
-<script
-    data-goatcounter="https://my-account.goatcounter.com/count"
-    async
-    src="//gc.zgo.at/count.js"></script>
+<!-- <script
+  data-goatcounter="https://my-account.goatcounter.com/count"
+  async
+  src="//gc.zgo.at/count.js"></script> -->
 
 <!-- TODO: Open Graph tags -->
-<meta property="og:title" content="My New Astro Website" />
+<!-- <meta property="og:title" content="My New Astro Website" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="http://www.example.com/" />
 <meta property="og:description" content="Welcome to my new Astro site!" />
 <meta
-    property="og:image"
-    content="https://www.example.com/_astro/seo-banner.BZD7kegZ.webp"
+  property="og:image"
+  content="https://www.example.com/_astro/seo-banner.BZD7kegZ.webp"
 />
-<meta property="og:image:alt" content="" />
+<meta property="og:image:alt" content="" /> -->
+
+<!-- Open Graph / Facebook -->
+<!-- <meta property="og:type" content="website" />
+<meta property="og:url" content={Astro.url} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={new URL(image.src, Astro.url)} /> -->
+
+<!-- Twitter -->
+<!-- <meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={Astro.url} />
+<meta property="twitter:title" content={title} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:image" content={new URL(image.src, Astro.url)} /> -->

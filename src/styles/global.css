@@ -2,5 +2,9 @@
 @import "./theme.css";
 
 [data-icon] {
-    color: var();
+  color: var();
+}
+
+@view-transition {
+  navigation: auto;
 }

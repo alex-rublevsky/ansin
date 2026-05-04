@@ -1,0 +1,18 @@
+---
+interface Props {
+  name: string;
+  price: number;
+  description: string;
+}
+
+const { name, price, description } = Astro.props;
+
+import Button from "@/components/shared/Button.astro";
+---
+
+<div class="max-w-[40ch]">
+  <h1 class="text-lg! leading-[1.1]">{name}</h1>
+  <p>{price}</p>
+  <Button>В корзину</Button>
+  <div set:html={description} />
+</div>

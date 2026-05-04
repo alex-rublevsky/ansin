@@ -1,0 +1,48 @@
+---
+import MainLayout from "../../layouts/MainLayout.astro";
+// export const prerender = true;
+import { products } from "../../lib/db/products/getAllProducts.ts";
+import Gallery from "../../components/Gallery.astro";
+import ProductInfo from "../../components/ProductInfo.astro";
+
+import type {
+  // InferGetStaticParamsType,
+  InferGetStaticPropsType,
+  GetStaticPaths,
+} from "astro";
+
+export const getStaticPaths: GetStaticPaths = () => {
+  return products.map(({ name, slug, price, images, description }) => ({
+    params: { slug: slug },
+    props: {
+      name: name,
+      price: price,
+      images: images,
+      description: description,
+    },
+  }));
+};
+
+// type Params = InferGetStaticParamsType<typeof getStaticPaths>;
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+// const { slug } = Astro.params as Params;
+const { name, price, images, description } = Astro.props as Props;
+const slug = Astro.params.slug as string;
+---
+
+<MainLayout title={name}>
+  <div
+    class="relative flex flex-col items-start gap-6 lg:flex-row lg:gap-10"
+  >
+    <Gallery
+      class:list="w-full self-start lg:sticky lg:top-0 lg:w-3/5 xl:w-2/3"
+      images={images}
+      slug={slug}
+      alt={name}
+    />
+    <div class="min-w-0 lg:flex-1">
+      <ProductInfo name={name} price={price} description={description} />
+    </div>
+  </div>
+</MainLayout>

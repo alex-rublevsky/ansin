@@ -1,0 +1,27 @@
+---
+import ProductCard from "./shared/ProductCard.astro";
+import { products } from "@/lib/db/products/getAllFeedProducts";
+---
+
+<section class="productFeed">
+  {
+    products.map((row) => (
+      <ProductCard
+        title={row.name}
+        slug={row.slug}
+        images={[row.first_image, row.second_image].filter(
+          (path): path is string => typeof path === "string" && path.length > 0,
+        )}
+        price={row.price}
+      />
+    ))
+  }
+</section>
+
+<style>
+  .productFeed {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    gap: var(--fluid-xs);
+  }
+</style>

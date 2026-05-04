@@ -1,26 +1,27 @@
 ---
 import Head from "@/components/shared/Head.astro";
 import NavBar from "@/components/shared/NavBar.astro";
-import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
 
 interface Props {
-    title: string;
-    description?: string;
+  title: string;
+  description?: string;
 }
 
 const {
-    title,
-    description = "Вся ваша жизнь может стать церемонией, а начало может быть положено в практике чая",
+  title,
+  description = "Вся ваша жизнь может стать церемонией, а начало может быть положено в практике чая",
 } = Astro.props;
 ---
 
 <html lang="en">
-    <head>
-        <Head title={title} description={description} />
-    </head>
+  <head>
+    <Head title={title} description={description} />
+    <ClientRouter />
+  </head>
 
-    <body>
-        <NavBar />
-        <slot />
-    </body>
+  <body>
+    <NavBar />
+    <slot />
+  </body>
 </html>

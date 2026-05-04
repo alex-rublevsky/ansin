@@ -1,12 +1,12 @@
 ::selection {
-  background: var(--primary);
-  color: var(--primary-foreground);
+  background: var(--foreground);
+  color: var(--background);
   text-shadow: none;
 }
 
 ::-moz-selection {
-  background: var(--primary);
-  color: var(--primary-foreground);
+  background: var(--foreground);
+  color: var(--background);
   text-shadow: none;
 }
 
@@ -15,6 +15,20 @@
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+
+  /* Tailwind text-* utilities resolve from fluid vars. */
+  --text-2xs: var(--fluid-2xs);
+  --text-xs: var(--fluid-xs);
+  --text-sm: var(--fluid-sm);
+  --text-base: var(--fluid-base);
+  --text-md: var(--fluid-md);
+  --text-lg: var(--fluid-lg);
+  --text-xl: var(--fluid-xl);
+  --text-2xl: var(--fluid-2xl);
+  --text-3xl: var(--fluid-3xl);
+  --text-4xl: var(--fluid-4xl);
+  --text-5xl: var(--fluid-5xl);
 }
 
 :root {
@@ -25,6 +39,9 @@
   --background: oklch(0.98 0.005 var(--hue));
   --foreground: oklch(0.12 0.03 var(--hue));
 
+	--muted-foreground: oklch(0.70 0.02 var(--hue));
+
+  --fluid-2xs: clamp(0.6rem, 0.69rem + -0.12vw, 0.7035rem);
   --fluid-xs: clamp(0.7035rem, 0.8083rem + -0.1353vw, 0.7813rem);
   --fluid-sm: clamp(0.9375rem, 0.9374rem + 0.0004vw, 0.9377rem);
   --fluid-base: clamp(1.125rem, 1.0815rem + 0.2174vw, 1.25rem);
@@ -40,9 +57,16 @@
 html {
   font-size: var(--fluid-base);
   font-family: var(--font-overused-grotesk);
-
   /* scroll-behavior: smooth; */
   overflow-x: hidden;
+}
+
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    min-height: 100vh;
+  }
 }
 
 h1 {

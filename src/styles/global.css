@@ -4,7 +4,3 @@
 [data-icon] {
   color: var();
 }
-
-@view-transition {
-  navigation: auto;
-}

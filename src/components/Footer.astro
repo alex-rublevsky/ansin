@@ -3,20 +3,33 @@ import { Image } from "astro:assets";
 import Button from "./shared/Button.astro";
 import { Icon } from "astro-icon/components";
 import Link from "@/components/shared/Link.astro";
-
+import { PUBLIC_ASSETS_BASE_URL } from "astro:env/client";
 ---
 
-<footer>
+<footer class="grid grid-cols-2">
+  <Image
+    src={PUBLIC_ASSETS_BASE_URL + "images/sesh.webp"}
+    width={1000}
+    height={1000}
+    alt="Фото чайной церемонии"
+    class="h-auto max-h-full w-auto max-w-full object-contain"
+  />
+  <div class="px-4">
     <h4 class="max-w-[50ch]">
-        Эрудиция, изучение и осмысление явлений через призму чайного мира
+      Эрудиция, изучение и осмысление явлений через призму чайного мира
     </h4>
     <p class="max-w-[45ch]">
-        Больше образовательного материала и информации о чайных встречах в
-        телеграм канале
+      Больше образовательного материала и информации о чайных встречах в
+      телеграм канале
     </p>
-    <Button href="https://t.me/Unseen_wujin_de_cha" class="w-fit" size="lg">
-        Телеграм Канал
-        <Icon name="telegram" title="Telegram" />
+    <Button href="https://t.me/Unseen_wujin_de_cha" size="lg">
+      Телеграм Канал
+      <Icon name="telegram" title="Telegram" />
     </Button>
-    <p> Понравился сайт? <Link href="https://t.me/alexrublevsky">Написать разработчику</Link></p>
+    <p>
+      Понравился сайт? <Link href="https://t.me/alexrublevsky"
+        >Написать разработчику</Link
+      >
+    </p>
+  </div>
 </footer>

@@ -13,6 +13,20 @@ export function setupDesktopMagnifier({
   mainImage,
   isEnabled = () => true,
 }: SetupDesktopMagnifierOptions) {
+  const zoomSurface = zoomLens.querySelector<HTMLElement>(
+    "[data-zoom-lens-surface]",
+  );
+
+  if (!zoomSurface) {
+    const noop = () => {};
+    return { deactivateZoom: noop, destroy: noop };
+  }
+
+  /** Without this, loupe mixes against the stacked main `img`, not `--background`. */
+  const revealMainBehindLoupe = () => {
+    mainImage.style.visibility = "";
+  };
+
   let pointerInside = false;
   const isZoomExcludedTarget = (target: EventTarget | null) =>
     target instanceof Element &&
@@ -20,7 +34,10 @@ export function setupDesktopMagnifier({
 
   const deactivateZoom = () => {
     zoomLens.classList.remove("zoom-active");
-    zoomLens.style.backgroundImage = "";
+    zoomSurface.style.backgroundImage = "";
+    zoomSurface.style.backgroundSize = "";
+    zoomSurface.style.backgroundPosition = "";
+    revealMainBehindLoupe();
   };
 
   const canUseZoom = () => {
@@ -31,9 +48,11 @@ export function setupDesktopMagnifier({
 
   const activateZoom = () => {
     if (!canUseZoom()) return false;
-    if (!mainImage.classList.contains("gallery-main-high-loaded")) return false;
-    zoomLens.style.backgroundImage = `url('${mainImage.src}')`;
-    zoomLens.style.backgroundSize = `${DESKTOP_ZOOM_FACTOR * 100}%`;
+    if (!mainImage.classList.contains("gallery-main-high-loaded"))
+      return false;
+    zoomSurface.style.backgroundImage = `url('${mainImage.src}')`;
+    zoomSurface.style.backgroundSize = `${DESKTOP_ZOOM_FACTOR * 100}%`;
+    mainImage.style.visibility = "hidden";
     zoomLens.classList.add("zoom-active");
     return true;
   };
@@ -68,7 +87,7 @@ export function setupDesktopMagnifier({
       Math.max(((e.clientY - rect.top) / rect.height) * 100, 0),
       100,
     );
-    zoomLens.style.backgroundPosition = `${xPct}% ${yPct}%`;
+    zoomSurface.style.backgroundPosition = `${xPct}% ${yPct}%`;
   };
 
   const handleHighReady = () => {

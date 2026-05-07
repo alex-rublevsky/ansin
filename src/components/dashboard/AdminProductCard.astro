@@ -2,28 +2,19 @@
 import { Image } from "astro:assets";
 import { Icon } from "astro-icon/components";
 import { PUBLIC_ASSETS_BASE_URL } from "astro:env/client";
-import type { FeedVariation } from "@/db/products/storefront";
-import VariationPicker from "@/components/shared/VariationPicker.astro";
 
 interface Props {
   title: string;
   slug: string;
-  /** Paths from DB (`products.images`). Second entry is used only at `lg` + fine-pointer hover, aligned with Gallery. */
+  /** Paths from DB (`products.images`). Second entry shown on hover (lg+ fine-pointer). */
   images: string[];
   price: string | number;
-  variations?: FeedVariation[];
+  isActive: boolean;
 }
 
-const { title, slug, images, price, variations = [] } = Astro.props;
+const { title, slug, images, price, isActive } = Astro.props;
 
-// Sort heaviest first — mirrors the old project's display-price logic
-const sortedVariations = [...variations]
-  .filter((v) => v.weight > 0)
-  .sort((a, b) => b.weight - a.weight);
-
-const displayPrice = sortedVariations[0]?.price ?? price;
-const priceLabel =
-  typeof displayPrice === "number" ? String(displayPrice) : displayPrice;
+const priceLabel = typeof price === "number" ? String(price) : price;
 
 const urls = images
   .filter(Boolean)
@@ -33,12 +24,20 @@ const secondUrl = urls[1] ?? null;
 ---
 
 <div class="product-card group relative" data-product-slug={slug}>
+  {
+    !isActive && (
+      <span class="absolute top-2 left-2 z-10 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+        Черновик
+      </span>
+    )
+  }
+
   <div
     class="relative mb-3 aspect-square overflow-hidden bg-background"
     data-image-container
   >
     <a
-      href={`/product/${slug}`}
+      href={`/dashboard/product/${slug}`}
       class="absolute inset-0 block"
       data-product-link
     >
@@ -86,16 +85,10 @@ const secondUrl = urls[1] ?? null;
     </a>
   </div>
 
-  <a href={`/product/${slug}`} class="block">
+  <a href={`/dashboard/product/${slug}`} class="block">
     <p>{priceLabel}</p>
     <p>{title}</p>
   </a>
-
-  {
-    sortedVariations.length > 0 && (
-      <VariationPicker variations={sortedVariations} />
-    )
-  }
 </div>
 
 <style>

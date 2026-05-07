@@ -61,12 +61,15 @@ const mainSharedClass =
   {
     !hasImages ? (
       <div class="relative flex aspect-square w-full items-center justify-center self-start lg:sticky lg:top-0">
-        <Icon name="missingImage" title="Сломанная Картинка" class="size-30 text-muted-foreground" />
+        <Icon
+          name="missingImage"
+          title="Сломанная Картинка"
+          class="size-30 text-muted-foreground"
+        />
       </div>
     ) : fullImageUrls.length === 1 ? (
       <div
-        class="bg-[var(--background)] relative order-1 flex w-full grow items-center justify-center lg:max-h-[calc(100vh-5rem)] lg:items-start lg:justify-start lg:overflow-hidden"
-        transition:name={`productImage-${slug}`}
+        class="bg-background relative order-1 flex w-full grow items-center justify-center lg:max-h-[calc(100vh-5rem)] lg:items-start lg:justify-start lg:overflow-hidden"
         data-zoom-container
       >
         <Image
@@ -79,11 +82,17 @@ const mainSharedClass =
           data-main-image
           data-initial-high-src={imageMeta[0].highSrc}
         />
-        <div
-          data-zoom-lens
-          class="absolute inset-0 z-10 bg-no-repeat"
-          style="cursor: zoom-in;"
-        />
+        <div data-zoom-lens class="absolute inset-0 z-10 cursor-zoom-in">
+          <div
+            class="pointer-events-none absolute inset-0 bg-background"
+            aria-hidden="true"
+            data-zoom-lens-ground
+          />
+          <div
+            class="pointer-events-none absolute inset-0 bg-no-repeat"
+            data-zoom-lens-surface
+          />
+        </div>
       </div>
     ) : (
       <div class="contents">
@@ -105,7 +114,7 @@ const mainSharedClass =
                 data-main-high-src={imageMeta[index].highSrc}
                 data-main-low-src={imageMeta[index].lowSrc}
               >
-                <div class="absolute inset-0 overflow-hidden bg-[var(--background)]">
+                <div class="absolute inset-0 overflow-hidden bg-background">
                   <div
                     class:list={[
                       "pointer-events-none absolute inset-0 z-10 transition-colors duration-200",
@@ -129,8 +138,7 @@ const mainSharedClass =
         </div>
 
         <div
-          class="bg-[var(--background)] relative order-1 flex w-full grow items-center justify-center lg:max-h-[calc(100vh-5rem)] lg:items-start lg:justify-start lg:overflow-hidden"
-          transition:name={`productImage-${slug}`}
+          class="bg-background relative order-1 flex w-full grow items-center justify-center lg:max-h-[calc(100vh-5rem)] lg:items-start lg:justify-start lg:overflow-hidden"
           data-zoom-container
         >
           <Image
@@ -145,12 +153,12 @@ const mainSharedClass =
           />
 
           <div
-            class="relative aspect-square w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden scroll-smooth bg-[var(--background)] lg:hidden"
+            class="relative aspect-square w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden scroll-smooth bg-background lg:hidden"
             data-mobile-gallery
           >
             <div class="flex h-full">
               {fullImageUrls.map((imageUrl, index) => (
-                <div class="flex w-full shrink-0 snap-center items-center justify-center bg-[var(--background)]">
+                <div class="flex w-full shrink-0 snap-center items-center justify-center bg-background">
                   <Image
                     width={600}
                     height={600}
@@ -165,11 +173,17 @@ const mainSharedClass =
               ))}
             </div>
           </div>
-          <div
-            data-zoom-lens
-            class="absolute inset-0 z-10 bg-no-repeat"
-            style="cursor: zoom-in;"
-          />
+          <div data-zoom-lens class="absolute inset-0 z-10 cursor-zoom-in">
+            <div
+              class="pointer-events-none absolute inset-0 bg-background"
+              aria-hidden="true"
+              data-zoom-lens-ground
+            />
+            <div
+              class="pointer-events-none absolute inset-0 bg-no-repeat"
+              data-zoom-lens-surface
+            />
+          </div>
         </div>
       </div>
     )
@@ -177,21 +191,15 @@ const mainSharedClass =
 </div>
 
 <script>
-  import {
-    consumeStoredGalleryImageIndex,
-    installGalleryBeforeSwapPatch,
-  } from "../lib/galleryNavigation";
-
-  installGalleryBeforeSwapPatch();
-
   const HOVER_ENABLE_DELAY_MS = 100;
   const MOBILE_SCROLL_SYNC_DEBOUNCE_MS = 50;
   const PROGRAMMATIC_SCROLL_LOCK_MS = 200;
   const DESKTOP_MAGNIFIER_MEDIA_QUERY =
     "(min-width: 1024px) and (hover: hover) and (pointer: fine)";
 
-  let magnifierMod: Promise<typeof import("../lib/galleryDesktopMagnifier")> | null =
-    null;
+  let magnifierMod: Promise<
+    typeof import("../lib/galleryDesktopMagnifier")
+  > | null = null;
   let disposeGallery: (() => void) | null = null;
   let beforeSwapBound = false;
 
@@ -395,24 +403,16 @@ const mainSharedClass =
           thumb?.getAttribute("data-main-high-src") ||
           thumb?.getAttribute("data-full-src");
         const lowSrc = thumb?.getAttribute("data-main-low-src");
-        if (mainImage && lowSrc) mainImage.src = lowSrc;
+        if (mainImage && lowSrc) {
+          mainImage.classList.remove("gallery-main-high-loaded");
+          mainImage.src = lowSrc;
+        }
         if (mainImage && highSrc) bindMainHigh(mainImage, highSrc);
         deactivateZoom();
         setActiveThumb(index);
       };
 
-      const slug = container.dataset.slug ?? "";
-      const storedIdx = slug ? consumeStoredGalleryImageIndex(slug) : null;
-
-      if (storedIdx !== null && storedIdx > 0) {
-        const targetIndex = Math.min(storedIdx, thumbnails.length - 1);
-        selectImage(targetIndex);
-        if (mobileGallery) {
-          mobileGallery.scrollLeft = targetIndex * mobileGallery.clientWidth;
-        }
-      } else {
-        bootHighRes();
-      }
+      bootHighRes();
 
       mainImage?.addEventListener(
         "gallery:high-ready",
@@ -450,7 +450,10 @@ const mainSharedClass =
 
       if (mobileSlideImages.length > 0) {
         upgradeSlide(mobileSlideImages[0]);
-        if (mobileSlideImages.length > 1 && typeof IntersectionObserver !== "undefined") {
+        if (
+          mobileSlideImages.length > 1 &&
+          typeof IntersectionObserver !== "undefined"
+        ) {
           const obs = new IntersectionObserver(
             (entries) => {
               entries.forEach((e) => {
@@ -462,7 +465,9 @@ const mainSharedClass =
             { root: mobileGallery ?? null, threshold: 0.1 },
           );
           mobileSlideImages.slice(1).forEach((img) => obs.observe(img));
-          signal.addEventListener("abort", () => obs.disconnect(), { once: true });
+          signal.addEventListener("abort", () => obs.disconnect(), {
+            once: true,
+          });
         } else {
           mobileSlideImages.slice(1).forEach(upgradeSlide);
         }
@@ -521,6 +526,14 @@ const mainSharedClass =
 
   ensureBeforeSwap();
   document.addEventListener("astro:page-load", initGallery);
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => initGallery(), {
+      once: true,
+    });
+  } else {
+    initGallery();
+  }
 </script>
 
 <style>
@@ -539,14 +552,16 @@ const mainSharedClass =
   }
 
   [data-zoom-lens] {
-    background-color: var(--background);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.2s ease;
   }
 
   [data-zoom-lens].zoom-active {
     opacity: 1;
     pointer-events: auto;
+  }
+
+  [data-zoom-lens-surface] {
+    mix-blend-mode: darken;
   }
 </style>

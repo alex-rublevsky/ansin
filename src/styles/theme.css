@@ -29,6 +29,10 @@
   --text-3xl: var(--fluid-3xl);
   --text-4xl: var(--fluid-4xl);
   --text-5xl: var(--fluid-5xl);
+
+  --gap-3xs: var(--fluid-3xs);
+  --gap-2xs: var(--fluid-2xs);
+  --gap-xs: var(--fluid-xs);
 }
 
 :root {
@@ -39,8 +43,9 @@
   --background: oklch(0.98 0.005 var(--hue));
   --foreground: oklch(0.12 0.03 var(--hue));
 
-	--muted-foreground: oklch(0.70 0.02 var(--hue));
+  --muted-foreground: oklch(0.7 0.02 var(--hue));
 
+  --fluid-3xs: clamp(0.28rem, 0.32rem + -0.05vw, 0.35rem);
   --fluid-2xs: clamp(0.6rem, 0.69rem + -0.12vw, 0.7035rem);
   --fluid-xs: clamp(0.7035rem, 0.8083rem + -0.1353vw, 0.7813rem);
   --fluid-sm: clamp(0.9375rem, 0.9374rem + 0.0004vw, 0.9377rem);

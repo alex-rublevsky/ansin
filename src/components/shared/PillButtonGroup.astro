@@ -1,0 +1,20 @@
+---
+import Button from "@/components/shared/Button.astro";
+
+interface Props {
+  items: { label: string; href: string }[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="flex gap-2">
+  {
+    items.map((item) => (
+      <Button variant="pill" href={item.href}>
+        {" "}
+        {item.label}{" "}
+      </Button>
+    ))
+  }
+</div>

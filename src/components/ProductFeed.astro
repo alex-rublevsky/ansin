@@ -1,6 +1,8 @@
 ---
 import ProductCard from "./shared/ProductCard.astro";
-import { products } from "@/lib/db/products/getAllFeedProducts";
+import { getFeedProducts } from "@/db/products/storefront";
+
+const products = await getFeedProducts();
 ---
 
 <section class="productFeed">
@@ -13,6 +15,7 @@ import { products } from "@/lib/db/products/getAllFeedProducts";
           (path): path is string => typeof path === "string" && path.length > 0,
         )}
         price={row.price}
+        variations={row.variations}
       />
     ))
   }

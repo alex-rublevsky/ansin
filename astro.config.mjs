@@ -9,7 +9,7 @@ import sitemap from "@astrojs/sitemap";
 export default defineConfig({
   site: "https://ansin.ru",
   integrations: [icon(), sitemap()],
-  //output: "server",
+  output: "server",
   env: {
     schema: {
       // TODO: update these variable examples

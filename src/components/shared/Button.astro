@@ -1,5 +1,47 @@
 ---
+const { variant, size, href, type } = Astro.props;
 
+type Variant = "primary" | "secondary" | "pill" | "destructive";
+
+type Size = "default" | "sm" | "lg";
+
+type Props = {
+  variant?: Variant;
+  size?: Size;
+  href?: string;
+  type?: "submit" | "button" | "reset";
+};
+
+const baseClasses = "cursor-pointer";
+
+const variantClasses: Record<Variant, string> = {
+  primary: "",
+  secondary: "",
+  pill: "border border-muted-foreground rounded-full",
+  destructive: "",
+};
+
+const sizeClasses: Record<Size, string> = {
+  default: "px-4 py-2",
+  sm: "px-1 py-[0.5] text-sm",
+  lg: "px-5 py-3",
+};
 ---
 
-<button> <slot /></button>
+{
+  href ? (
+    <a
+      href={href}
+      class={`${baseClasses} ${variantClasses[variant ?? "primary"]} ${sizeClasses[size ?? "default"]}`}
+    >
+      <slot />
+    </a>
+  ) : (
+    <button
+      type={type ?? "button"}
+      class={`${baseClasses} ${variantClasses[variant ?? "primary"]} ${sizeClasses[size ?? "default"]}`}
+    >
+      <slot />
+    </button>
+  )
+}

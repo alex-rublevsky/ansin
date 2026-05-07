@@ -1,9 +1,21 @@
 ---
-interface Props {
-  variations: string[];
-}
+import Button from "./Button.astro";
 
-// const { variations } = Astro.props;
+const { variations } = Astro.props;
 ---
 
-<div></div>
+<div class="flex flex-wrap gap-3xs mt-0.5">
+  {
+    variations.map((v: any) => (
+      <Button
+        variant="pill"
+        size="sm"
+        data-variation-id={v.id}
+        data-price={v.price}
+        data-weight={v.weight}
+      >
+        {v.weight}г
+      </Button>
+    ))
+  }
+</div>

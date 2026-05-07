@@ -1,0 +1,34 @@
+---
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import { getDashboardProductBySlug } from "@/db/products/dashboard";
+import AdminProductForm from "@/components/dashboard/AdminProductForm.astro";
+
+const { slug } = Astro.params;
+
+const detail = await getDashboardProductBySlug(slug!);
+
+if (!detail) {
+  return Astro.redirect("/dashboard");
+}
+
+const { product, variations } = detail;
+---
+
+<DashboardLayout title={product.name}>
+  <div class="relative flex flex-col items-start gap-6 lg:flex-row lg:gap-10">
+    <div class="min-w-0 lg:flex-1">
+      <AdminProductForm
+        name={product.name}
+        slug={product.slug}
+        price={product.price}
+        description={product.description}
+        isActive={product.isActive}
+        images={Array.isArray(product.images) ? product.images : []}
+        categoryId={product.categoryId}
+        volume={product.volume}
+        cakeVolume={product.cakeVolume}
+        variations={variations}
+      />
+    </div>
+  </div>
+</DashboardLayout>

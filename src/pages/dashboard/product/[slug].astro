@@ -17,18 +17,7 @@ const { product, variations } = detail;
 <DashboardLayout title={product.name}>
   <div class="relative flex flex-col items-start gap-6 lg:flex-row lg:gap-10">
     <div class="min-w-0 lg:flex-1">
-      <AdminProductForm
-        name={product.name}
-        slug={product.slug}
-        price={product.price}
-        description={product.description}
-        isActive={product.isActive}
-        images={Array.isArray(product.images) ? product.images : []}
-        categoryId={product.categoryId}
-        volume={product.volume}
-        cakeVolume={product.cakeVolume}
-        variations={variations}
-      />
+      <AdminProductForm product={product} variations={variations} />
     </div>
   </div>
 </DashboardLayout>

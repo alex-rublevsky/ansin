@@ -1,0 +1,123 @@
+---
+import type { Product, ProductVariation } from "@/db/schema";
+import Button from "@/components/shared/Button.astro";
+import ImagesDropzone from "@/components/dashboard/ImagesDropzone.astro";
+import Checkbox from "@/components/shared/Checkbox.astro";
+import Input from "../shared/Input.astro";
+
+type FieldName = "name" | "slug" | "price" | "volume" | "cakeVolume";
+
+interface Props {
+  product?: Product;
+  variations?: ProductVariation[];
+  errors?: Partial<Record<FieldName, string>>;
+}
+
+const { product, variations = [], errors = {} } = Astro.props;
+
+const name = product?.name ?? "";
+const slug = product?.slug ?? "";
+const price = product?.price ?? 0;
+const description = product?.description ?? "";
+const isActive = product?.isActive ?? true;
+const images = Array.isArray(product?.images) ? product.images : [];
+const categoryId = product?.categoryId ?? null;
+const volume = product?.volume ?? 0;
+const cakeVolume = product?.cakeVolume ?? 0;
+---
+
+<div class="grid grid-cols-2 gap-6">
+  <ImagesDropzone />
+
+  <form class="max-w-[40ch] flex flex-col gap-(--fluid-sm)">
+    <Input
+      type="text"
+      name="name"
+      value={name}
+      label="Название"
+      required
+      error={errors.name}
+    />
+
+    <Input
+      type="text"
+      name="slug"
+      value={slug}
+      label="Slug"
+      required
+      error={errors.slug}
+    />
+
+    <Input
+      type="number"
+      name="price"
+      value={price.toString()}
+      label="Цена"
+      step="1"
+      required
+      error={errors.price}
+    />
+    <!--
+      <label>
+        Описание
+        <textarea name="description">{description}</textarea>
+      </label> -->
+
+    <Input
+      type="number"
+      name="volume"
+      value={volume.toString()}
+      label="Объём г"
+      error={errors.volume}
+    />
+
+    <Input
+      type="number"
+      name="cake_volume"
+      value={cakeVolume.toString()}
+      label="Объём блина г"
+      error={errors.cakeVolume}
+    />
+
+    <!-- {
+        categoryId !== null && (
+          <input type="hidden" name="category_id" value={categoryId} />
+        )
+      } -->
+
+    <Checkbox name="is_active" value="1" checked={isActive}>
+      Товар активен
+    </Checkbox>
+
+    <Button type="submit">Сохранить</Button>
+  </form>
+
+  <!-- Variations -->
+  <!-- {
+    variations.length > 0 && (
+      <section>
+        <h5>Вариации</h5>
+        <table>
+          <thead>
+            <tr>
+              <th>Вес (г)</th>
+              <th>Цена</th>
+              <th>Артикул</th>
+              <th>Порядок</th>
+            </tr>
+          </thead>
+          <tbody>
+            {variations.map((v) => (
+              <tr>
+                <td>{v.weight}</td>
+                <td>{v.price}</td>
+                <td>{v.sku}</td>
+                <td>{v.sort}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    )
+  } -->
+</div>

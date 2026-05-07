@@ -1,0 +1,149 @@
+---
+interface Props {
+  value?: string;
+  name: string;
+  id?: string;
+  type?: "text" | "email" | "number" | "tel" | "password";
+  placeholder?: string;
+  label?: string;
+  required?: boolean;
+  error?: string;
+  step?: number | string;
+}
+
+const {
+  value = "",
+  name,
+  id,
+  type = "text",
+  placeholder,
+  label,
+  required,
+  error,
+  step,
+} = Astro.props;
+
+const inputId = id ?? `input-${name}`;
+const hasLabel = !!label;
+const hasError = !!error;
+---
+
+<div
+  class:list={[
+    "input-wrapper",
+    { "has-label": hasLabel, "has-error": hasError },
+  ]}
+>
+  <input
+    id={inputId}
+    value={value}
+    name={name}
+    type={type}
+    placeholder={hasLabel ? " " : placeholder}
+    class="input-field"
+    required={required || undefined}
+    aria-invalid={hasError ? "true" : undefined}
+    step={step?.toString()}
+  />
+  {
+    hasLabel && (
+      <label for={inputId} class="input-label">
+        {label}
+      </label>
+    )
+  }
+  {
+    hasError && (
+      <span class="input-error" role="alert">
+        {error}
+      </span>
+    )
+  }
+</div>
+
+<style>
+  .input-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .input-field {
+    width: 100%;
+    height: 2.75rem;
+    padding-inline: 0.75rem;
+    padding-block: 0.625rem;
+    border: 1px solid var(--muted-foreground);
+    border-radius: 0.375rem;
+    background: transparent;
+    color: var(--foreground);
+    font-size: inherit;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease-out;
+  }
+
+  .input-field::placeholder {
+    color: var(--muted-foreground);
+  }
+
+  .input-field:focus {
+    border-color: var(--foreground);
+  }
+
+  .has-label .input-field {
+    padding-top: 1.125rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .has-error .input-field,
+  .has-error .input-field:focus {
+    border-color: var(--error);
+  }
+
+  .input-error {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.75rem;
+    color: var(--error);
+  }
+
+  .input-label {
+    pointer-events: none;
+    position: absolute;
+    left: 0.75rem;
+    z-index: 1;
+    /* Default state: sitting inside the input, vertically centred */
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted-foreground);
+    font-size: 1em;
+    transition:
+      top 0.25s ease-out,
+      transform 0.25s ease-out,
+      font-size 0.25s ease-out,
+      color 0.25s ease-out,
+      padding-inline 0.25s ease-out,
+      background-color 0.25s ease-out;
+  }
+
+  .input-field:focus + .input-label,
+  .input-field:not(:placeholder-shown) + .input-label {
+    top: 0;
+    transform: translateY(-50%);
+    font-size: 0.75rem;
+    color: var(--foreground);
+    background-color: var(--background);
+    padding-inline: 0.25rem;
+  }
+
+  .has-error .input-field:focus + .input-label,
+  .has-error .input-field:not(:placeholder-shown) + .input-label {
+    color: var(--error);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .input-label {
+      transition: none;
+    }
+  }
+</style>

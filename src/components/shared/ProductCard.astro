@@ -40,68 +40,71 @@ const firstUrl = urls[0] ?? null;
 const secondUrl = urls[1] ?? null;
 ---
 
-<div class="product-card group relative" data-category={categorySlug}>
+<div class="product-card group relative isolate" data-category={categorySlug}>
+  <a
+    href={`/product/${slug}`}
+    class="absolute inset-0 z-1 focus-visible:z-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+    data-product-link
+    aria-label={`${title}, ${priceLabel}`}
+  />
+
   <div
-    class="relative mb-3 aspect-square overflow-hidden bg-background"
+    class="relative z-0 mb-3 aspect-square overflow-hidden bg-background"
     data-image-container
   >
-    <a
-      href={`/product/${slug}`}
-      class="absolute inset-0 block"
-      data-product-link
-    >
-      {
-        firstUrl ? (
-          <>
-            <div data-image-wrapper="0" class="absolute inset-0 bg-background">
-              <Image
-                src={firstUrl}
-                width={600}
-                height={600}
-                alt={title}
-                loading="lazy"
-                class="absolute inset-0 h-full w-full object-cover object-center"
-                data-image-index="0"
-              />
-            </div>
-            {secondUrl ? (
-              <div
-                data-image-wrapper="1"
-                class="product-card-second-image absolute inset-0 opacity-0 bg-background group-hover:opacity-100"
-              >
-                <Image
-                  src={secondUrl}
-                  width={600}
-                  height={600}
-                  alt={title}
-                  loading="lazy"
-                  class="absolute inset-0 h-full w-full object-cover object-center"
-                  data-image-index="1"
-                />
-              </div>
-            ) : null}
-          </>
-        ) : (
-          <div class="absolute inset-0 flex items-center justify-center">
-            <Icon
-              name="missingImage"
-              title="Нет изображения"
-              class="size-16 text-muted-foreground"
+    {
+      firstUrl ? (
+        <>
+          <div data-image-wrapper="0" class="absolute inset-0 bg-background">
+            <Image
+              src={firstUrl}
+              width={600}
+              height={600}
+              alt=""
+              loading="lazy"
+              class="absolute inset-0 h-full w-full object-cover object-center"
+              data-image-index="0"
             />
           </div>
-        )
-      }
-    </a>
+          {secondUrl ? (
+            <div
+              data-image-wrapper="1"
+              class="product-card-second-image absolute inset-0 opacity-0 bg-background group-hover:opacity-100"
+            >
+              <Image
+                src={secondUrl}
+                width={600}
+                height={600}
+                alt=""
+                loading="lazy"
+                class="absolute inset-0 h-full w-full object-cover object-center"
+                data-image-index="1"
+              />
+            </div>
+          ) : null}
+        </>
+      ) : (
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <Icon
+            name="image"
+            title="Нет изображения"
+            class="size-16 text-muted-foreground"
+          />
+        </div>
+      )
+    }
   </div>
 
-  <a href={`/product/${slug}`} class="block">
+  <div class="relative z-0">
     <p>{priceLabel}</p>
     <p>{title}</p>
-  </a>
+  </div>
 
   {
     sortedVariations.length > 0 && (
-      <VariationPicker variations={sortedVariations} />
+      <div class="relative z-2">
+        <VariationPicker variations={sortedVariations} />
+      </div>
     )
   }
 </div>

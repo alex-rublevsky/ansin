@@ -1,8 +1,9 @@
 ---
-import type { Product, ProductVariation } from "@/db/schema";
-import Button from "@/components/shared/Button.astro";
 import ImagesDropzone from "@/components/dashboard/ImagesDropzone.astro";
+import Button from "@/components/shared/Button.astro";
 import Checkbox from "@/components/shared/Checkbox.astro";
+import type { Product, ProductVariation } from "@/db/schema";
+import MarkdownEditor from "../dashboard/MarkdownEditor.astro";
 import Input from "../shared/Input.astro";
 
 type FieldName = "name" | "slug" | "price" | "volume" | "cakeVolume";
@@ -29,55 +30,55 @@ const cakeVolume = product?.cakeVolume ?? 0;
 <div class="grid grid-cols-2 gap-6">
   <ImagesDropzone />
 
-  <form class="max-w-[40ch] flex flex-col gap-(--fluid-sm)">
-    <Input
-      type="text"
-      name="name"
-      value={name}
-      label="Название"
-      required
-      error={errors.name}
-    />
+  <form class="flex flex-col gap-(--fluid-sm)">
+    <div class="grid grid-cols-2 gap-(--fluid-2xs)">
+      <Input
+        type="text"
+        name="name"
+        value={name}
+        label="Название"
+        required
+        error={errors.name}
+      />
 
-    <Input
-      type="text"
-      name="slug"
-      value={slug}
-      label="Slug"
-      required
-      error={errors.slug}
-    />
+      <Input
+        type="text"
+        name="slug"
+        value={slug}
+        label="Slug"
+        required
+        error={errors.slug}
+      />
 
-    <Input
-      type="number"
-      name="price"
-      value={price.toString()}
-      label="Цена"
-      step="1"
-      required
-      error={errors.price}
-    />
-    <!--
-      <label>
-        Описание
-        <textarea name="description">{description}</textarea>
-      </label> -->
+      <Input
+        type="number"
+        name="price"
+        value={price.toString()}
+        label="Цена"
+        step="1"
+        required
+        error={errors.price}
+      />
+    </div>
+    <MarkdownEditor name="description" content={description} label="Описание" />
 
-    <Input
-      type="number"
-      name="volume"
-      value={volume.toString()}
-      label="Объём г"
-      error={errors.volume}
-    />
+    <div class="grid grid-cols-2 gap-(--fluid-2xs)">
+      <Input
+        type="number"
+        name="volume"
+        value={volume.toString()}
+        label="Объём г"
+        error={errors.volume}
+      />
 
-    <Input
-      type="number"
-      name="cake_volume"
-      value={cakeVolume.toString()}
-      label="Объём блина г"
-      error={errors.cakeVolume}
-    />
+      <Input
+        type="number"
+        name="cake_volume"
+        value={cakeVolume.toString()}
+        label="Объём блина г"
+        error={errors.cakeVolume}
+      />
+    </div>
 
     <!-- {
         categoryId !== null && (
@@ -91,9 +92,9 @@ const cakeVolume = product?.cakeVolume ?? 0;
 
     <Button type="submit">Сохранить</Button>
   </form>
-
-  <!-- Variations -->
-  <!-- {
+  <Button variant="destructive">Удалить товар</Button>
+  <!--
+  {
     variations.length > 0 && (
       <section>
         <h5>Вариации</h5>

@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "./theme.css";
 
-[data-icon] {
+/* [data-icon] {
   color: var();
-}
+} */

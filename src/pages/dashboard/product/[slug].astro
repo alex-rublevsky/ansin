@@ -15,9 +15,11 @@ const { product, variations } = detail;
 ---
 
 <DashboardLayout title={product.name}>
-  <div class="relative flex flex-col items-start gap-6 lg:flex-row lg:gap-10">
+  <section
+    class="relative flex flex-col items-start gap-6 lg:flex-row lg:gap-10 pt-10"
+  >
     <div class="min-w-0 lg:flex-1">
       <AdminProductForm product={product} variations={variations} />
     </div>
-  </div>
+  </section>
 </DashboardLayout>

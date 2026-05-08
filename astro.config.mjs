@@ -1,9 +1,9 @@
 // @ts-check
-import { defineConfig, envField, fontProviders } from "astro/config";
 import node from "@astrojs/node";
-import icon from "astro-icon";
-import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
+import tailwindcss from "@tailwindcss/vite";
+import icon from "astro-icon";
+import { defineConfig, envField, fontProviders } from "astro/config";
 
 // https://astro.build/config
 export default defineConfig({
@@ -58,10 +58,10 @@ export default defineConfig({
   build: {
     concurrency: 8,
   },
-  // prefetch: {
-  //   prefetchAll: true,
-  //   defaultStrategy: "hover",
-  // },
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: "hover",
+  },
   image: {
     domains: ["storage.yandexcloud.net"],
   },

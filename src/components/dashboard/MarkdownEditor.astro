@@ -1,0 +1,408 @@
+---
+interface Props {
+  content?: string;
+  name?: string;
+  label?: string;
+}
+
+import Label from "../shared/Label.astro";
+import Button from "../shared/Button.astro";
+
+const { content = "", name, label } = Astro.props;
+---
+
+<div class="editor-field">
+  {label && <Label class="editor-label">{label}</Label>}
+
+  <div class="tiptap-wrapper">
+    <!-- ─── Toolbar ─────────────────────────────────────────── -->
+    <div class="tiptap-toolbar" role="toolbar" aria-label="Text formatting">
+      <div class="tiptap-group">
+        <Button
+          variant="editorTool"
+          data-action="bold"
+          name="bold"
+          title="Жирный"
+          aria-label="Bold"
+        />
+        <Button
+          variant="editorTool"
+          data-action="italic"
+          name="italic"
+          title="Курсив"
+          aria-label="Italic"
+        />
+      </div>
+
+      <span class="tiptap-sep" aria-hidden="true"></span>
+
+      <div class="tiptap-group">
+        <Button
+          variant="editorTool"
+          data-action="h2"
+          title="Heading 2"
+          aria-label="Heading 2">H2</Button
+        >
+        <Button
+          variant="editorTool"
+          data-action="h3"
+          title="Heading 3"
+          aria-label="Heading 3">H3</Button
+        >
+      </div>
+
+      <span class="tiptap-sep" aria-hidden="true"></span>
+
+      <div class="tiptap-group">
+        <Button
+          variant="editorTool"
+          data-action="bulletList"
+          name="bulletList"
+          title="Список"
+          aria-label="Bullet list"
+        />
+        <Button
+          variant="editorTool"
+          data-action="orderedList"
+          name="numberedList"
+          title="Нумерованный список"
+          aria-label="Numbered list"
+        />
+      </div>
+
+      <span class="tiptap-sep" aria-hidden="true"></span>
+
+      <div class="tiptap-group">
+        <Button
+          variant="editorTool"
+          data-action="link"
+          name="link"
+          title="Ссылка"
+          aria-label="Link"
+        />
+        <Button
+          variant="editorTool"
+          data-action="image"
+          name="image"
+          title="Изображение"
+          aria-label="Image"
+        />
+      </div>
+
+      <span class="tiptap-sep" aria-hidden="true"></span>
+
+      <div class="tiptap-group">
+        <Button
+          variant="editorTool"
+          data-action="undo"
+          title="Undo (Ctrl+Z)"
+          name="undo"
+          aria-label="Undo"
+        />
+        <Button
+          variant="editorTool"
+          data-action="redo"
+          title="Redo (Ctrl+Y)"
+          name="redo"
+          aria-label="Redo"
+        />
+      </div>
+    </div>
+    <!-- ─── Editor mount point ──────────────────────────────── -->
+    <div class="tiptap-editor" data-content={content}></div>
+  </div>
+</div>
+
+{name && <input type="hidden" name={name} />}
+
+<script>
+  import { Editor } from "@tiptap/core";
+import Image from "@tiptap/extension-image";
+import Link from "@tiptap/extension-link";
+import StarterKit from "@tiptap/starter-kit";
+
+  // Astro deduplicates identical <script> blocks, so this single script
+  // initialises every editor instance found on the page.
+  document
+    .querySelectorAll<HTMLElement>(".tiptap-wrapper")
+    .forEach((wrapper) => {
+      const editorEl = wrapper.querySelector<HTMLElement>(".tiptap-editor")!;
+      const toolbar = wrapper.querySelector<HTMLElement>(".tiptap-toolbar")!;
+      const content = editorEl.dataset.content ?? "";
+
+      // The hidden input lives just after the outer .editor-field wrapper —
+      // that's where form values are collected.
+      const field = wrapper.closest<HTMLElement>(".editor-field");
+      const hiddenInput = field?.nextElementSibling as HTMLInputElement | null;
+
+      // ── Initialise editor ─────────────────────────────────────
+      const editor = new Editor({
+        element: editorEl,
+        extensions: [
+          StarterKit, // includes Bold, Italic, Headings, Lists, History, …
+          Link.configure({
+            openOnClick: false, // don't navigate away on click while editing
+            defaultProtocol: "https",
+            HTMLAttributes: {
+              rel: "noopener noreferrer nofollow",
+              target: "_blank",
+            },
+          }),
+          Image.configure({
+            HTMLAttributes: { class: "max-w-full rounded" },
+          }),
+        ],
+        content,
+        editable: true,
+      });
+
+      // ── Sync hidden input for form submission ─────────────────
+      if (hiddenInput?.tagName === "INPUT") {
+        hiddenInput.value = editor.getHTML();
+        editor.on("update", () => {
+          hiddenInput.value = editor.getHTML();
+        });
+      }
+
+      // ── Toolbar active / disabled states ──────────────────────
+      function syncToolbar() {
+        toolbar
+          .querySelectorAll<HTMLButtonElement>("button[data-action]")
+          .forEach((btn) => {
+            const action = btn.dataset.action!;
+
+            // undo / redo: only disabled state, no "active" look
+            if (action === "undo") {
+              btn.disabled = !editor.can().undo();
+              return;
+            }
+            if (action === "redo") {
+              btn.disabled = !editor.can().redo();
+              return;
+            }
+
+            const active =
+              action === "bold"
+                ? editor.isActive("bold")
+                : action === "italic"
+                  ? editor.isActive("italic")
+                  : action === "h2"
+                    ? editor.isActive("heading", { level: 2 })
+                    : action === "h3"
+                      ? editor.isActive("heading", { level: 3 })
+                      : action === "bulletList"
+                        ? editor.isActive("bulletList")
+                        : action === "orderedList"
+                          ? editor.isActive("orderedList")
+                          : action === "link"
+                            ? editor.isActive("link")
+                            : false;
+
+            btn.classList.toggle("is-active", active);
+          });
+      }
+
+      editor.on("selectionUpdate", syncToolbar);
+      editor.on("update", syncToolbar);
+      syncToolbar(); // set initial state
+
+      // ── Toolbar click handler (event delegation) ──────────────
+      toolbar.addEventListener("click", (e) => {
+        const btn = (e.target as Element).closest<HTMLButtonElement>(
+          "button[data-action]",
+        );
+        if (!btn || btn.disabled) return;
+        const action = btn.dataset.action!;
+
+        switch (action) {
+          case "bold":
+            editor.chain().focus().toggleBold().run();
+            break;
+          case "italic":
+            editor.chain().focus().toggleItalic().run();
+            break;
+          case "h2":
+            editor.chain().focus().toggleHeading({ level: 2 }).run();
+            break;
+          case "h3":
+            editor.chain().focus().toggleHeading({ level: 3 }).run();
+            break;
+          case "bulletList":
+            editor.chain().focus().toggleBulletList().run();
+            break;
+          case "orderedList":
+            editor.chain().focus().toggleOrderedList().run();
+            break;
+          case "undo":
+            editor.chain().focus().undo().run();
+            break;
+          case "redo":
+            editor.chain().focus().redo().run();
+            break;
+
+          case "link": {
+            const prev = editor.getAttributes("link").href ?? "";
+            const url = window.prompt("URL", prev);
+            if (url === null) break; // user cancelled
+            if (url === "") {
+              editor.chain().focus().unsetLink().run();
+              break;
+            }
+            editor.chain().focus().setLink({ href: url }).run();
+            break;
+          }
+
+          case "image": {
+            const url = window.prompt("Image URL");
+            if (url) editor.chain().focus().setImage({ src: url }).run();
+            break;
+          }
+        }
+      });
+    });
+</script>
+
+<style>
+  /* ─── Field wrapper & label ───────────────────────────────── */
+  .editor-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    width: 100%;
+  }
+
+  .editor-label {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+    padding-inline: 0.25rem;
+  }
+
+  /* ─── Outer border box (matches Input.astro style) ────────── */
+  .tiptap-wrapper {
+    border: 1px solid var(--muted-foreground);
+    border-radius: 0.375rem;
+    overflow: hidden;
+    transition: border-color 0.2s ease-out;
+  }
+
+  .tiptap-wrapper:focus-within {
+    border-color: var(--foreground);
+  }
+
+  /* ─── Toolbar ─────────────────────────────────────────────── */
+  .tiptap-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.125rem;
+    padding: 0.3125rem 0.5rem;
+    background: var(--muted);
+    border-bottom: 1px solid
+      color-mix(in oklch, var(--muted-foreground) 35%, transparent);
+  }
+
+  .tiptap-group {
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+  }
+
+  .tiptap-sep {
+    display: block;
+    width: 1px;
+    height: 1.125rem;
+    margin-inline: 0.25rem;
+    background: var(--muted-foreground);
+    opacity: 0.3;
+    flex-shrink: 0;
+  }
+
+  /* ─── Editor content area ────────────────────────────────── */
+  .tiptap-editor {
+    padding: 0.75rem;
+    min-height: 9rem;
+    background: var(--background);
+    cursor: text;
+  }
+
+  /* ProseMirror root — injected by TipTap at runtime, so :global is required */
+  .tiptap-editor :global(.ProseMirror) {
+    outline: none;
+    min-height: 7.5rem;
+    line-height: 1.6;
+    font-size: var(--fluid-base);
+
+  }
+
+  /* Vertical rhythm between block-level nodes */
+  .tiptap-editor :global(.ProseMirror > * + *) {
+    margin-top: 0.5em;
+  }
+
+  .tiptap-editor :global(.ProseMirror h2) {
+    font-size: var(--fluid-lg);
+    font-weight: 600;
+    line-height: 1.2;
+    margin-top: 1.25em;
+    margin-bottom: 0.25em;
+  }
+
+  .tiptap-editor :global(.ProseMirror h3) {
+    font-size: var(--fluid-md);
+    font-weight: 600;
+    line-height: 1.25;
+    margin-top: 1em;
+    margin-bottom: 0.2em;
+  }
+
+  .tiptap-editor :global(.ProseMirror ul),
+  .tiptap-editor :global(.ProseMirror ol) {
+    padding-left: 1.375rem;
+    margin: 0.25em 0;
+  }
+
+  .tiptap-editor :global(.ProseMirror ul) {
+    list-style-type: disc;
+  }
+  .tiptap-editor :global(.ProseMirror ol) {
+    list-style-type: decimal;
+  }
+
+  .tiptap-editor :global(.ProseMirror li + li) {
+    margin-top: 0.2em;
+  }
+
+  .tiptap-editor :global(.ProseMirror strong) {
+    font-weight: 700;
+  }
+  .tiptap-editor :global(.ProseMirror em) {
+    font-style: italic;
+  }
+
+  .tiptap-editor :global(.ProseMirror a) {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    opacity: 0.7;
+    transition: opacity 0.15s ease-out;
+  }
+  .tiptap-editor :global(.ProseMirror a:hover) {
+    opacity: 1;
+  }
+
+  .tiptap-editor :global(.ProseMirror img.max-w-full) {
+    max-width: 100%;
+    border-radius: 0.25rem;
+    display: block;
+    margin-block: 0.5em;
+  }
+
+  /* Empty-editor placeholder */
+  .tiptap-editor :global(.ProseMirror p.is-editor-empty:first-child::before) {
+    content: "Начните вводить текст…";
+    color: var(--muted-foreground);
+    pointer-events: none;
+    float: left;
+    height: 0;
+  }
+</style>

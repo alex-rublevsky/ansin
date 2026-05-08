@@ -1,12 +1,15 @@
 ---
-import Button from "@/components/shared/Button.astro";
 import Logo from "@/components/shared/Logo.astro";
 import CategoryFilter from "@/components/CategoryFilter.astro";
 import CartButton from "@/components/CartButton.astro";
 ---
 
-<nav class="fixed bottom-0 left-0 right-0 z-999">
-  <Button><Logo /> Logo</Button>
-  <CategoryFilter />
+<nav
+  class="fixed flex items-end justify-between p-2 bottom-0 left-0 right-0 z-999"
+>
+  <div class="flex items-center">
+    <Logo />
+    <CategoryFilter />
+  </div>
   <CartButton />
 </nav>

@@ -1,7 +1,8 @@
 ---
+import { Icon } from "astro-icon/components";
 import type { HTMLAttributes } from "astro/types";
 
-type Variant = "primary" | "secondary" | "pill" | "destructive";
+type Variant = "primary" | "secondary" | "pill" | "destructive" | "editorTool";
 
 type Size = "default" | "xs" | "sm";
 
@@ -12,30 +13,43 @@ type Props = Omit<
   variant?: Variant;
   size?: Size;
   href?: string;
+  name?: string;
+  title?: string;
 };
 
-const { variant, size, href, type, class: className, ...rest } = Astro.props;
+const {
+  variant,
+  size,
+  href,
+  type,
+  name,
+  title,
+  class: className,
+  ...rest
+} = Astro.props;
 
 const baseClasses =
-  "cursor-pointer rounded transition-colors ease-out duration-300";
+  "cursor-pointer rounded transition-colors ease-out duration-170";
 
 const variantClasses: Record<Variant, string> = {
   primary:
     "bg-foreground text-background border border-foreground hover:bg-background hover:border hover:border-foreground hover:text-foreground",
   secondary: "",
-  pill: "border border-muted-foreground bg-background rounded-full hover:bg-muted active:bg-muted-foreground active:duration-50 data-[active]:bg-foreground data-[active]:text-background data-[active]:border-foreground",
-  destructive: "",
+  pill: "border border-muted-foreground bg-background rounded-full hover:bg-muted active:bg-muted-foreground data-[active]:bg-foreground data-[active]:text-background data-[active]:border-foreground",
+  destructive: "bg-destructive text-destructive-foreground",
+  editorTool:
+    "flex items-center justify-center box-border size-[1.875rem] shrink-0 border-0 p-0 rounded-lg bg-transparent text-xs font-bold leading-none text-foreground transition-[background-color,color] ease-out hover:bg-foreground/10 active:bg-foreground/30 disabled:opacity-30 disabled:cursor-default [&.is-active]:bg-foreground [&.is-active]:text-background [&_svg]:pointer-events-none [&_svg]:block [&_svg]:size-4 [&_svg]:stroke-current [&_svg]:fill-none [&_svg]:[stroke-width:2] [&_svg]:[stroke-linecap:round] [&_svg]:[stroke-linejoin:round]",
 };
 
 const sizeClasses: Record<Size, string> = {
   default: "px-4 py-2",
   sm: "px-2 py-1 text-sm",
   xs: "px-1 py-[0.5] text-sm",
-  // lg: "px-5 py-3",
 };
 
 const variantClass = variantClasses[variant ?? "primary"];
-const sizeClass = sizeClasses[size ?? "default"];
+const sizeClass =
+  variant === "editorTool" ? "" : sizeClasses[size ?? "default"];
 const composedClass = `${baseClasses}${variantClass ? ` ${variantClass}` : ""}${sizeClass ? ` ${sizeClass}` : ""}${className ? ` ${className}` : ""}`;
 ---
 
@@ -44,6 +58,14 @@ const composedClass = `${baseClasses}${variantClass ? ` ${variantClass}` : ""}${
     <a href={href} class={composedClass} {...rest}>
       <slot />
     </a>
+  ) : variant === "editorTool" ? (
+    <button type="button" class={composedClass} {...rest}>
+      {Astro.slots.has("default") ? (
+        <slot />
+      ) : name ? (
+        <Icon name={name} title={title} />
+      ) : null}
+    </button>
   ) : (
     <button type={type ?? "button"} class={composedClass} {...rest}>
       <slot />

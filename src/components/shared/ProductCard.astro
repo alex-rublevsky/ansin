@@ -1,9 +1,9 @@
 ---
-import { Image } from "astro:assets";
-import { Icon } from "astro-icon/components";
-import { PUBLIC_ASSETS_BASE_URL } from "astro:env/client";
-import type { FeedVariation } from "@/db/products/storefront";
 import VariationPicker from "@/components/shared/VariationPicker.astro";
+import type { FeedVariation } from "@/db/products/storefront";
+import { Icon } from "astro-icon/components";
+import { Image } from "astro:assets";
+import { PUBLIC_ASSETS_BASE_URL } from "astro:env/client";
 
 interface Props {
   title: string;
@@ -12,9 +12,17 @@ interface Props {
   images: string[];
   price: string | number;
   variations?: FeedVariation[];
+  categorySlug: string | null;
 }
 
-const { title, slug, images, price, variations = [] } = Astro.props;
+const {
+  title,
+  slug,
+  images,
+  price,
+  variations = [],
+  categorySlug = null,
+} = Astro.props;
 
 // Sort heaviest first — mirrors the old project's display-price logic
 const sortedVariations = [...variations]
@@ -32,7 +40,7 @@ const firstUrl = urls[0] ?? null;
 const secondUrl = urls[1] ?? null;
 ---
 
-<div class="product-card group relative" data-product-slug={slug}>
+<div class="product-card group relative" data-category={categorySlug}>
   <div
     class="relative mb-3 aspect-square overflow-hidden bg-background"
     data-image-container

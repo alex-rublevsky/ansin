@@ -16,6 +16,7 @@ const products = await getFeedProducts();
         )}
         price={row.price}
         variations={row.variations}
+        categorySlug={row.categorySlug}
       />
     ))
   }
@@ -28,3 +29,30 @@ const products = await getFeedProducts();
     gap: var(--fluid-xs);
   }
 </style>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>(
+    "[data-category-button]",
+  );
+  const productCards = document.querySelectorAll<HTMLElement>(".product-card");
+
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const category = button.getAttribute("data-category");
+
+      buttons.forEach((btn) => btn.removeAttribute("data-active"));
+
+      button.setAttribute("data-active", "");
+
+      productCards.forEach((productCard) => {
+        const productCategory = productCard.getAttribute("data-category");
+
+        if (category === "all" || category === productCategory) {
+          productCard.style.display = "";
+        } else {
+          productCard.style.display = "none";
+        }
+      });
+    });
+  });
+</script>

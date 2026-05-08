@@ -2,6 +2,7 @@ import { asc, desc, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
+  categories,
   productVariations,
   products,
   type ProductVariation,
@@ -17,6 +18,7 @@ export type FeedProduct = {
   slug: string;
   name: string;
   price: number;
+  categorySlug: string | null;
   first_image: string | null;
   second_image: string | null;
   variations: FeedVariation[];
@@ -57,8 +59,10 @@ export async function getFeedProducts(): Promise<FeedProduct[]> {
       name: products.name,
       price: products.price,
       images: products.images,
+      categorySlug: categories.slug,
     })
     .from(products)
+    .leftJoin(categories, eq(products.categoryId, categories.id))
     .where(eq(products.isActive, true))
     .orderBy(desc(products.createdAt));
 
@@ -73,6 +77,7 @@ export async function getFeedProducts(): Promise<FeedProduct[]> {
       slug: p.slug,
       name: p.name,
       price: p.price,
+      categorySlug: p.categorySlug ?? null,
       first_image: images[0] ?? null,
       second_image: images[1] ?? null,
       variations: byProduct.get(p.id) ?? [],

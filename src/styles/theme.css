@@ -10,6 +10,16 @@
   text-shadow: none;
 }
 
+/*
+ * Checkbox keeps keyboard focus on the native `<input>`; UA focus outlines there
+ * do not follow squircle. See Checkbox.astro (`outline: none` + sibling ring).
+ */
+*,
+*::before,
+*::after {
+  corner-shape: squircle;
+}
+
 @theme inline {
   --font-sans: var(--font-overused-grotesk) sans-serif;
 

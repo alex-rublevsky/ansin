@@ -65,6 +65,7 @@ const { name, value, disabled, checked } = Astro.props;
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
+    outline: none;
   }
 
   .checkbox-check {
@@ -90,7 +91,6 @@ const { name, value, disabled, checked } = Astro.props;
     height: 1.25rem;
     position: relative;
     border-radius: var(--border-radius);
-    container-type: inline-size;
   }
 
   /* The border ring — fades up on hover/checked */
@@ -119,20 +119,10 @@ const { name, value, disabled, checked } = Astro.props;
 
   @media (prefers-reduced-motion: no-preference) {
     .checkbox-fill {
-      border-radius: 0;
-      /* Keep corners rounded during the scale-up by computing nested radius */
-      /* prettier-ignore */
-      --nested-border-radius: max(
-        0px,
-        (var(--border-radius) - (100cqw * var(--initial-scale) / 2)) /
-          var(--initial-scale)
-      );
-      clip-path: inset(0 round var(--nested-border-radius));
       scale: var(--initial-scale);
       transition:
         opacity ease 0.2s,
-        scale var(--fill-spring),
-        clip-path var(--fill-spring);
+        scale var(--fill-spring);
     }
   }
 
@@ -173,7 +163,6 @@ const { name, value, disabled, checked } = Astro.props;
 
   @media (prefers-reduced-motion: no-preference) {
     .checkbox-input:checked + .checkbox-check .checkbox-fill {
-      clip-path: inset(0 round var(--border-radius));
       scale: 1;
     }
 

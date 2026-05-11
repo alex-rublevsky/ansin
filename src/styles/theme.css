@@ -28,7 +28,7 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-destructive: var(--destructive);
-
+  --color-destructive-foreground: var(--destructive-foreground);
   /* Tailwind text-* utilities resolve from fluid vars. */
   --text-2xs: var(--fluid-2xs);
   --text-xs: var(--fluid-xs);
@@ -60,7 +60,6 @@
 
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.98 0.01 25);
-
   --fluid-3xs: clamp(0.28rem, 0.32rem + -0.05vw, 0.35rem);
   --fluid-2xs: clamp(0.6rem, 0.69rem + -0.12vw, 0.7035rem);
   --fluid-xs: clamp(0.7035rem, 0.8083rem + -0.1353vw, 0.7813rem);
@@ -93,76 +92,76 @@ html {
     padding-left: 1rem;
     padding-right: 1rem;
   }
-}
 
-h1 {
-  font-size: var(--fluid-3xl);
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: 1.2%;
-  color: var(--foreground);
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
+  h1 {
+    font-size: var(--fluid-3xl);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 1.2%;
+    color: var(--foreground);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
 
-h2 {
-  font-size: var(--fluid-2xl);
-  font-weight: 400;
-  line-height: 0.95;
-  letter-spacing: 1.2%;
-  color: var(--foreground);
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
+  h2 {
+    font-size: var(--fluid-2xl);
+    font-weight: 400;
+    line-height: 0.95;
+    letter-spacing: 1.2%;
+    color: var(--foreground);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
 
-h3 {
-  font-size: var(--fluid-xl);
-  line-height: 1;
-  font-weight: 300;
-  letter-spacing: 1.2%;
-  color: var(--foreground);
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
+  h3 {
+    font-size: var(--fluid-xl);
+    line-height: 1;
+    font-weight: 300;
+    letter-spacing: 1.2%;
+    color: var(--foreground);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
 
-h4 {
-  font-size: var(--fluid-lg);
-  line-height: 1;
-  font-weight: 400;
-  letter-spacing: 1.2%;
-  color: var(--foreground);
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
+  h4 {
+    font-size: var(--fluid-lg);
+    line-height: 1;
+    font-weight: 400;
+    letter-spacing: 1.2%;
+    color: var(--foreground);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
 
-h5 {
-  font-size: var(--fluid-md);
-  line-height: 1;
-  font-weight: 600;
-  letter-spacing: 1.2%;
-  color: var(--foreground);
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
+  h5 {
+    font-size: var(--fluid-md);
+    line-height: 1;
+    font-weight: 600;
+    letter-spacing: 1.2%;
+    color: var(--foreground);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
 
-h6 {
-  font-size: var(--fluid-base);
-  line-height: 1;
-  font-weight: 700;
-  letter-spacing: 1.2%;
-  color: var(--foreground);
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
+  h6 {
+    font-size: var(--fluid-base);
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 1.2%;
+    color: var(--foreground);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
 
-p {
-  font-size: var(--fluid-base);
-  line-height: 1.4;
-  color: var(--foreground);
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
+  p {
+    font-size: var(--fluid-base);
+    line-height: 1.4;
+    color: var(--foreground);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
 
-span {
-  color: var(--foreground);
+  span {
+    color: var(--foreground);
+  }
 }

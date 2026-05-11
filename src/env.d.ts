@@ -3,7 +3,7 @@
 interface ImportMetaEnv {
   readonly PUBLIC_BETTER_AUTH_URL: string;
   readonly SECRET_BETTER_AUTH: string;
-  readonly TURSO_DATABASE_URL: string;
+  readonly PUBLIC_TURSO_DATABASE_URL: string;
   readonly SECRET_TURSO_AUTH_TOKEN: string;
   readonly PUBLIC_ASSETS_BASE_URL: string;
   readonly SECRET_ADMIN_EMAILS: string;

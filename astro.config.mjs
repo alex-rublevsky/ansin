@@ -39,7 +39,7 @@ export default defineConfig({
         context: "server",
         access: "secret",
       }),
-      TURSO_DATABASE_URL: envField.string({
+      PUBLIC_TURSO_DATABASE_URL: envField.string({
         context: "server",
         access: "public",
       }),

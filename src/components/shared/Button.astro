@@ -4,17 +4,24 @@ import type { HTMLAttributes } from "astro/types";
 
 type Variant = "primary" | "secondary" | "pill" | "destructive" | "editorTool";
 
-type Size = "default" | "xs" | "sm";
+type Size = "default" | "xs" | "sm" | "lg";
 
 type Props = Omit<
   HTMLAttributes<"button">,
-  keyof { variant?: Variant; size?: Size; href?: string }
+  keyof {
+    variant?: Variant;
+    size?: Size;
+    href?: string;
+    withIcon?: boolean;
+  }
 > & {
   variant?: Variant;
   size?: Size;
   href?: string;
   name?: string;
   title?: string;
+  /** Set when the slot is icon + text so they align with gap; Astro cannot infer this from the slot. */
+  withIcon?: boolean;
 };
 
 const {
@@ -24,12 +31,21 @@ const {
   type,
   name,
   title,
+  withIcon = false,
   class: className,
   ...rest
 } = Astro.props;
 
+const resolvedVariant = variant ?? "primary";
+
+/** Icon + label row (opt-in via `leadingIcon`). `[&_*]:text-inherit` keeps nested spans on theme foreground tokens. */
+const layoutClasses =
+  withIcon && resolvedVariant !== "editorTool"
+    ? "inline-flex items-center justify-center gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_*]:text-inherit"
+    : "";
+
 const baseClasses =
-  "cursor-pointer rounded transition-colors ease-out duration-170";
+  "cursor-pointer rounded transition-colors ease-out duration-170 disabled:cursor-not-allowed disabled:opacity-50";
 
 const variantClasses: Record<Variant, string> = {
   primary:
@@ -45,12 +61,13 @@ const sizeClasses: Record<Size, string> = {
   default: "px-4 py-2",
   sm: "px-2 py-1 text-sm",
   xs: "px-1 py-[0.5] text-sm",
+  lg: "h-12 px-6 text-base! font-normal [&_svg]:size-6",
 };
 
-const variantClass = variantClasses[variant ?? "primary"];
+const variantClass = variantClasses[resolvedVariant];
 const sizeClass =
-  variant === "editorTool" ? "" : sizeClasses[size ?? "default"];
-const composedClass = `${baseClasses}${variantClass ? ` ${variantClass}` : ""}${sizeClass ? ` ${sizeClass}` : ""}${className ? ` ${className}` : ""}`;
+  resolvedVariant === "editorTool" ? "" : sizeClasses[size ?? "default"];
+const composedClass = `${baseClasses}${layoutClasses ? ` ${layoutClasses}` : ""}${variantClass ? ` ${variantClass}` : ""}${sizeClass ? ` ${sizeClass}` : ""}${className ? ` ${className}` : ""}`;
 ---
 
 {

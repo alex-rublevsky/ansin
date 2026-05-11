@@ -1,0 +1,73 @@
+---
+import AuthLayout from "@/layouts/AuthLayout.astro";
+import Button from "@/components/shared/Button.astro";
+import Link from "@/components/shared/Link.astro";
+
+import { Icon } from "astro-icon/components";
+
+const error = Astro.url.searchParams.get("error");
+---
+
+<AuthLayout title="Вход в админку">
+  <main class="w-full max-w-md space-y-8 text-center">
+    <h1 class="text-lg! font-normal!">Вход в админку</h1>
+
+    {
+      error === "unauthorized" && (
+        <div class="bg-destructive border-destructive-foreground/50! text-destructive-foreground rounded-md border px-4 py-3">
+          У вас нет доступа
+        </div>
+      )
+    }
+
+    <Button id="google-signin" class="w-full" withIcon>
+      <Icon name="google" title="Google" />
+      <span data-signin-label>Войти</span>
+    </Button>
+
+    <Link href="/">
+      &larr; Вернуться в магазин
+    </Link>
+  </main>
+</AuthLayout>
+
+<script>
+  document.getElementById("google-signin")?.addEventListener("click", async (e) => {
+    const button = e.currentTarget as HTMLButtonElement;
+    const label = button.querySelector<HTMLSpanElement>("[data-signin-label]");
+    button.disabled = true;
+    if (label) label.textContent = "Вход...";
+
+    try {
+      const response = await fetch("/api/auth/sign-in/social", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider: "google",
+          callbackURL: "/dashboard",
+        }),
+      });
+
+      if (!response.ok) {
+        alert("Не удалось войти. Попробуйте еще раз.");
+        button.disabled = false;
+        if (label) label.textContent = "Войти";
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Ошибка аутентификации: Нет redirect URL");
+        button.disabled = false;
+        if (label) label.textContent = "Войти";
+      }
+    } catch (_error) {
+      alert("Ошибка сети. Попробуйте еще раз.");
+      button.disabled = false;
+      if (label) label.textContent = "Войти";
+    }
+  });
+</script>

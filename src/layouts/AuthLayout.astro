@@ -1,0 +1,23 @@
+---
+import Head from "@/components/shared/Head.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = "Вход в панель управления",
+} = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <Head title={title} description={description} />
+  </head>
+
+  <body class="bg-background flex min-h-screen items-center justify-center px-4">
+    <slot />
+  </body>
+</html>

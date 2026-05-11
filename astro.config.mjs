@@ -7,18 +7,39 @@ import { defineConfig, envField, fontProviders } from "astro/config";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://ansin.ru",
+  site: "https://d5dlmoeh5bvrbgn8dnuv.akta928u.apigw.yandexcloud.net",
   integrations: [icon(), sitemap()],
   output: "server",
+  security: {
+    // Astro's built-in CSRF origin check compares the Origin header against `site`.
+    // Behind the API Gateway (and later the CDN) the proxy rewrites the Host header,
+    // making the check fail for legitimate requests. Auth and route protection are
+    // handled instead by the Better Auth middleware and per-route guards.
+    checkOrigin: false,
+  },
   env: {
     schema: {
-      // TODO: update these variable examples
       SECRET_BETTER_AUTH: envField.string({
         context: "server",
         access: "secret",
       }),
+      PUBLIC_BETTER_AUTH_URL: envField.string({
+        context: "server",
+        access: "public",
+      }),
+      SECRET_ADMIN_EMAILS: envField.string({
+        context: "server",
+        access: "secret",
+      }),
+      PUBLIC_GOOGLE_CLIENT_ID: envField.string({
+        context: "server",
+        access: "public",
+      }),
+      SECRET_GOOGLE_CLIENT: envField.string({
+        context: "server",
+        access: "secret",
+      }),
       TURSO_DATABASE_URL: envField.string({
-        //TODO: should this be set to client?
         context: "server",
         access: "public",
       }),
@@ -30,6 +51,22 @@ export default defineConfig({
         context: "client",
         access: "public",
         default: "https://storage.yandexcloud.net/ansin-static/",
+      }),
+      PUBLIC_YANDEX_STORAGE_BUCKET: envField.string({
+        context: "server",
+        access: "public",
+      }),
+      SECRET_YANDEX_STORAGE_ACCESS_KEY: envField.string({
+        context: "server",
+        access: "secret",
+      }),
+      SECRET_YANDEX_STORAGE_KEY: envField.string({
+        context: "server",
+        access: "secret",
+      }),
+      PUBLIC_YANDEX_STORAGE_REGION: envField.string({
+        context: "server",
+        access: "public",
       }),
     },
   },

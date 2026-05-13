@@ -21,6 +21,7 @@ const {
   required,
   error,
   step,
+  ...rest
 } = Astro.props;
 
 const inputId = id ?? `input-${name}`;
@@ -44,6 +45,7 @@ const hasError = !!error;
     required={required || undefined}
     aria-invalid={hasError ? "true" : undefined}
     step={step?.toString()}
+    {...rest}
   />
   {
     hasLabel && (

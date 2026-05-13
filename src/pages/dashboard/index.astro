@@ -1,9 +1,9 @@
 ---
 import DashboardLayout from "@/layouts/DashboardLayout.astro";
-import { getDashboardProducts } from "@/db/products/dashboard";
-import AdminProductCard from "@/components/dashboard/AdminProductCard.astro";
+import { listDashboardProducts } from "@/db/dashboard/products/listProducts";
+import DashboardProductCard from "@/components/dashboard/DashboardProductCard.astro";
 
-const products = await getDashboardProducts();
+const products = await listDashboardProducts();
 ---
 
 <DashboardLayout title="Ансин — Админка">
@@ -13,14 +13,13 @@ const products = await getDashboardProducts();
     >
       {
         products.map((product) => (
-          <AdminProductCard
+          <DashboardProductCard
             title={product.name}
             slug={product.slug}
             images={[product.first_image, product.second_image].filter(
               (path): path is string =>
                 typeof path === "string" && path.length > 0,
             )}
-            price={product.price}
             isActive={product.isActive}
           />
         ))

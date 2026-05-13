@@ -80,13 +80,6 @@ const { content = "", name, label } = Astro.props;
           title="Ссылка"
           aria-label="Link"
         />
-        <Button
-          variant="editorTool"
-          data-action="image"
-          name="image"
-          title="Изображение"
-          aria-label="Image"
-        />
       </div>
 
       <span class="tiptap-sep" aria-hidden="true"></span>
@@ -117,9 +110,8 @@ const { content = "", name, label } = Astro.props;
 
 <script>
   import { Editor } from "@tiptap/core";
-import Image from "@tiptap/extension-image";
-import Link from "@tiptap/extension-link";
-import StarterKit from "@tiptap/starter-kit";
+  import Link from "@tiptap/extension-link";
+  import StarterKit from "@tiptap/starter-kit";
 
   // Astro deduplicates identical <script> blocks, so this single script
   // initialises every editor instance found on the page.
@@ -147,9 +139,6 @@ import StarterKit from "@tiptap/starter-kit";
               rel: "noopener noreferrer nofollow",
               target: "_blank",
             },
-          }),
-          Image.configure({
-            HTMLAttributes: { class: "max-w-full rounded" },
           }),
         ],
         content,
@@ -251,12 +240,6 @@ import StarterKit from "@tiptap/starter-kit";
             editor.chain().focus().setLink({ href: url }).run();
             break;
           }
-
-          case "image": {
-            const url = window.prompt("Image URL");
-            if (url) editor.chain().focus().setImage({ src: url }).run();
-            break;
-          }
         }
       });
     });
@@ -331,7 +314,6 @@ import StarterKit from "@tiptap/starter-kit";
     min-height: 7.5rem;
     line-height: 1.6;
     font-size: var(--fluid-base);
-
   }
 
   /* Vertical rhythm between block-level nodes */
@@ -388,13 +370,6 @@ import StarterKit from "@tiptap/starter-kit";
   }
   .tiptap-editor :global(.ProseMirror a:hover) {
     opacity: 1;
-  }
-
-  .tiptap-editor :global(.ProseMirror img.max-w-full) {
-    max-width: 100%;
-    border-radius: 0.25rem;
-    display: block;
-    margin-block: 0.5em;
   }
 
   /* Empty-editor placeholder */

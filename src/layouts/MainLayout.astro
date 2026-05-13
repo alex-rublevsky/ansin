@@ -1,6 +1,8 @@
 ---
 import Head from "@/components/shared/Head.astro";
 import NavBar from "@/components/NavBar.astro";
+import CartDrawer from "@/components/cart/CartDrawer.astro";
+import { ClientRouter } from "astro:transitions";
 
 interface Props {
   title: string;
@@ -16,10 +18,12 @@ const {
 <html lang="en">
   <head>
     <Head title={title} description={description} />
+    <ClientRouter />
   </head>
 
   <body>
     <NavBar />
     <slot />
+    <CartDrawer />
   </body>
 </html>

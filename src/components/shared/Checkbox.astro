@@ -6,7 +6,7 @@ interface Props {
   checked?: boolean;
 }
 
-const { name, value, disabled, checked } = Astro.props;
+const { name, value, disabled, checked, ...rest } = Astro.props;
 ---
 
 <label class="checkbox-wrapper">
@@ -17,6 +17,7 @@ const { name, value, disabled, checked } = Astro.props;
     checked={checked}
     disabled={disabled}
     class="checkbox-input"
+    {...rest}
   />
   <span class="checkbox-check" aria-hidden="true">
     <span class="checkbox-fill">

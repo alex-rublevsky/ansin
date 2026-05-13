@@ -5,10 +5,16 @@ import tailwindcss from "@tailwindcss/vite";
 import icon from "astro-icon";
 import { defineConfig, envField, fontProviders } from "astro/config";
 
+import alpinejs from "@astrojs/alpinejs";
+
 // https://astro.build/config
 export default defineConfig({
   site: "https://d5dlmoeh5bvrbgn8dnuv.akta928u.apigw.yandexcloud.net",
-  integrations: [icon(), sitemap()],
+  integrations: [
+    icon(),
+    sitemap(),
+    alpinejs({ entrypoint: "/src/lib/alpine-entrypoint" }),
+  ],
   output: "server",
   security: {
     // Astro's built-in CSRF origin check compares the Origin header against `site`.

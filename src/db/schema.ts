@@ -38,16 +38,15 @@ export const productVariations = sqliteTable(
     weight: integer("weight").notNull().default(0),
     price: real("price").notNull(),
     sku: text("sku").notNull().unique(),
-    sort: integer("sort").notNull().default(0),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .default(sql`(unixepoch())`),
   },
   (table) => [
     index("idx_product_variations_product_id").on(table.productId),
-    index("idx_product_variations_product_sort").on(
+    index("idx_product_variations_product_weight").on(
       table.productId,
-      table.sort,
+      table.weight,
     ),
   ],
 );
@@ -58,6 +57,7 @@ export const categories = sqliteTable("categories", {
   slug: text("slug").notNull().unique(),
   description: text("description"),
   displayOrder: integer("display_order").notNull().default(0),
+  //TODO: remove this column, categories will based on whether they are empty or not
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
 });
 

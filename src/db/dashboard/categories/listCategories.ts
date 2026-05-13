@@ -3,13 +3,15 @@ import { asc } from "drizzle-orm";
 import { db } from "@/db";
 import { categories } from "@/db/schema";
 
-export type ActiveCategory = {
+export type DashboardCategoryOption = {
   id: number;
   name: string;
   slug: string;
 };
 
-export async function getAllCategories(): Promise<ActiveCategory[]> {
+export async function listDashboardCategories(): Promise<
+  DashboardCategoryOption[]
+> {
   return db
     .select({
       id: categories.id,

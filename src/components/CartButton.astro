@@ -3,4 +3,18 @@ import { Icon } from "astro-icon/components";
 import Button from "@/components/shared/Button.astro";
 ---
 
-<Button><Icon name="cart" title="Cart" /></Button>
+<Button
+  class="relative aspect-square"
+  size="sm"
+  aria-label="Корзина"
+  x-data
+  x-on:click="window.dispatchEvent(new Event('cart:open'))"
+>
+  <Icon name="cart" title="Корзина" />
+  <span
+    class="absolute -top-1 -right-1 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-foreground px-1 text-xs leading-none text-background"
+    x-show="$store.cart.count > 0"
+    x-text="$store.cart.count"
+    x-cloak>0</span
+  >
+</Button>

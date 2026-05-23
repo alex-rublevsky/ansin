@@ -2,14 +2,15 @@
 import Logo from "@/components/shared/Logo.astro";
 import CategoryFilter from "@/components/CategoryFilter.astro";
 import CartButton from "@/components/CartButton.astro";
+const isHomePage = Astro.url.pathname === "/";
 ---
 
 <nav
-  class="fixed flex items-end justify-between p-2 bottom-0 left-0 right-0 z-999"
+  class="site-nav fixed bottom-0 left-0 right-0 z-999 flex items-end justify-between p-2"
 >
   <div class="flex items-center">
     <Logo />
-    <CategoryFilter />
+    {isHomePage && <CategoryFilter />}
   </div>
   <CartButton />
 </nav>

@@ -11,9 +11,14 @@ const dashboardNavItems = [
     match: "prefix" as const,
   },
 ];
+const isDashboardFeedPage = Astro.url.pathname === "/dashboard";
 ---
 
 <nav class="fixed bottom-0 left-0 right-0 z-999 flex">
   <PillButtonGroup items={dashboardNavItems} />
-  <Button href="/dashboard/product/new">Создать</Button>
+  {
+    isDashboardFeedPage && (
+      <Button href="/dashboard/product/new">Создать</Button>
+    )
+  }
 </nav>

@@ -21,7 +21,8 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-overused-grotesk) sans-serif;
+  --font-sans: var(--font-overused-grotesk), sans-serif;
+  --font-serif: var(--font-kazuki-reiwa), serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -48,7 +49,8 @@
 }
 
 :root {
-  --font-sans: var(--font-overused-grotesk) sans-serif;
+  --font-sans: var(--font-overused-grotesk), sans-serif;
+  --font-serif: var(--font-kazuki-reiwa), serif;
 
   --hue: 263.26;
 
@@ -76,7 +78,7 @@
 
 html {
   font-size: var(--fluid-base);
-  font-family: var(--font-overused-grotesk);
+  font-family: var(--font-sans);
   /* scroll-behavior: smooth; */
   overflow-x: hidden;
 }
@@ -93,8 +95,14 @@ html {
     padding-right: 1rem;
   }
 
+  section.no-padding {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
   h1 {
     font-size: var(--fluid-3xl);
+    font-family: var(--font-kazuki-reiwa);
     font-weight: 500;
     line-height: 1;
     letter-spacing: 1.2%;
@@ -105,6 +113,8 @@ html {
 
   h2 {
     font-size: var(--fluid-2xl);
+    font-family: var(--font-kazuki-reiwa);
+
     font-weight: 400;
     line-height: 0.95;
     letter-spacing: 1.2%;
@@ -115,6 +125,8 @@ html {
 
   h3 {
     font-size: var(--fluid-xl);
+    font-family: var(--font-kazuki-reiwa);
+
     line-height: 1;
     font-weight: 300;
     letter-spacing: 1.2%;
@@ -125,7 +137,8 @@ html {
 
   h4 {
     font-size: var(--fluid-lg);
-    line-height: 1;
+    font-family: var(--font-kazuki-reiwa);
+    line-height: 0.95;
     font-weight: 400;
     letter-spacing: 1.2%;
     color: var(--foreground);
@@ -155,7 +168,7 @@ html {
 
   p {
     font-size: var(--fluid-base);
-    line-height: 1.4;
+    line-height: 1.35;
     color: var(--foreground);
     word-wrap: break-word;
     overflow-wrap: break-word;

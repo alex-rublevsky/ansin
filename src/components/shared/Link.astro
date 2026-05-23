@@ -1,10 +1,25 @@
 ---
 interface Props {
   href: string;
+  class?: string;
 }
 
-const { href } = Astro.props;
+const { href, class: className } = Astro.props;
 ---
 
 <!-- TODO: add underline animaiton -->
-<a href={href}><slot /></a>
+<a href={href} class={className}>
+  <slot />
+</a>
+
+<style>
+  a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 0.065rem;
+    text-underline-offset: 0.3rem;
+  }
+  a:active {
+    transform: scale(0.97);
+    transition: 170ms ease-out;
+  }
+</style>

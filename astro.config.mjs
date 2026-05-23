@@ -94,6 +94,20 @@ export default defineConfig({
         ],
       },
     },
+    {
+      provider: fontProviders.local(),
+      name: "Kazuki Reiwa",
+      cssVariable: "--font-kazuki-reiwa",
+      options: {
+        variants: [
+          {
+            weight: "200",
+            style: "normal",
+            src: ["./src/assets/fonts/KazukiReiwa-Light-subset.woff2"],
+          },
+        ],
+      },
+    },
   ],
   vite: {
     plugins: [tailwindcss()],

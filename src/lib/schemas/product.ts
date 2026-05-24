@@ -8,8 +8,8 @@ const variationSchema = z.object({
   weight: z
     .number()
     .int("Вес должен быть целым числом")
-    .nonnegative("Вес не может быть отрицательным"),
-  price: z.number().nonnegative("Цена не может быть отрицательной"),
+    .positive("Вес должен быть больше нуля"),
+  price: z.number().positive("Цена должна быть больше нуля"),
 });
 
 export const productSchema = z.object({
@@ -37,8 +37,7 @@ export const productSchema = z.object({
   volume: z
     .number()
     .int("Объём должен быть целым числом")
-    .nonnegative("Объём не может быть отрицательным")
-    .default(0),
+    .positive("Введите корректный объём"),
   cakeVolume: z
     .number()
     .int("Объём блина должен быть целым числом")

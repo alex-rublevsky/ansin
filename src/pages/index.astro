@@ -2,12 +2,14 @@
 import Footer from "@/components/Footer.astro";
 import ProductFeed from "@/components/ProductFeed.astro";
 import MainLayout from "@/layouts/MainLayout.astro";
+import Hero from "@/components/Hero.astro";
 
 export const prerender = true;
 ---
 
 <MainLayout title="Ансин">
-  <main>
+  <main class="flex min-h-screen flex-col">
+    <Hero />
     <ProductFeed />
     <Footer />
   </main>

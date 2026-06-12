@@ -105,6 +105,25 @@ export default defineConfig({
             style: "normal",
             src: ["./src/assets/fonts/KazukiReiwa-Light-subset.woff2"],
           },
+          {
+            weight: "400",
+            style: "normal",
+            src: ["./src/assets/fonts/KazukiReiwa-Regular-subset.woff2"],
+          },
+        ],
+      },
+    },
+    {
+      provider: fontProviders.local(),
+      name: "Long Cang",
+      cssVariable: "--font-long-cang",
+      options: {
+        variants: [
+          {
+            weight: "200",
+            style: "normal",
+            src: ["./src/assets/fonts/LongCang-Regular-subset.woff2"],
+          },
         ],
       },
     },

@@ -3,16 +3,14 @@ import Head from "@/components/shared/Head.astro";
 import NavBar from "@/components/NavBar.astro";
 import CartDrawer from "@/components/cart/CartDrawer.astro";
 import { ClientRouter } from "astro:transitions";
+import { SITE_DESCRIPTION } from "@/consts";
 
 interface Props {
   title: string;
   description?: string;
 }
 
-const {
-  title,
-  description = "Вся ваша жизнь может стать церемонией, а начало может быть положено в практике чая",
-} = Astro.props;
+const { title, description = SITE_DESCRIPTION } = Astro.props;
 ---
 
 <html lang="en">

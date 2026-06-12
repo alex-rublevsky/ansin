@@ -11,7 +11,7 @@ const { items } = Astro.props;
 <div class="flex gap-2">
   {
     items.map((item) => (
-      <Button variant="pill" href={item.href}>
+      <Button size="sm" variant="pill" href={item.href}>
         {" "}
         {item.label}{" "}
       </Button>

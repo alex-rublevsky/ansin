@@ -20,5 +20,10 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 
+# Yandex Cloud deployment
+.yandex-cache
+yandex-api-gateway.yaml
+
 # jetbrains setting folder
 .idea/
+TODO

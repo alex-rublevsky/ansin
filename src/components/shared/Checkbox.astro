@@ -26,8 +26,7 @@ const { name, value, disabled, checked, ...rest } = Astro.props;
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         role="img"
-        aria-label="Checkmark"
-      >
+        aria-label="Checkmark">
         <path
           d="M2 6L6 10L14 2"
           pathLength="1"
@@ -44,6 +43,7 @@ const { name, value, disabled, checked, ...rest } = Astro.props;
 
 <style>
   .checkbox-wrapper {
+    width: fit-content;
     cursor: pointer;
     display: inline-flex;
     align-items: center;

@@ -1,229 +1,262 @@
 ---
 import ImagesDropzone from "@/components/dashboard/ImagesDropzone.astro";
+import MarkdownEditor from "@/components/dashboard/MarkdownEditor.astro";
 import Button from "@/components/shared/Button.astro";
 import Checkbox from "@/components/shared/Checkbox.astro";
-import { listDashboardCategories } from "@/db/dashboard/categories/listCategories";
-import type { Product, ProductVariation } from "@/db/schema";
-import MarkdownEditor from "../dashboard/MarkdownEditor.astro";
-import Input from "../shared/Input.astro";
-import Select from "../shared/Select.astro";
+import Input from "@/components/shared/Input.astro";
+import Select from "@/components/shared/Select.astro";
+import { getAllCategories } from "@/db/dashboard/categories/allCategories";
 
+type ProductFormProduct = {
+  id?: number;
+  slug?: string;
+  name?: string;
+  images?: string[];
+  volume?: number | null;
+  cakeVolume?: number | null;
+  categoryId?: number;
+  description?: string | null;
+  isActive?: boolean;
+  variations?: any;
+};
 interface Props {
-  product?: Product;
-  variations?: ProductVariation[];
+  product?: ProductFormProduct;
 }
+const { product = {} } = Astro.props as Props;
 
-const { product, variations = [] } = Astro.props;
+const images = product.images ?? [];
 
-const name = product?.name ?? "";
-const description = product?.description ?? "";
-const isActive = product?.isActive ?? true;
-const images = Array.isArray(product?.images) ? product.images : [];
-const categoryId = product?.categoryId ?? null;
-const categories = await listDashboardCategories();
-const volume = product?.volume ?? 0;
-const cakeVolume = product?.cakeVolume ?? 0;
-const serializedVariations = JSON.stringify(
-  variations.map((variation) => ({
-    weight: variation.weight,
-    price: variation.price,
-  })),
-);
+const categories = await getAllCategories();
+const creating = product.slug ? false : true;
+const selectedCategoryId = product.categoryId ? String(product.categoryId) : "";
 ---
 
-<div class="grid md:grid-cols-2 gap-6">
-  <ImagesDropzone images={images} productId={product?.id} />
-
+<section>
   <form
-    class="flex flex-col gap-(--fluid-sm)"
-    x-data="productForm()"
-    x-on:submit.prevent="save"
-    data-product-id={product?.id?.toString() ?? ""}
-    data-variations={serializedVariations}
-  >
-    <p
-      class="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
-      x-show="errors.form"
-      x-text="errors.form"
-      x-cloak
-      role="alert"
-    >
-    </p>
+    id="product-form"
+    class="formWrapper"
+    method="POST"
+    data-mode={creating ? "create" : "edit"}>
+    {!creating && <input type="hidden" name="id" value={product.id} />}
 
-    <div class="grid grid-cols-2 gap-(--fluid-2xs)">
-      <div>
-        <Input
-          type="text"
-          name="name"
-          value={name}
-          label="Название"
-          required
-          {...{ "x-model": "name" } as any}
+    <div class="productForm">
+      <div class="firstColumn">
+        <h1 class="text-lg pb-2">
+          {creating ? "Добавление товара" : "Редактирование товара"}
+        </h1>
+        <ImagesDropzone images={images} />
+      </div>
+      <div class="infoColumn">
+        <div class="textInputFields">
+          <div class="nameSlug">
+            <Input name="name" label="Название" value={product.name} required />
+            <Input
+              name="slug"
+              label="Ярлык"
+              value={product.slug ? product.slug : ""}
+              readonly={true}
+              required
+            />
+          </div>
+
+          <div class="volumeInputs">
+            <Input
+              type="number"
+              name="volume"
+              value={product.volume}
+              label="Объём г"
+              required
+            />
+
+            <Input
+              type="number"
+              name="cakeVolume"
+              label="Объём блина г"
+              value={product.cakeVolume}
+            />
+          </div>
+          <div class="categoryActiveInputs">
+            <Select
+              name="categoryId"
+              label="Категория"
+              placeholder="Выбрать"
+              value={selectedCategoryId}
+              options={categories.map((category) => ({
+                value: String(category.id),
+                label: category.name,
+              }))}
+              required
+            />
+            <Checkbox
+              name="isActive"
+              value="1"
+              checked={product.isActive ?? true}>
+              Товар активен
+            </Checkbox>
+          </div>
+        </div>
+        <div>
+          <h5>Вариации</h5>
+          <div class="variationsTableWrapper">
+            <table class="variationsTable">
+              <thead>
+                <tr class="text-left">
+                  <th>Вес г</th>
+                  <th>Цена</th>
+                  <th>Цена/г</th>
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  product.variations
+                    ? product.variations.map((variation: any) => (
+                        <tr class="">
+                          <td>{variation.weight}</td>
+                          <td class="py-1">
+                            <Input
+                              class="w-[12ch]!"
+                              name={`variations[${variation.id}].price`}
+                              value={variation.price}
+                            />
+                          </td>
+                          <td>{variation.price / variation.weight}</td>
+                        </tr>
+                      ))
+                    : null
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <MarkdownEditor
+          name="description"
+          label="Описание"
+          content={product.description ?? ""}
         />
-        <p
-          class="mt-1 text-xs font-medium text-destructive"
-          x-show="errors.name"
-          x-text="errors.name"
-          x-cloak
+      </div>
+      <div class="fixed bottom-1.5 right-1.5 z-999">
+        <Button size="sm" type="submit"
+          >{creating ? "Добавить" : "Сохранить"}</Button
         >
-        </p>
+        <Button size="sm" variant="destructive">Удалить</Button>
       </div>
-
-      <div>
-        <Select
-          name="categoryId"
-          label="Категория"
-          placeholder="Выберите категорию"
-          value={categoryId === null ? "" : String(categoryId)}
-          options={categories.map((category) => ({
-            value: String(category.id),
-            label: category.name,
-          }))}
-          {...{ "x-model": "categoryId" } as any}
-        />
-        <p
-          class="mt-1 text-xs font-medium text-destructive"
-          x-show="errors.categoryId"
-          x-text="errors.categoryId"
-          x-cloak
-        >
-        </p>
-      </div>
-    </div>
-    <MarkdownEditor name="description" content={description} label="Описание" />
-    <p
-      class="text-xs font-medium text-destructive"
-      x-show="errors.description"
-      x-text="errors.description"
-      x-cloak
-    >
-    </p>
-
-    <div class="grid grid-cols-2 gap-(--fluid-2xs)">
-      <div>
-        <Input
-          type="number"
-          name="volume"
-          value={volume.toString()}
-          label="Объём г"
-          {...{ "x-model.number": "volume" } as any}
-        />
-        <p
-          class="mt-1 text-xs font-medium text-destructive"
-          x-show="errors.volume"
-          x-text="errors.volume"
-          x-cloak
-        >
-        </p>
-      </div>
-
-      <div>
-        <Input
-          type="number"
-          name="cakeVolume"
-          value={cakeVolume.toString()}
-          label="Объём блина г"
-          {...{ "x-model.number": "cakeVolume" } as any}
-        />
-        <p
-          class="mt-1 text-xs font-medium text-destructive"
-          x-show="errors.cakeVolume"
-          x-text="errors.cakeVolume"
-          x-cloak
-        >
-        </p>
-      </div>
-    </div>
-
-    <Checkbox
-      name="isActive"
-      value="1"
-      checked={isActive}
-      {...{ "x-model": "isActive" } as any}
-    >
-      Товар активен
-    </Checkbox>
-
-    <section x-show="needsVariations" x-cloak>
-      <div class="mb-2">
-        <h5>Вариации</h5>
-      </div>
-      <div
-        class="overflow-hidden overflow-x-auto rounded-lg border border-border"
-      >
-        <table class="w-full text-sm">
-          <thead>
-            <tr>
-              <th class="px-3 py-2 text-left font-medium text-muted-foreground">
-                Вес
-              </th>
-              <th
-                class="px-3 py-2 text-right font-medium text-muted-foreground"
-              >
-                Цена
-              </th>
-              <th
-                class="px-3 py-2 text-right text-xs font-medium text-muted-foreground"
-              >
-                ₽/г
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <template x-for="weight in weightSteps" :key="weight">
-              <tr class="border-t border-border">
-                <td class="px-3 py-1.5" x-text="weight + ' г'"></td>
-                <td class="px-3 py-1.5 text-right">
-                  <input
-                    type="number"
-                    min="0"
-                    step="1"
-                    placeholder="0"
-                    class="w-24 rounded border border-border bg-background px-2 py-0.5 text-right text-sm focus:border-foreground focus:outline-none"
-                    x-model.number="priceByWeight[weight]"
-                    x-on:input="clearError('variations')"
-                  />
-                </td>
-                <td
-                  class="px-3 py-1.5 text-right text-xs tabular-nums text-muted-foreground"
-                  x-text="pricePerGram(weight)"
-                >
-                </td>
-              </tr>
-            </template>
-          </tbody>
-        </table>
-      </div>
-      <p
-        class="mt-1 text-xs font-medium text-destructive"
-        x-show="errors.variations"
-        x-text="errors.variations"
-        x-cloak
-      >
-      </p>
-    </section>
-
-    <div class="flex flex-wrap gap-2">
-      <Button
-        type="submit"
-        {...{ ":disabled": "saveState === 'loading'" } as any}
-      >
-        <span x-text="saveLabel">Сохранить</span>
-      </Button>
-      {
-        product && (
-          <Button
-            type="button"
-            variant="destructive"
-            {...({
-              "x-on:click": "deleteProduct",
-              ":disabled": "deleteState === 'loading'",
-            } as any)}
-          >
-            <span x-text="deleteLabel">Удалить товар</span>
-          </Button>
-        )
-      }
     </div>
   </form>
-</div>
+</section>
+<script>
+  import { actions } from "astro:actions";
+  import { generateSlug } from "@/lib/slugGeneration";
+
+  const form = document.querySelector<HTMLFormElement>("#product-form");
+  if (!form) throw Error("Форма не найдена");
+  const mode = form.dataset.mode;
+
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.currentTarget as HTMLFormElement);
+      const { data, error } =
+        mode === "edit"
+          ? await actions.product.updateProduct(formData)
+          : await actions.product.createProduct(formData);
+
+      if (error) {
+        alert(error);
+      } else {
+        alert(data);
+      }
+    });
+
+    const nameInput = form.querySelector<HTMLInputElement>('[name="name"]');
+    const slugInput = form.querySelector<HTMLInputElement>('[name="slug"]');
+
+    if (nameInput && slugInput) {
+      nameInput.addEventListener("input", () => {
+        slugInput.value = generateSlug(nameInput.value);
+      });
+    }
+  }
+</script>
+
+<style>
+  .formWrapper {
+    margin: auto;
+    padding-top: 1rem;
+    padding-bottom: 4rem;
+    container-type: inline-size;
+    max-width: 130ch;
+  }
+  .productForm {
+    display: grid;
+    align-items: start;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin: auto;
+    @container (min-width: 100ch) {
+      grid-template-columns: 2fr 3fr;
+    }
+  }
+
+  .infoColumn {
+    padding-top: 1rem;
+    display: grid;
+    gap: 2.5rem;
+  }
+
+  @container (min-width: 75ch) {
+    .productForm {
+      grid-template-columns: 1fr 1fr;
+    }
+    .firstColumn {
+      position: sticky;
+      top: 1rem;
+    }
+    .infoColumn {
+      padding-top: 3.8rem;
+    }
+  }
+
+  .textInputFields {
+    display: grid;
+    gap: 0.7rem;
+    container-type: inline-size;
+  }
+
+  .nameSlug {
+    display: grid;
+    gap: 0.7rem;
+    grid-template-columns: 1fr;
+    @container (min-width: 60ch) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .volumeInputs {
+    display: grid;
+    gap: 0.7rem;
+    grid-template-columns: 1fr;
+    @container (min-width: 30ch) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .categoryActiveInputs {
+    display: grid;
+    gap: 0.7rem;
+    grid-template-columns: 1fr;
+    @container (min-width: 37ch) {
+      grid-template-columns: 1fr 1fr;
+      justify-items: center;
+    }
+  }
+
+  .variationsTableWrapper {
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 0.5rem;
+  }
+  .variationsTable {
+    width: 100%;
+  }
+</style>

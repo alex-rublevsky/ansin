@@ -1,5 +1,290 @@
 ---
+import { BASE_IMAGE_URL } from "@/constants";
+import { Image } from "astro:assets";
+import Button from "@/components/shared/Button.astro";
+import { Icon } from "astro-icon/components";
 
+const { images } = Astro.props;
 ---
 
-<div>Images update</div>
+<div id="drop-area" data-initial-images={JSON.stringify(images)}>
+  <div id="gallery">
+    {
+      images.map((image: string) => (
+        <div class="productImage relative group cursor-grab">
+          <Button
+            @click.prevent
+            class="opacity-0 group-hover:opacity-100 transition-opacity duration-170 ease-out absolute top-0 right-0 z-999"
+            size="square">
+            <Icon name="x" title="Удалить" />
+          </Button>
+          <Image
+            src={`${BASE_IMAGE_URL}${image}`}
+            alt=""
+            width={300}
+            height={300}
+          />
+        </div>
+      ))
+    }
+
+    <label id="add-photo-button" for="image_uploads" class="addItemEntry">
+      <span class="plus">+</span>
+      <span>Добавить фото</span>
+    </label>
+
+    <input
+      hidden
+      name="image_uploads"
+      class="addItemEntry"
+      type="file"
+      id="image_uploads"
+      multiple
+      accept="image/*"
+    />
+
+    <input
+      type="hidden"
+      name="images"
+      data-images-input
+      value={JSON.stringify(images)}
+    />
+  </div>
+
+  <label class="text-sm text-center text-muted pt-2 pb-1 select-none"
+    >Фотки можно перетащить сюда</label
+  >
+  <progress id="progress-bar" max="100" value="0"></progress>
+</div>
+
+<style>
+  #drop-area {
+    display: flex;
+    flex-direction: column;
+    border: var(--border-thick) dashed var(--border);
+    /*border-radius: var(--radius-lg);*/
+    width: 100%;
+    padding: 0.4rem;
+  }
+
+  #drop-area.highlight {
+    border-color: purple;
+  }
+
+  #gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
+    gap: 0.5rem;
+  }
+
+  #progress-bar {
+    display: none;
+  }
+
+  .productImage img,
+  .addItemEntry {
+    width: 100%;
+    aspect-ratio: 1;
+    user-select: none;
+  }
+
+  .productImage {
+    border: var(--border-width) solid var(--border);
+  }
+
+  .addItemEntry {
+    padding: 0.2rem;
+    text-align: center;
+    line-height: 1;
+    display: flex;
+    gap: 1rem;
+    font-size: var(--fluid-sm);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: var(--border-width) dashed var(--border);
+    cursor: pointer;
+    transition:
+      border-color 170ms,
+      transform 170ms;
+  }
+
+  .addItemEntry:hover {
+    border-color: var(--primary);
+  }
+  .addItemEntry:active {
+    transform: scale(0.97);
+  }
+
+  .addItemEntry .plus {
+    font-size: var(--fluid-lg);
+    font-weight: 100;
+    line-height: 0;
+    color: var(--muted);
+    transition:
+      transform 170ms ease-out,
+      color 170ms ease-out;
+  }
+
+  .addItemEntry:hover .plus {
+    transform: scale(1.15);
+    color: var(--foreground);
+  }
+
+  /*.addItemEntry:hover {
+
+         border: 0.2rem dashed var(--primary);
+         border-radius: var(--radius);
+
+     }*/
+
+  /*.imageEntry.dragging{
+         opacity:0.5;
+     }*/
+</style>
+
+<script>
+  const fileInput = document.getElementById(
+    "image_uploads",
+  ) as HTMLInputElement;
+
+  fileInput.addEventListener("change", (e) => {
+    const files = (e.target as HTMLInputElement).files;
+
+    if (files) {
+      handleFiles(files);
+    }
+  });
+
+  let dropArea = document.getElementById("drop-area") as HTMLElement;
+  if (!dropArea) {
+    throw Error("No drop area found!");
+  }
+
+  ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+    dropArea.addEventListener(eventName, preventDefaults, false);
+  });
+
+  function preventDefaults(e: Event) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  ["dragenter", "dragover"].forEach((eventName) => {
+    dropArea.addEventListener(eventName, highlight, false);
+  });
+
+  ["dragleave", "drop"].forEach((eventName) => {
+    dropArea.addEventListener(eventName, unhighlight, false);
+  });
+
+  function highlight(e: Event) {
+    dropArea.classList.add("highlight");
+  }
+
+  function unhighlight(e: Event) {
+    dropArea.classList.remove("highlight");
+  }
+
+  dropArea.addEventListener("drop", handleDrop, false);
+
+  function handleDrop(e: DragEvent) {
+    let dt = e.dataTransfer;
+    if (!dt) {
+      throw Error("No drag event found!");
+    }
+    let files = dt.files;
+
+    handleFiles(files);
+  }
+
+  function handleFiles(files: FileList) {
+    const fileArray = [...files];
+    initializeProgress(files.length);
+    fileArray.forEach(uploadFileAndReturnPath);
+    fileArray.forEach(previewFile);
+  }
+
+  async function uploadFileAndReturnPath(file: File): Promise<string> {
+    const response = await fetch("/api/upload-url", {
+      method: "POST",
+      body: JSON.stringify({
+        filename: file.name,
+      }),
+    });
+    const presigned = await response.json();
+    const formData = new FormData();
+
+    Object.entries(presigned.fields).forEach(([key, value]) => {
+      formData.append(key, value as string);
+    });
+
+    formData.append("file", file);
+
+    await fetch(presigned.url, {
+      method: "POST",
+      body: formData,
+    })
+      .then(progressDone)
+      .catch((e) => {
+        alert(`Ошибка загрузки: ${e.message}`);
+      });
+
+    return presigned.imagePath;
+  }
+
+  // async function deleteFiles(files: File[]) {
+  //   const response = await fetch('/api/delete-url', {
+  //     method: 'POST',
+  //     body: JSON.stringify(files.map(file => file.name))
+  //   })
+
+  //   }
+
+  function previewFile(file: File) {
+    let reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = function () {
+      if (typeof reader.result === "string") {
+        let img = document.createElement("img");
+        img.src = reader.result;
+        const gallery = document.getElementById("gallery") as HTMLElement;
+        const addButton = document.getElementById(
+          "add-photo-button",
+        ) as HTMLElement;
+
+        gallery.insertBefore(img, addButton);
+      }
+    };
+  }
+
+  let filesDone = 0;
+  let filesToDo = 0;
+  let progressBar = document.getElementById(
+    "progress-bar",
+  ) as HTMLProgressElement;
+
+  function initializeProgress(numfiles: number) {
+    progressBar.style.display = "block";
+    progressBar.value = 0;
+    filesDone = 0;
+    filesToDo = numfiles;
+  }
+
+  function progressDone() {
+    filesDone++;
+    progressBar.value = (filesDone / filesToDo) * 100;
+  }
+
+  type ImageEntry = {
+    id: string;
+    path: string;
+    status: "ready" | "uploading" | "error";
+    origin: "existing" | "staged";
+  };
+
+  let images: ImageEntry[] = JSON.parse(dropArea.dataset.initialImages ?? "[]");
+</script>
+<script>
+  import "@/lib/gallery-sortable";
+</script>

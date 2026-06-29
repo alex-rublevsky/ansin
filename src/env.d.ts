@@ -5,7 +5,6 @@ interface ImportMetaEnv {
   readonly SECRET_BETTER_AUTH: string;
   readonly PUBLIC_TURSO_DATABASE_URL: string;
   readonly SECRET_TURSO_AUTH_TOKEN: string;
-  readonly PUBLIC_ASSETS_BASE_URL: string;
   readonly SECRET_ADMIN_EMAILS: string;
   readonly PUBLIC_GOOGLE_CLIENT_ID: string;
   readonly SECRET_GOOGLE_CLIENT: string;
@@ -24,4 +23,8 @@ declare namespace App {
     session: import("./lib/auth").Session | null;
     user: import("./lib/auth").User | null;
   }
+}
+// for alpine autocompletion
+interface Window {
+  Alpine: import("alpinejs").Alpine;
 }

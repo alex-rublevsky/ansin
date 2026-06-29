@@ -1,29 +1,31 @@
 ---
 import { Icon } from "astro-icon/components";
 import { Image } from "astro:assets";
-import { PUBLIC_ASSETS_BASE_URL } from "astro:env/client";
+import { BASE_IMAGE_URL } from "@/constants";
 import Button from "./shared/Button.astro";
 import Link from "@/components/shared/Link.astro";
 ---
 
-<footer class="grid md:grid-cols-2 bg-foreground pt-2 md:pt-12 pb-26">
+<footer class="grid grow md:grid-cols-2 bg-foreground pt-2 md:pt-12 pb-26">
   <Image
-    src={PUBLIC_ASSETS_BASE_URL + "images/sesh.webp"}
+    src={BASE_IMAGE_URL + "images/sesh.webp"}
     width={1000}
     height={1000}
     alt="Фото чайной церемонии"
-    class="h-auto max-h-full w-auto px-2 md:px-0 max-w-full object-contain"
+    class="h-auto max-h-full w-auto px-2 md:px-0 max-w-full object-contain select-none"
   />
-  <div class="px-4 flex flex-col justify-center gap-(--fluid-xl)">
+  <div class="px-4 flex flex-col justify-evenly gap-(--fluid-xl)">
     <div>
+      <span class="font-chinese text-muted/30 text-4xl leading-none"
+        >无尽的茶</span
+      >
       <h4 class="max-w-[50ch] text-background! pb-6">
         Эрудиция, изучение и осмысление явлений через призму чайного мира
       </h4>
 
       <Button
         class="border-background! bg-background! text-foreground! hover:bg-foreground! hover:text-background!"
-        href="https://t.me/Unseen_wujin_de_cha"
-      >
+        href="https://t.me/Unseen_wujin_de_cha">
         Телеграм Канал
         <Icon name="telegram" title="Telegram" />
       </Button>
@@ -31,8 +33,7 @@ import Link from "@/components/shared/Link.astro";
     <div class="flex flex-col gap-2 self-start">
       <Link
         href="https://t.me/alexrublevsky"
-        class="text-background! font-serif"
-      >
+        class="text-background! font-serif font-normal">
         Понравился сайт? Написать разработчику
       </Link>
     </div>

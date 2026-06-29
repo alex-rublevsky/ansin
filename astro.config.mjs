@@ -53,11 +53,6 @@ export default defineConfig({
         context: "server",
         access: "secret",
       }),
-      PUBLIC_ASSETS_BASE_URL: envField.string({
-        context: "client",
-        access: "public",
-        default: "https://storage.yandexcloud.net/ansin-static/",
-      }),
       PUBLIC_YANDEX_STORAGE_BUCKET: envField.string({
         context: "server",
         access: "public",

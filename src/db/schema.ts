@@ -10,22 +10,25 @@ import {
 export const products = sqliteTable("products", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
-  description: text("description").notNull(),
-  price: real("price").notNull(),
+  description: text("description"),
+  //price: real("price").notNull(),
   slug: text("slug").notNull().unique(),
-  categoryId: integer("category_id").references(() => categories.id),
+  categoryId: integer("category_id")
+    .references(() => categories.id)
+    .notNull(),
   volume: integer("volume").notNull().default(0),
   cakeVolume: integer("cake_volume").notNull().default(0),
   images: text("images", { mode: "json" })
     .$type<string[]>()
+    .notNull()
     .default(sql`'[]'`),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
+  // createdAt: integer("created_at", { mode: "timestamp" })
+  //   .notNull()
+  //   .default(sql`(unixepoch())`),
+  // updatedAt: integer("updated_at", { mode: "timestamp" })
+  //   .notNull()
+  //   .default(sql`(unixepoch())`),
 });
 
 export const productVariations = sqliteTable(
@@ -54,7 +57,7 @@ export const productVariations = sqliteTable(
 export const categories = sqliteTable("categories", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
+  slug: text("slug").unique().notNull(),
   description: text("description"),
   displayOrder: integer("display_order").notNull().default(0),
   //TODO: remove this column, categories will based on whether they are empty or not
@@ -191,18 +194,24 @@ export const deployments = sqliteTable("deployments", {
   completedAt: integer("completed_at", { mode: "timestamp" }),
 });
 
+export const schema = {
+  users,
+  sessions,
+  accounts,
+  verifications,
+  products,
+  // productVariations,
+  // productAttributes,
+  // attributeValues,
+  // productAttributeValues,
+  // variationAttributeValues,
+  categories,
+  // storeLocations,
+  // productStoreLocations,
+  // news,
+};
+
 export type Product = typeof products.$inferSelect;
 export type NewProduct = typeof products.$inferInsert;
 export type ProductVariation = typeof productVariations.$inferSelect;
 export type NewProductVariation = typeof productVariations.$inferInsert;
-
-export type Category = typeof categories.$inferSelect;
-export type NewCategory = typeof categories.$inferInsert;
-export type Order = typeof orders.$inferSelect;
-export type NewOrder = typeof orders.$inferInsert;
-export type User = typeof users.$inferSelect;
-export type Session = typeof sessions.$inferSelect;
-export type DeploymentChange = typeof deploymentChanges.$inferSelect;
-export type NewDeploymentChange = typeof deploymentChanges.$inferInsert;
-export type Deployment = typeof deployments.$inferSelect;
-export type NewDeployment = typeof deployments.$inferInsert;

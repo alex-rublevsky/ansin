@@ -1,20 +1,18 @@
 ---
-import { Icon } from "astro-icon/components";
 import Button from "@/components/shared/Button.astro";
+import { Icon } from "astro-icon/components";
 ---
 
 <Button
-  class="relative aspect-square"
+  class="relative aspect-square size-9! px-0! py-0! bg-background! text-foreground! hover:bg-foreground! hover:text-background!"
   size="sm"
   aria-label="Корзина"
-  x-data
-  x-on:click="window.dispatchEvent(new Event('cart:open'))"
->
+  href="/checkout"
+  x-data>
   <Icon name="cart" title="Корзина" />
   <span
-    class="absolute -top-1 -right-1 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-foreground px-1 text-xs leading-none text-background"
-    x-show="$store.cart.count > 0"
-    x-text="$store.cart.count"
-    x-cloak>0</span
-  >
+    class="absolute -top-1 -right-1 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-foreground px-1 text-xs leading-none text-background!"
+    x-transition
+    x-show="$store.cart.cartItemsCount"
+    x-text="$store.cart.cartItemsCount"></span>
 </Button>

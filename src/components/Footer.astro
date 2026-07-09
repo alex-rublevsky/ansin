@@ -1,9 +1,9 @@
 ---
+import Link from "@/components/shared/Link.astro";
+import { BASE_IMAGE_URL } from "@/constants";
 import { Icon } from "astro-icon/components";
 import { Image } from "astro:assets";
-import { BASE_IMAGE_URL } from "@/constants";
 import Button from "./shared/Button.astro";
-import Link from "@/components/shared/Link.astro";
 ---
 
 <footer class="grid grow md:grid-cols-2 bg-foreground pt-2 md:pt-12 pb-26">
@@ -14,9 +14,9 @@ import Link from "@/components/shared/Link.astro";
     alt="Фото чайной церемонии"
     class="h-auto max-h-full w-auto px-2 md:px-0 max-w-full object-contain select-none"
   />
-  <div class="px-4 flex flex-col justify-evenly gap-(--fluid-xl)">
+  <div class="px-4 flex flex-col justify-evenly gap-(--step-3)">
     <div>
-      <span class="font-chinese text-muted/30 text-4xl leading-none"
+      <span class="font-chinese text-muted/30 text-3xl leading-none"
         >无尽的茶</span
       >
       <h4 class="max-w-[50ch] text-background! pb-6">

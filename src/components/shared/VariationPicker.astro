@@ -1,21 +1,89 @@
 ---
-import Button from "./Button.astro";
+// Headless: expects to be rendered inside a `productPicker` Alpine scope
+// (see src/lib/product-picker.ts) and reads/calls:
+//   variations, availableWeights, isSelected(weight), selectWeight(weight)
+// Stale/removed variations are handled globally by StaleVariationModal.astro,
+// not here.
+const { size = "default", class: className } = Astro.props;
 
-const { variations } = Astro.props;
+const sizeClass =
+  size === "sm" ? "variationOption--sm" : "variationOption--default";
 ---
 
-<div class="flex flex-wrap gap-3xs mt-0.5">
-  {
-    variations.map((v: any) => (
-      <Button
-        variant="pill"
-        size="xs"
-        data-variation-id={v.id}
-        data-price={v.price}
-        data-weight={v.weight}
-      >
-        {v.weight}г
-      </Button>
-    ))
-  }
+<div
+  class={`flex flex-wrap gap-3xs mt-0.5 ${className ?? ""}`}
+  x-show="variations?.length"
+  @click.stop>
+  <template x-for="v in variations" :key="v.id">
+    <button
+      type="button"
+      class:list={["variationOption", sizeClass]}
+      data-variation-option
+      @click.prevent="selectWeight(v.weight)"
+      :disabled="!availableWeights.includes(v.weight)"
+      :class="{ 'is-selected': isSelected(v.weight) }"
+      x-text="v.weight + 'г'">
+    </button>
+  </template>
 </div>
+
+<style>
+  .variationOption {
+    display: inline-flex;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    border-radius: 9999px;
+    border: 1px solid var(--border);
+    background: var(--background);
+    transition:
+      background-color 0.2s ease-out,
+      border-color 0.2s ease-out,
+      color 0.2s ease-out;
+  }
+
+ .variationOption:active {
+  transform: scale(0.97);
+  transition: 170ms ease-out;
+}
+  .variationOption:hover:not(:disabled) {
+    border-color: var(--foreground-muted);
+    background: color-mix(in oklch, var(--muted) 20%, var(--background));
+  }
+
+  .variationOption.is-selected:hover:not(:disabled) {
+  border-color: var(--foreground);
+  background: color-mix(in oklch, var(--foreground) 75%, var(--background));
+  color: var(--background);
+}
+ 
+
+  .variationOption.is-selected {
+    border-color: var(--foreground);
+    background: var(--foreground);
+    color: var(--background);
+  }
+
+  .variationOption--sm {
+    padding: 0 0.25rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  .variationOption--default {
+    height: 2.25rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .variationOption:disabled,
+  .variationOption:disabled:hover {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background-color: color-mix(in oklch, var(--muted) 40%, transparent);
+    border-color: var(--muted);
+    color: var(--muted-foreground);
+  }
+</style>

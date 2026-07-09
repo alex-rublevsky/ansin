@@ -1,0 +1,141 @@
+---
+import Button from "@/components/shared/Button.astro";
+
+// Mount exactly once per page (e.g. in MainLayout.astro) — every productPicker
+// instance reports into the shared `staleNotices` store; this is the single
+// place that store gets rendered.
+---
+
+<dialog
+  x-data="staleVariationModal"
+  x-ref="dialog"
+  x-effect="syncOpenState()"
+  closedby="none"
+  tabindex="-1"
+  @cancel.prevent
+  @keydown.escape.prevent
+  class="staleVariationModal">
+  <template x-if="hasNotices">
+    <div class="staleVariationModal__content">
+      <h5>
+        Некоторые товары больше не доступны и <u class="underlineLower">были удалены из корзины</u>
+      </h5>
+
+      <ul class="staleVariationModal__list flex flex-col gap-3 m-0 p-0 list-none">
+        <template x-for="notice in notices" :key="notice.id">
+          <li class="flex items-start gap-3">
+            <div class="relative size-14 shrink-0 overflow-hidden rounded-md bg-border">
+              <template x-if="notice.image">
+                <img
+                  alt=""
+                  class="absolute inset-0 size-full object-cover"
+                  style="mix-blend-mode: darken"
+                  x-bind:src="notice.image"
+                />
+              </template>
+            </div>
+            <div class="min-w-0 flex flex-col gap-0.5">
+              <span class="truncate text-sm" x-text="notice.productName"></span>
+              <span
+                class="text-xs text-muted-foreground"
+                x-text="notice.variationWeight + 'г'"></span>
+            </div>
+          </li>
+        </template>
+      </ul>
+
+      <Button @click="acknowledge()">Продолжить</Button>
+    </div>
+  </template>
+</dialog>
+
+<style>
+  html:has(.staleVariationModal[open]) {
+    overflow: hidden;
+  }
+
+  .underlineLower {
+    text-decoration: underline;
+    text-decoration-thickness: 0.065rem;
+    text-underline-offset: 0.17rem;
+  }
+
+  .staleVariationModal {
+    margin: auto;
+    max-width: 30rem;
+    width: calc(100% - 1rem);
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-lg);
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  /* Focus lands on the dialog itself on open (see syncOpenState), not on
+     the button, so it doesn't show a focus ring the instant it appears —
+     the button still gets one normally if the user tabs to it. */
+  .staleVariationModal:focus,
+  .staleVariationModal:focus-visible {
+    outline: none;
+  }
+
+  .staleVariationModal::backdrop {
+    background: color-mix(in oklch, var(--foreground) 50%, transparent);
+    backdrop-filter: blur(4.5px);
+  }
+
+  .staleVariationModal__content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1.5rem;
+  }
+
+  .staleVariationModal__content > h6 {
+    font-size: var(--text-sm);
+    line-height: 1.5;
+  }
+
+  @property --top-fade {
+    syntax: "<length>";
+    inherits: false;
+    initial-value: 0;
+  }
+
+  @property --bottom-fade {
+    syntax: "<length>";
+    inherits: false;
+    initial-value: 0;
+  }
+
+  @keyframes scrollfade {
+    0% {
+      --top-fade: 0;
+    }
+    10%,
+    100% {
+      --top-fade: 2rem;
+    }
+    0%,
+    90% {
+      --bottom-fade: 2rem;
+    }
+    100% {
+      --bottom-fade: 0;
+    }
+  }
+
+  .staleVariationModal__list {
+    max-height: 10.5rem;
+    overflow-y: auto;
+    mask: linear-gradient(
+      to bottom,
+      #0000,
+      #ffff var(--top-fade) calc(100% - var(--bottom-fade)),
+      #0000
+    );
+    animation: scrollfade;
+    animation-timeline: --scrollfade;
+    scroll-timeline: --scrollfade y;
+  }
+</style>

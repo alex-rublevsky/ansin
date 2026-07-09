@@ -6,11 +6,18 @@ const isHomePage = Astro.url.pathname === "/";
 ---
 
 <nav
-  class="site-nav fixed bottom-0 left-0 right-0 z-999 flex items-end justify-between p-2"
->
-  <div class="flex items-center">
+  class="site-nav fixed bottom-3 left-3 right-3 z-999 flex items-end justify-between gap-2">
+  <div class="shrink-0">
     <Logo />
-    {isHomePage && <CategoryFilter />}
   </div>
-  <CartButton />
+  {
+    isHomePage && (
+      <div class="min-w-0 flex-1 self-end">
+        <CategoryFilter />
+      </div>
+    )
+  }
+  <div class="shrink-0">
+    <CartButton />
+  </div>
 </nav>

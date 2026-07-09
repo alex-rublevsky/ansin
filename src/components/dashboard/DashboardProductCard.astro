@@ -1,75 +1,32 @@
 ---
 import { Image } from "astro:assets";
 import { Icon } from "astro-icon/components";
-import { PUBLIC_ASSETS_BASE_URL } from "astro:env/client";
+import { BASE_IMAGE_URL } from "@/constants";
 import Badge from "../shared/Badge.astro";
 
-interface Props {
-  title: string;
-  slug: string;
-  href?: string;
-  images: string[];
-  isActive: boolean;
-}
+const { product } = Astro.props;
 
-const {
-  title,
-  slug,
-  href = `/dashboard/product/${slug}`,
-  images,
-  isActive,
-} = Astro.props;
-
-const urls = images
-  .filter(Boolean)
-  .map((path) => PUBLIC_ASSETS_BASE_URL + path);
-const firstUrl = urls[0] ?? null;
-const secondUrl = urls[1] ?? null;
-
-const ariaLabel = !isActive ? `${title}, черновик` : title;
+const { images } = product;
 ---
 
-<div class="product-card group relative isolate">
-  <a
-    href={href}
-    class="absolute inset-0 z-1 focus-visible:z-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
-    aria-label={ariaLabel}></a>
+<a href={`dashboard/product/${product.slug}`} class="productСard">
+  {!product.isActive && (
+    <Badge class="absolute top-2 left-2 z-10 pointer-events-none">
+      Черновик
+    </Badge>
+  )}
 
-  {
-    !isActive && (
-      <span class="pointer-events-none">
-        <Badge> Черновик </Badge>
-      </span>
-    )
-  }
-
-  <div class="relative z-0 mb-3 aspect-square overflow-hidden bg-background">
+  <div class="productImage">
     {
-      firstUrl ? (
-        <>
-          <div class="absolute inset-0 bg-background">
-            <Image
-              src={firstUrl}
-              width={600}
-              height={600}
-              alt=""
-              loading="lazy"
-              class="absolute inset-0 h-full w-full object-cover object-center"
-            />
-          </div>
-          {secondUrl ? (
-            <div class="product-card-second-image absolute inset-0 opacity-0 bg-background group-hover:opacity-100">
-              <Image
-                src={secondUrl}
-                width={600}
-                height={600}
-                alt=""
-                loading="lazy"
-                class="absolute inset-0 h-full w-full object-cover object-center"
-              />
-            </div>
-          ) : null}
-        </>
+      images.length > 0 ? (
+        <Image
+          src={BASE_IMAGE_URL + images[0]}
+          width={500}
+          height={500}
+          alt={product.name}
+          loading="lazy"
+          class="object-cover "
+        />
       ) : (
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
           <Icon
@@ -82,53 +39,5 @@ const ariaLabel = !isActive ? `${title}, черновик` : title;
     }
   </div>
 
-  <div class="relative z-0">
-    <p>{title}</p>
-  </div>
-</div>
-
-<style>
-  .product-card {
-    transition:
-      transform 0.3s ease-out,
-      box-shadow 0.3s ease-out;
-  }
-
-  .product-card-second-image {
-    display: none;
-  }
-
-  @media (min-width: 1024px) and (hover: hover) {
-    .product-card-second-image {
-      display: block;
-    }
-  }
-
-  .product-card-second-image {
-    transition: opacity 0.3s ease-out;
-  }
-
-  .product-card img {
-    mix-blend-mode: darken;
-    transition:
-      transform 0.5s ease-out,
-      opacity 0.5s ease-out;
-  }
-
-  @media (hover: hover) {
-    .product-card:hover {
-      z-index: 1;
-      transform: scale(1.02);
-      box-shadow:
-        0 1px 1px hsl(0deg 0% 0% / 0.045),
-        0 5px 5px hsl(0deg 0% 0% / 0.0245),
-        0 10px 10px hsl(0deg 0% 0% / 0.045),
-        0 15px 15px hsl(0deg 0% 0% / 0.045),
-        0 20px 20px hsl(0deg 0% 0% / 0.045);
-    }
-
-    .product-card:hover img {
-      transform: scale(1.05);
-    }
-  }
-</style>
+  <p class="text-sm">{product.name}</p>
+</a>

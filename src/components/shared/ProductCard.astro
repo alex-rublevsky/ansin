@@ -1,156 +1,97 @@
 ---
-import VariationPicker from "@/components/shared/VariationPicker.astro";
-import type { FeedVariation } from "@/db/products/storefront";
-import { Icon } from "astro-icon/components";
+import { BASE_IMAGE_URL } from "@/constants";
 import { Image } from "astro:assets";
-import { PUBLIC_ASSETS_BASE_URL } from "astro:env/client";
+import Button from "@/components/shared/Button.astro";
+import { Icon } from "astro-icon/components";
+import VariationPicker from "@/components/shared/VariationPicker.astro";
+import { toProductPickerInit } from "@/lib/product-picker";
 
-interface Props {
-  title: string;
-  slug: string;
-  /** Paths from DB (`products.images`). Second entry is used only at `lg` + fine-pointer hover, aligned with Gallery. */
-  images: string[];
-  price: string | number;
-  variations?: FeedVariation[];
-  categorySlug: string | null;
+const { product } = Astro.props;
+
+if (!product) {
+  return null;
 }
 
-const {
-  title,
-  slug,
-  images,
-  price,
-  variations = [],
-  categorySlug = null,
-} = Astro.props;
+const { images } = product;
 
-// Sort heaviest first — mirrors the old project's display-price logic
-const sortedVariations = [...variations]
-  .filter((v) => v.weight > 0)
-  .sort((a, b) => b.weight - a.weight);
-
-const displayPrice = sortedVariations[0]?.price ?? price;
-const priceLabel =
-  typeof displayPrice === "number" ? String(displayPrice) : displayPrice;
-
-const urls = images
-  .filter(Boolean)
-  .map((path) => PUBLIC_ASSETS_BASE_URL + path);
-const firstUrl = urls[0] ?? null;
-const secondUrl = urls[1] ?? null;
+const pickerInit = toProductPickerInit(
+  {
+    id: product.id,
+    slug: product.slug,
+    name: product.name,
+    image: images.length > 0 ? BASE_IMAGE_URL + images[0] : "",
+    volume: product.volume,
+    variations: product.variations,
+  },
+  { mode: "quickAdd" },
+);
 ---
 
-<div class="product-card group relative isolate" data-category={categorySlug}>
-  <a
-    href={`/product/${slug}`}
-    class="absolute inset-0 z-1 focus-visible:z-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
-    data-product-link
-    aria-label={`${title}, ${priceLabel}`}
-  />
-
-  <div
-    class="relative z-0 mb-3 aspect-square overflow-hidden bg-background"
-    data-image-container
-  >
-    {
-      firstUrl ? (
-        <>
-          <div data-image-wrapper="0" class="absolute inset-0 bg-background">
-            <Image
-              src={firstUrl}
-              width={600}
-              height={600}
-              alt=""
-              loading="lazy"
-              class="absolute inset-0 h-full w-full object-cover object-center"
-              data-image-index="0"
+<a
+  class="productCard"
+  href={`/product/${product.slug}`}
+  x-data={`productPicker(${JSON.stringify(pickerInit)})`}>
+  <div class="productImageWrapper">
+    <div class="productImage">
+      {
+        images.length > 0 ? (
+          <Image
+            src={BASE_IMAGE_URL + images[0]}
+            width={500}
+            height={500}
+            alt={product.name}
+            loading="lazy"
+            class="object-cover "
+          />
+        ) : (
+          <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <Icon
+              name="image"
+              title="Нет изображения"
+              class="size-16 text-muted-foreground"
             />
           </div>
-          {secondUrl ? (
-            <div
-              data-image-wrapper="1"
-              class="product-card-second-image absolute inset-0 opacity-0 bg-background group-hover:opacity-100"
-            >
-              <Image
-                src={secondUrl}
-                width={600}
-                height={600}
-                alt=""
-                loading="lazy"
-                class="absolute inset-0 h-full w-full object-cover object-center"
-                data-image-index="1"
-              />
-            </div>
-          ) : null}
-        </>
-      ) : (
-        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <Icon
-            name="image"
-            title="Нет изображения"
-            class="size-16 text-muted-foreground"
-          />
-        </div>
-      )
+        )
+      }
+    </div>
+
+    <Button
+      @click.prevent.stop="addToCart()"
+      class="addToCartButton"
+      size="square"
+      {...{ ":disabled": "!canAdd" } as any}>
+      <Icon name="cart" title="Корзина" />
+    </Button>
+  </div>
+
+  <div class="flex gap-2xs">
+    <p x-text="displayPrice"></p>
+    {
+      product.discountedPrice ? (
+        <p class="line-through">{product.discountedPrice}</p>
+      ) : null
     }
   </div>
 
-  <div class="relative z-0">
-    <p>{priceLabel}</p>
-    <p>{title}</p>
-  </div>
+  <p class="text-sm">{product.name}</p>
 
-  {
-    sortedVariations.length > 0 && (
-      <div class="relative z-2">
-        <VariationPicker variations={sortedVariations} />
-      </div>
-    )
-  }
-</div>
+  <VariationPicker size="sm" />
+</a>
 
 <style>
-  .product-card {
-    transition:
-      transform 0.3s ease-out,
-      box-shadow 0.3s ease-out;
-  }
-
-  .product-card-second-image {
-    display: none;
-  }
-
-  @media (min-width: 1024px) and (hover: hover) {
-    .product-card-second-image {
-      display: block;
-    }
-  }
-
-  [data-image-wrapper="1"] {
-    transition: opacity 0.3s ease-out;
-  }
-
-  .product-card img {
-    mix-blend-mode: darken;
-    transition:
-      transform 0.5s ease-out,
-      opacity 0.5s ease-out;
+  .addToCartButton {
+    display: block;
+    position: absolute;
+    bottom: 0.4rem;
+    right: 0.4rem;
+    opacity: 0;
+    transform: translateY(0.4rem);
   }
 
   @media (hover: hover) {
-    .product-card:hover {
-      z-index: 1;
-      transform: scale(1.02);
-      box-shadow:
-        0 1px 1px hsl(0deg 0% 0% / 0.045),
-        0 5px 5px hsl(0deg 0% 0% / 0.0245),
-        0 10px 10px hsl(0deg 0% 0% / 0.045),
-        0 15px 15px hsl(0deg 0% 0% / 0.045),
-        0 20px 20px hsl(0deg 0% 0% / 0.045);
-    }
-
-    .product-card:hover img {
-      transform: scale(1.05);
+    .productCard:hover .addToCartButton {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 </style>

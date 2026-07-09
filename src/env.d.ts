@@ -25,6 +25,15 @@ declare namespace App {
   }
 }
 // for alpine autocompletion
+/// <reference types="alpinejs__persist" />
 interface Window {
   Alpine: import("alpinejs").Alpine;
+}
+import "alpinejs";
+
+declare module "alpinejs" {
+  interface Stores {
+    cart: import("./lib/cart/store").CartStore;
+    staleNotices: import("./lib/cart/staleNotices").StaleNoticeStore;
+  }
 }

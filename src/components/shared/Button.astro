@@ -2,9 +2,15 @@
 import { Icon } from "astro-icon/components";
 import type { HTMLAttributes } from "astro/types";
 
-type Variant = "primary" | "secondary" | "pill" | "destructive" | "editorTool";
+type Variant =
+  | "primary"
+  | "secondary"
+  | "tertiary"
+  | "pill"
+  | "destructive"
+  | "editorTool";
 
-type Size = "default" | "xs" | "sm" | "lg";
+type Size = "default" | "xs" | "sm" | "lg" | "square";
 
 type Props = Omit<
   HTMLAttributes<"button">,
@@ -38,29 +44,33 @@ const {
 
 const resolvedVariant = variant ?? "primary";
 
-/** Icon + label row (opt-in via `leadingIcon`). `[&_*]:text-inherit` keeps nested spans on theme foreground tokens. */
+/** Icon + label row (opt-in via `leadingIcon`). */
 const layoutClasses =
   withIcon && resolvedVariant !== "editorTool"
-    ? "inline-flex items-center justify-center gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_*]:text-inherit"
+    ? "inline-flex items-center justify-center gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0"
     : "";
 
 const baseClasses =
-  "cursor-pointer rounded transition-colors ease-out duration-170 disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-foreground [&_*]:text-inherit [&_svg]:pointer-events-none [&_svg]:shrink-0";
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    "bg-foreground text-background border border-foreground hover:bg-background hover:border hover:border-foreground hover:text-foreground",
-  secondary: "",
-  pill: "border border-muted-foreground bg-background rounded-full hover:bg-muted active:bg-muted-foreground data-[active]:bg-foreground data-[active]:text-background data-[active]:border-foreground",
+    "border border-foreground bg-foreground text-background hover:bg-background hover:text-foreground active:scale-[0.97] active:bg-transparent active:text-foreground",
+  secondary:
+    "border border-foreground bg-transparent text-foreground hover:bg-foreground hover:text-background active:bg-foreground active:text-background",
+  tertiary:
+    "border border-foreground/15 bg-background/70 text-foreground backdrop-blur-sm hover:bg-foreground hover:text-background active:bg-foreground active:text-background disabled:border-muted/60 disabled:bg-muted/70 disabled:text-muted-foreground hover:disabled:bg-muted",
+  pill: "border border-border bg-background rounded-full hover:border-foreground hover:bg-[color-mix(in_oklch,var(--muted)_50%,var(--background))] active:bg-muted-foreground data-[active]:bg-foreground data-[active]:text-background data-[active]:border-foreground",
   destructive: "bg-destructive text-destructive-foreground",
   editorTool:
     "flex items-center justify-center box-border size-[1.875rem] shrink-0 border-0 p-0 rounded-lg bg-transparent text-xs font-bold leading-none text-foreground transition-[background-color,color] ease-out hover:bg-foreground/10 active:bg-foreground/30 disabled:opacity-30 disabled:cursor-default [&.is-active]:bg-foreground [&.is-active]:text-background [&_svg]:pointer-events-none [&_svg]:block [&_svg]:size-4 [&_svg]:stroke-current [&_svg]:fill-none [&_svg]:[stroke-width:2] [&_svg]:[stroke-linecap:round] [&_svg]:[stroke-linejoin:round]",
 };
 
 const sizeClasses: Record<Size, string> = {
-  default: "px-4 py-2",
-  sm: "px-2 py-1 text-sm",
-  xs: "px-1 py-[0.5] text-sm",
+  default: "h-11 px-4 py-3 text-sm",
+  sm: "h-9 px-3 py-1 text-sm",
+  square: "aspect-square p-2 text-sm",
+  xs: "px-0.5 px-1 py-0 text-xs",
   lg: "h-12 px-6 text-base! font-normal [&_svg]:size-6",
 };
 

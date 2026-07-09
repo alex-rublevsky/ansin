@@ -31,22 +31,37 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
 
-  /* Tailwind text-* utilities resolve from fluid vars. */
-  --text-2xs: var(--fluid-2xs);
-  --text-xs: var(--fluid-xs);
-  --text-sm: var(--fluid-sm);
-  --text-base: var(--fluid-base);
-  --text-md: var(--fluid-md);
-  --text-lg: var(--fluid-lg);
-  --text-xl: var(--fluid-xl);
-  --text-2xl: var(--fluid-2xl);
-  --text-3xl: var(--fluid-3xl);
-  --text-4xl: var(--fluid-4xl);
-  --text-5xl: var(--fluid-5xl);
+  /* Tailwind text-* utilities resolve from step scale. */
+  --text-2xs: var(--step--2);
+  --text-xs: var(--step--2);
+  --text-sm: var(--step--1);
+  --text-base: var(--step-0);
+  --text-md: var(--step-1);
+  --text-lg: var(--step-2);
+  --text-xl: var(--step-3);
+  --text-2xl: var(--step-4);
+  --text-3xl: var(--step-5);
 
-  --gap-3xs: var(--fluid-3xs);
-  --gap-2xs: var(--fluid-2xs);
-  --gap-xs: var(--fluid-xs);
+  /* Spacing scale → p-*, m-*, gap-*, space-y-*, etc. */
+  --spacing-3xs: var(--space-3xs);
+  --spacing-2xs: var(--space-2xs);
+  --spacing-xs: var(--space-xs);
+  --spacing-s: var(--space-s);
+  --spacing-m: var(--space-m);
+  --spacing-l: var(--space-l);
+  --spacing-xl: var(--space-xl);
+  --spacing-2xl: var(--space-2xl);
+  --spacing-3xl: var(--space-3xl);
+
+  /* One-up pairs (fluid between two steps) */
+  --spacing-3xs-2xs: var(--space-3xs-2xs);
+  --spacing-2xs-xs: var(--space-2xs-xs);
+  --spacing-xs-s: var(--space-xs-s);
+  --spacing-s-m: var(--space-s-m);
+  --spacing-m-l: var(--space-m-l);
+  --spacing-l-xl: var(--space-l-xl);
+  --spacing-xl-2xl: var(--space-xl-2xl);
+  --spacing-2xl-3xl: var(--space-2xl-3xl);
 }
 
 :root {
@@ -64,26 +79,47 @@
   --muted: oklch(0.75 0.02 var(--hue));
   --muted-foreground: oklch(0.3 0.02 var(--hue));
 
-  --border: oklch(0.9 0.02 var(--hue));
+  --border: oklch(0.92 0.02 var(--hue));
 
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.98 0.01 25);
-  --fluid-3xs: clamp(0.28rem, 0.32rem + -0.05vw, 0.35rem);
-  --fluid-2xs: clamp(0.6rem, 0.69rem + -0.12vw, 0.7035rem);
-  --fluid-xs: clamp(0.7035rem, 0.8083rem + -0.1353vw, 0.7813rem);
-  --fluid-sm: clamp(0.9375rem, 0.9374rem + 0.0004vw, 0.9377rem);
-  --fluid-base: clamp(1.125rem, 1.0815rem + 0.2174vw, 1.25rem);
-  --fluid-md: clamp(1.35rem, 1.24rem + 0.55vw, 1.6663rem);
-  --fluid-lg: clamp(1.62rem, 1.4109rem + 1.0454vw, 2.2211rem);
-  --fluid-xl: clamp(1.944rem, 1.5904rem + 1.7682vw, 2.9607rem);
-  --fluid-2xl: clamp(2.3328rem, 1.7715rem + 2.8067vw, 3.9467rem);
-  --fluid-3xl: clamp(2.7994rem, 1.9432rem + 4.281vw, 5.2609rem);
-  --fluid-4xl: clamp(3.3593rem, 2.0879rem + 6.357vw, 7.0145rem);
-  --fluid-5xl: clamp(4.0311rem, 2.1802rem + 9.2549vw, 9.3527rem);
+
+/* @link https://utopia.fyi/type/calculator?c=320,17,1.2,1536,20,1.25,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=s,l,xl,12 */
+  --step--2: clamp(0.7378rem, 0.7215rem + 0.0818vw, 0.8rem);
+  --step--1: clamp(0.8854rem, 0.8553rem + 0.1508vw, 1rem);
+  --step-0: clamp(1.0625rem, 1.0132rem + 0.2467vw, 1.25rem);
+  --step-1: clamp(1.275rem, 1.1993rem + 0.3783vw, 1.5625rem);
+  --step-2: clamp(1.53rem, 1.4187rem + 0.5567vw, 1.9531rem);
+  --step-3: clamp(1.836rem, 1.6767rem + 0.7966vw, 2.4414rem);
+  --step-4: clamp(2.2032rem, 1.9799rem + 1.1165vw, 3.0518rem);
+  --step-5: clamp(2.6438rem, 2.3357rem + 1.5406vw, 3.8147rem);
+
+  --space-3xs: clamp(0.25rem, 0.2336rem + 0.0822vw, 0.3125rem);
+  --space-2xs: clamp(0.5625rem, 0.5461rem + 0.0822vw, 0.625rem);
+  --space-xs: clamp(0.8125rem, 0.7796rem + 0.1645vw, 0.9375rem);
+  --space-s: clamp(1.0625rem, 1.0132rem + 0.2467vw, 1.25rem);
+  --space-m: clamp(1.625rem, 1.5592rem + 0.3289vw, 1.875rem);
+  --space-l: clamp(2.125rem, 2.0263rem + 0.4934vw, 2.5rem);
+  --space-xl: clamp(3.1875rem, 3.0395rem + 0.7401vw, 3.75rem);
+  --space-2xl: clamp(4.25rem, 4.0526rem + 0.9868vw, 5rem);
+  --space-3xl: clamp(6.375rem, 6.0789rem + 1.4803vw, 7.5rem);
+
+  /* One-up pairs */
+  --space-3xs-2xs: clamp(0.25rem, 0.1513rem + 0.4934vw, 0.625rem);
+  --space-2xs-xs: clamp(0.5625rem, 0.4638rem + 0.4934vw, 0.9375rem);
+  --space-xs-s: clamp(0.8125rem, 0.6974rem + 0.5757vw, 1.25rem);
+  --space-s-m: clamp(1.0625rem, 0.8487rem + 1.0691vw, 1.875rem);
+  --space-m-l: clamp(1.625rem, 1.3947rem + 1.1513vw, 2.5rem);
+  --space-l-xl: clamp(2.125rem, 1.6974rem + 2.1382vw, 3.75rem);
+  --space-xl-2xl: clamp(3.1875rem, 2.7105rem + 2.3849vw, 5rem);
+  --space-2xl-3xl: clamp(4.25rem, 3.3947rem + 4.2763vw, 7.5rem);
+
+  --border-width: clamp(0.12rem, 0.05rem + -0.05vw, 0.15rem);
+  --border-thick: clamp(0.17rem, 0.15rem + -0.05vw, 0.23rem);
 }
 
 html {
-  font-size: var(--fluid-base);
+  font-size: var(--step-0);
   font-family: var(--font-sans);
   /* scroll-behavior: smooth; */
   overflow-x: hidden;
@@ -97,8 +133,8 @@ html {
   }
 
   section {
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: var(--space-s);
+    padding-right: var(--space-s);
   }
 
   section.no-padding {
@@ -107,7 +143,7 @@ html {
   }
 
   h1 {
-    font-size: var(--fluid-3xl);
+    font-size: var(--step-5);
     font-family: var(--font-kazuki-reiwa);
     font-weight: 200;
     line-height: 1;
@@ -118,7 +154,7 @@ html {
   }
 
   h2 {
-    font-size: var(--fluid-2xl);
+    font-size: var(--step-4);
     font-family: var(--font-kazuki-reiwa);
 
     font-weight: 200;
@@ -130,7 +166,7 @@ html {
   }
 
   h3 {
-    font-size: var(--fluid-xl);
+    font-size: var(--step-3);
     font-family: var(--font-kazuki-reiwa);
 
     line-height: 1;
@@ -142,7 +178,7 @@ html {
   }
 
   h4 {
-    font-size: var(--fluid-lg);
+    font-size: var(--step-2);
     font-family: var(--font-kazuki-reiwa);
     line-height: 0.95;
     font-weight: 200;
@@ -153,9 +189,11 @@ html {
   }
 
   h5 {
-    font-size: var(--fluid-md);
+    font-size: var(--step-1);
+    font-family: var(--font-kazuki-reiwa);
     line-height: 1;
-    font-weight: 600;
+    padding-bottom: var(--space-2xs);
+    font-weight: 500;
     letter-spacing: 1.2%;
     color: var(--foreground);
     word-wrap: break-word;
@@ -163,9 +201,10 @@ html {
   }
 
   h6 {
-    font-size: var(--fluid-base);
-    line-height: 1;
-    font-weight: 700;
+    font-size: var(--step-0);
+    font-family: var(--font-kazuki-reiwa);
+    line-height: 1.1;
+    font-weight: 600;
     letter-spacing: 1.2%;
     color: var(--foreground);
     word-wrap: break-word;
@@ -173,7 +212,7 @@ html {
   }
 
   p {
-    font-size: var(--fluid-base);
+    font-size: var(--step-0);
     line-height: 1.35;
     color: var(--foreground);
     word-wrap: break-word;

@@ -1,6 +1,51 @@
 @import "tailwindcss";
 @import "./theme.css";
+@import "./viewTransitions.css";
+
+[x-cloak] {
+  display: none !important;
+}
 
 /* [data-icon] {
   color: var();
 } */
+
+.autoGrid {
+  /* Fluid min column: ~5rem on narrow viewports → ~10rem from ~360px up (replaces 5rem / 10rem @ 360px). */
+  --min-col-size: clamp(
+    5rem,
+    calc(5rem + 5rem * (100vw - 280px) / 80px),
+    10rem
+  );
+  display: grid;
+  gap: var(--space-2xs);
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(var(--min-col-size), 100%), 1fr)
+  );
+}
+
+.productImageWrapper {
+  position: relative;
+}
+
+.productImage {
+  overflow: clip;
+  background-color: var(--background);
+}
+
+.productImage img {
+  mix-blend-mode: darken;
+}
+
+@media (hover: hover) {
+  .productImage img {
+    transition: transform 0.3s ease-out;
+  }
+
+  .productImage:hover img {
+    transform: scale(1.05);
+  }
+}
+
+

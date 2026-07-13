@@ -2,8 +2,105 @@
 import MainLayout from "../layouts/MainLayout.astro";
 
 export const prerender = true;
+
+import Button from "@/components/shared/Button.astro";
+import Input from "@/components/shared/Input.astro";
+import { Icon } from "astro-icon/components";
+import CartItemEntry from "../components/cart/CartItemEntry.astro";
+
 ---
 
-<MainLayout title="Оформление заказа — Ансин">
-  <h1>Оформление заказа</h1>
+<MainLayout title="Оформление заказа" description="Оформите ваш заказ">
+  <main x-data>
+    <section class="mx-auto max-w-7xl py-4 pb-28">
+      <h1 class="text-lg! font-normal! pb-2xs">Оформление заказа</h1>
+
+      <div class="flex flex-col gap-8 lg:flex-row">
+        <!-- Left: Customer Information Form -->
+        <div class="flex-1">
+          <form id="checkout-form">
+            <div class="textInputFields">
+              <Input name="name" label="Имя" required />
+              <Input name="lastName" label="Фамилия" required />
+              <Input name="email" label="Email" required />
+              <Input name="phone" label="Телефон" required />
+            </div>
+            <Input name="comment" label="Комментарий к заказу" as="textarea" />
+           <div class="flex items-center gap-2">
+            <Icon class="text-green-600 size-7 " name="safetyCheck" title="Данные в безопасности, надёжно защищены и не передаются третьим лицам" />
+            <p class="text-sm text-muted-qforeground">Данные в безопасности, надёжно защищены и не передаются третьим лицам</p>
+
+           </div>
+          </form>
+        </div>
+
+        <!-- Right: Order Summary -->
+        <div class="lg:sticky lg:top-4 lg:w-108 lg:self-start">
+          <div class="summaryWrap p-6">
+          
+              <div x-show="$store.cart.discount" class="flex items-baseline justify-between">
+                <p class="text-foreground-muted font-light">Скидка</p>
+                <p
+                  class="text-foreground-muted font-light"
+                  x-text="'-' + $store.cart.discount"></p>
+              </div>
+          
+
+            <div class="flex items-baseline justify-between">
+              <p class="text-foreground-muted font-light">Доставка</p>
+              <p class="text-foreground-muted text-sm font-light">
+                Обсуждается после заказа
+              </p>
+            </div>
+
+            <div
+              class="flex items-baseline justify-between topSeparator py-5 mt-4 text-xl">
+              <h3>Итого</h3>
+              <h3 class="text-md" x-text="$store.cart.subtotal"></h3>
+            </div>
+
+            <Button
+              id="place-order-btn"
+              type="submit"
+              form="checkout-form"
+              class="w-full"
+              size="lg">
+              Оформить заказ
+            </Button>
+
+            <!-- Order Items -->
+            <!-- TODO: show only if items are present for the border to be gone -->
+            <div class="mt-6">
+              <div class="space-y-3">
+                <template
+                  x-for="item in Object.values($store.cart.cartItems)"
+                  :key="item.id">
+                  <CartItemEntry x-data="item" />
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 </MainLayout>
+
+<style>
+  .textInputFields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+    container-type: inline-size;
+    padding-bottom: 0.7rem;
+  }
+
+  .summaryWrap {
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+
+  .topSeparator {
+    border-top: var(--border-width) solid var(--border);
+  }
+</style>

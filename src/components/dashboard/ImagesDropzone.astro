@@ -11,10 +11,14 @@ const { images } = Astro.props;
   <div id="gallery">
     {
       images.map((image: string) => (
-        <div class="productImage relative group cursor-grab">
+        <div
+          class="productImage relative group cursor-grab"
+          data-path={image}
+          data-status="ready">
           <Button
-            @click.prevent
-            class="opacity-0 group-hover:opacity-100 transition-opacity duration-170 ease-out absolute top-0 right-0 z-999"
+            type="button"
+            data-action="remove"
+            class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-out absolute top-0 right-0 z-999"
             size="square">
             <Icon name="x" title="Удалить" />
           </Button>
@@ -23,7 +27,18 @@ const { images } = Astro.props;
             alt=""
             width={300}
             height={300}
+            data-role="preview"
           />
+          <div class="tileSpinner" role="status">
+            <Icon
+              name="spinner"
+              title="Загрузка"
+              class="size-8 animate-spin"
+            />
+            <span class="sr-only">Загрузка...</span>
+          </div>
+
+          <div class="tileError" aria-hidden="true" />
         </div>
       ))
     }
@@ -35,33 +50,46 @@ const { images } = Astro.props;
 
     <input
       hidden
-      name="image_uploads"
       class="addItemEntry"
       type="file"
       id="image_uploads"
       multiple
       accept="image/*"
     />
-
-    <input
-      type="hidden"
-      name="images"
-      data-images-input
-      value={JSON.stringify(images)}
-    />
   </div>
 
   <label class="text-sm text-center text-muted pt-2 pb-1 select-none"
     >Фотки можно перетащить сюда</label
   >
-  <progress id="progress-bar" max="100" value="0"></progress>
 </div>
+
+<template id="image-tile-template">
+  <div class="productImage relative group cursor-grab">
+    <Button
+      type="button"
+      data-action="remove"
+      class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-out absolute top-0 right-0 z-999"
+      size="square">
+      <Icon name="x" title="Удалить" />
+    </Button>
+    <img alt="" data-role="preview" />
+    <div class="tileSpinner" role="status">
+      <Icon
+        name="spinner"
+        title="Загрузка"
+        class="size-8 animate-spin"
+      />
+      <span class="sr-only">Загрузка...</span>
+    </div>
+    <div class="tileError" aria-hidden="true"></div>
+  </div>
+</template>
 
 <style>
   #drop-area {
     display: flex;
     flex-direction: column;
-    border: var(--border-thick) dashed var(--border);
+    border: var(--border-width) dashed var(--border);
     /*border-radius: var(--radius-lg);*/
     width: 100%;
     padding: 0.4rem;
@@ -77,10 +105,6 @@ const { images } = Astro.props;
     gap: 0.5rem;
   }
 
-  #progress-bar {
-    display: none;
-  }
-
   .productImage img,
   .addItemEntry {
     width: 100%;
@@ -89,7 +113,17 @@ const { images } = Astro.props;
   }
 
   .productImage {
+    position: relative;
     border: var(--border-width) solid var(--border);
+  }
+
+  .productImage img {
+    display: block;
+    object-fit: cover;
+    transition:
+      opacity 170ms ease-out,
+      filter 170ms ease-out,
+      transform 0.3s ease-out;
   }
 
   .addItemEntry {
@@ -98,7 +132,7 @@ const { images } = Astro.props;
     line-height: 1;
     display: flex;
     gap: 1rem;
-    font-size: var(--fluid-sm);
+    font-size: var(--step--1);
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -117,7 +151,7 @@ const { images } = Astro.props;
   }
 
   .addItemEntry .plus {
-    font-size: var(--fluid-lg);
+    font-size: var(--step-2);
     font-weight: 100;
     line-height: 0;
     color: var(--muted);
@@ -131,160 +165,58 @@ const { images } = Astro.props;
     color: var(--foreground);
   }
 
-  /*.addItemEntry:hover {
+  /* Per-tile upload state overlays. Only one of these is visible at a time,
+     driven by the `data-status` attribute set from dropzone-gallery.ts. */
+  .tileSpinner,
+  .tileError {
+    display: none;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+  }
 
-         border: 0.2rem dashed var(--primary);
-         border-radius: var(--radius);
+  .productImage[data-status="uploading"] {
+    cursor: wait;
+  }
 
-     }*/
+  .productImage[data-status="uploading"] img {
+    opacity: 0.5;
+    filter: grayscale(0.4);
+  }
 
-  /*.imageEntry.dragging{
-         opacity:0.5;
-     }*/
+  .productImage[data-status="uploading"] .tileSpinner {
+    display: flex;
+  }
+
+  .productImage[data-status="error"] img {
+    opacity: 0.35;
+  }
+
+  .productImage[data-status="error"] .tileError {
+    display: flex;
+  }
+
+  .tileError {
+    background: color-mix(in oklch, var(--destructive) 15%, transparent);
+  }
+
+  .tileError::after {
+    content: "!";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--destructive);
+    color: var(--destructive-foreground);
+    font-size: var(--step--1);
+    font-weight: 700;
+    line-height: 1;
+  }
 </style>
 
 <script>
-  const fileInput = document.getElementById(
-    "image_uploads",
-  ) as HTMLInputElement;
-
-  fileInput.addEventListener("change", (e) => {
-    const files = (e.target as HTMLInputElement).files;
-
-    if (files) {
-      handleFiles(files);
-    }
-  });
-
-  let dropArea = document.getElementById("drop-area") as HTMLElement;
-  if (!dropArea) {
-    throw Error("No drop area found!");
-  }
-
-  ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
-    dropArea.addEventListener(eventName, preventDefaults, false);
-  });
-
-  function preventDefaults(e: Event) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
-  ["dragenter", "dragover"].forEach((eventName) => {
-    dropArea.addEventListener(eventName, highlight, false);
-  });
-
-  ["dragleave", "drop"].forEach((eventName) => {
-    dropArea.addEventListener(eventName, unhighlight, false);
-  });
-
-  function highlight(e: Event) {
-    dropArea.classList.add("highlight");
-  }
-
-  function unhighlight(e: Event) {
-    dropArea.classList.remove("highlight");
-  }
-
-  dropArea.addEventListener("drop", handleDrop, false);
-
-  function handleDrop(e: DragEvent) {
-    let dt = e.dataTransfer;
-    if (!dt) {
-      throw Error("No drag event found!");
-    }
-    let files = dt.files;
-
-    handleFiles(files);
-  }
-
-  function handleFiles(files: FileList) {
-    const fileArray = [...files];
-    initializeProgress(files.length);
-    fileArray.forEach(uploadFileAndReturnPath);
-    fileArray.forEach(previewFile);
-  }
-
-  async function uploadFileAndReturnPath(file: File): Promise<string> {
-    const response = await fetch("/api/upload-url", {
-      method: "POST",
-      body: JSON.stringify({
-        filename: file.name,
-      }),
-    });
-    const presigned = await response.json();
-    const formData = new FormData();
-
-    Object.entries(presigned.fields).forEach(([key, value]) => {
-      formData.append(key, value as string);
-    });
-
-    formData.append("file", file);
-
-    await fetch(presigned.url, {
-      method: "POST",
-      body: formData,
-    })
-      .then(progressDone)
-      .catch((e) => {
-        alert(`Ошибка загрузки: ${e.message}`);
-      });
-
-    return presigned.imagePath;
-  }
-
-  // async function deleteFiles(files: File[]) {
-  //   const response = await fetch('/api/delete-url', {
-  //     method: 'POST',
-  //     body: JSON.stringify(files.map(file => file.name))
-  //   })
-
-  //   }
-
-  function previewFile(file: File) {
-    let reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onloadend = function () {
-      if (typeof reader.result === "string") {
-        let img = document.createElement("img");
-        img.src = reader.result;
-        const gallery = document.getElementById("gallery") as HTMLElement;
-        const addButton = document.getElementById(
-          "add-photo-button",
-        ) as HTMLElement;
-
-        gallery.insertBefore(img, addButton);
-      }
-    };
-  }
-
-  let filesDone = 0;
-  let filesToDo = 0;
-  let progressBar = document.getElementById(
-    "progress-bar",
-  ) as HTMLProgressElement;
-
-  function initializeProgress(numfiles: number) {
-    progressBar.style.display = "block";
-    progressBar.value = 0;
-    filesDone = 0;
-    filesToDo = numfiles;
-  }
-
-  function progressDone() {
-    filesDone++;
-    progressBar.value = (filesDone / filesToDo) * 100;
-  }
-
-  type ImageEntry = {
-    id: string;
-    path: string;
-    status: "ready" | "uploading" | "error";
-    origin: "existing" | "staged";
-  };
-
-  let images: ImageEntry[] = JSON.parse(dropArea.dataset.initialImages ?? "[]");
-</script>
-<script>
-  import "@/lib/gallery-sortable";
+  import "@/lib/dropzone-gallery";
 </script>

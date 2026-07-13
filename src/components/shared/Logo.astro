@@ -1,7 +1,264 @@
 ---
-import { Image } from "astro:assets";
+// Scroll-driven navbar logo, ported from `ansin 0.5`.
+const { large } = Astro.props;
 ---
 
-<a href="/" class="active:scale-97 duration-150">
-  <Image src="/logo-bg.svg" alt="Logo" width="80" height="80" />
+<a href="/" class={`navbar-logo ${large ? `scale-180` : ""}`} aria-label="Home">
+  <div class="navbar-logo-layers" id="scroll-logo-layers">
+    <div class="navbar-logo-layer layer-1">
+      <img src="/logo-bg.svg" alt="" />
+    </div>
+    <div class="navbar-logo-layer layer-2">
+      <img src="/logo-bg.svg" alt="" />
+    </div>
+    <div class="navbar-logo-layer layer-3">
+      <img src="/logo-bg.svg" alt="" />
+    </div>
+    <div class="navbar-logo-layer layer-4">
+      <img src="/logo-bg.svg" alt="" />
+    </div>
+  </div>
 </a>
+<!--
+<script>
+  const CYCLE_DURATION = 4;
+  const TOP_STATIC_THRESHOLD = 1;
+  const LAYERS_SELECTOR = ".navbar-logo-layer";
+
+  let logoRootCache: HTMLElement | null = null;
+  let layersCache: HTMLElement[] = [];
+
+  function getLogoRefs() {
+    if (!logoRootCache || !document.body.contains(logoRootCache)) {
+      logoRootCache = document.getElementById("scroll-logo-layers");
+      layersCache = logoRootCache
+        ? Array.from(
+            logoRootCache.querySelectorAll<HTMLElement>(LAYERS_SELECTOR),
+          )
+        : [];
+    }
+
+    return { logoRoot: logoRootCache, layers: layersCache };
+  }
+
+  function getCycleScroll() {
+    return window.innerWidth < 768 ? 1600 : 900;
+  }
+
+  function updateScrollLogo() {
+    const { logoRoot, layers } = getLogoRefs();
+    if (!logoRoot || layers.length === 0) return;
+
+    if (window.scrollY <= TOP_STATIC_THRESHOLD) {
+      logoRoot.setAttribute("data-top-static", "");
+      return;
+    }
+
+    logoRoot.removeAttribute("data-top-static");
+
+    const cycleScroll = getCycleScroll();
+    const t = ((window.scrollY % cycleScroll) / cycleScroll) * CYCLE_DURATION;
+
+    layers.forEach((layer, i) => {
+      const phase = i * (CYCLE_DURATION / 4);
+      layer.style.animationDelay = `${-((t + phase) % CYCLE_DURATION)}s`;
+    });
+  }
+
+  function initScrollLogo() {
+    if ((window as any).__ansinScrollLogoInited) {
+      updateScrollLogo();
+      return;
+    }
+
+    (window as any).__ansinScrollLogoInited = true;
+
+    let ticking = false;
+
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            updateScrollLogo();
+            ticking = false;
+          });
+          ticking = true;
+        }
+      },
+      { passive: true },
+    );
+
+    updateScrollLogo();
+  }
+
+  initScrollLogo();
+  document.addEventListener("astro:page-load", initScrollLogo);
+</script> -->
+
+<style>
+  .navbar-logo {
+    flex-shrink: 0;
+    box-sizing: border-box;
+    width: 5rem;
+    height: 5rem;
+    opacity: 1;
+    margin-left: -0.5rem;
+    margin-bottom: -0.5rem;
+    cursor: pointer;
+    pointer-events: auto;
+    text-decoration: none;
+    display: block;
+    border-radius: 50%;
+    transition: transform 0.15s;
+    mix-blend-mode: darken;
+  }
+
+  @media (hover: hover) {
+    .navbar-logo:hover {
+      transform: scale(1.07);
+    }
+  }
+
+  .navbar-logo:active {
+    transform: scale(0.97);
+  }
+
+  .navbar-logo-layers {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .navbar-logo-layer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    /* Scroll-scrubbed grow animation (needs the script above):
+    animation: navbarLogoGrow 4s linear infinite;
+    animation-play-state: paused;
+    */
+    transform: translate(-50%, -50%) scale(var(--static-scale));
+    opacity: 1;
+  }
+
+  .navbar-logo-layer.layer-1 {
+    /* animation-delay: 0s; */
+    --static-scale: 1;
+  }
+
+  .navbar-logo-layer.layer-2 {
+    /* animation-delay: -1s; */
+    --static-scale: 0.7716;
+  }
+
+  .navbar-logo-layer.layer-3 {
+    /* animation-delay: -2s; */
+    --static-scale: 0.5954;
+  }
+
+  .navbar-logo-layer.layer-4 {
+    /* animation-delay: -3s; */
+    --static-scale: 0.4593;
+  }
+
+  .navbar-logo-layer img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  /*
+  @keyframes navbarLogoGrow {
+    0% {
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+      z-index: 100;
+    }
+
+    5% {
+      transform: translate(-50%, -50%) scale(0.05);
+      opacity: 0.2;
+      z-index: 100;
+    }
+
+    9% {
+      transform: translate(-50%, -50%) scale(0.15);
+      opacity: 0.5;
+      z-index: 100;
+    }
+
+    14% {
+      transform: translate(-50%, -50%) scale(0.3);
+      opacity: 0.8;
+      z-index: 100;
+    }
+
+    18% {
+      transform: translate(-50%, -50%) scale(0.4593);
+      opacity: 1;
+      z-index: 100;
+    }
+
+    40% {
+      transform: translate(-50%, -50%) scale(0.5954);
+      opacity: 1;
+      z-index: 75;
+    }
+
+    63% {
+      transform: translate(-50%, -50%) scale(0.7716);
+      opacity: 1;
+      z-index: 50;
+    }
+
+    86% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+      z-index: 25;
+    }
+
+    89% {
+      transform: translate(-50%, -50%) scale(1.03);
+      opacity: 0.8;
+      z-index: 1;
+    }
+
+    93% {
+      transform: translate(-50%, -50%) scale(1.08);
+      opacity: 0.4;
+      z-index: 1;
+    }
+
+    96% {
+      transform: translate(-50%, -50%) scale(1.15);
+      opacity: 0.1;
+      z-index: 1;
+    }
+
+    100% {
+      transform: translate(-50%, -50%) scale(1.2);
+      opacity: 0;
+      z-index: 1;
+    }
+  }
+
+  .navbar-logo-layers:is([data-transition-static], [data-top-static])
+    .navbar-logo-layer {
+    animation: none !important;
+    transform: translate(-50%, -50%) scale(var(--static-scale));
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .navbar-logo-layer {
+      animation: none;
+      transform: translate(-50%, -50%) scale(var(--static-scale));
+      opacity: 1;
+    }
+  }
+  */
+</style>

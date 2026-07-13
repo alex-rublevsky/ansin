@@ -8,7 +8,7 @@ const { class: className, ...rest } = Astro.props;
 
 <span
   class:list={[
-    "rounded bg-muted/30 px-1.5 py-0.5 text-2xs text-muted-foreground",
+    "rounded border-(length:--border-width) border-muted/30 bg-muted/10 px-1.5 py-0.5 text-2xs text-muted-foreground",
     className,
   ]}
   {...rest}>

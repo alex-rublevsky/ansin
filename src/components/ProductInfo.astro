@@ -1,18 +1,56 @@
 ---
+import { toProductPickerInit } from "@/lib/product-picker";
+
 interface Props {
+  id: string | number;
+  slug: string;
+  image: string | null;
   name: string;
-  price: number;
+  volume: number;
+  cakeVolume: number;
+  variations: { id: number; weight: number; price: number }[];
   description: string;
 }
 
-const { name, price, description } = Astro.props;
+const { id, slug, image, name, volume, cakeVolume, variations, description } =
+  Astro.props;
 
+import Badge from "@/components/shared/Badge.astro";
 import Button from "@/components/shared/Button.astro";
+import QuantityStepper from "@/components/shared/QuantitySelector.astro";
+import VariationPicker from "@/components/shared/VariationPicker.astro";
+
+const pickerInit = toProductPickerInit({
+  id,
+  slug,
+  name,
+  image: image ?? "",
+  volume,
+  cakeVolume,
+  variations,
+});
 ---
 
-<div class="max-w-[40ch]">
-  <h1 class="text-lg! leading-[1.1]">{name}</h1>
-  <p>{price}</p>
-  <Button>В корзину</Button>
-  <div set:html={description} />
+<div
+  class="px-(--space-2xs) mx-auto lg:max-w-[45ch] lg:pl-0 lg:pr-5 lg:py-5"
+  x-data={`productPicker(${JSON.stringify(pickerInit)})`}>
+  <h1 class="text-lg! leading-[1.35]">{name}</h1>
+  <p class="mt-2 font-serif text-lg font-light" x-show="!allInCart" x-text="displayPrice">
+  </p>
+  <Badge class="mt-2" x-show="allInCart" x-cloak>Уже в корзине</Badge>
+
+  <div class="mt-4 flex flex-col gap-4">
+    {variations.length > 0 && <VariationPicker />}
+
+    <div class="flex flex-wrap items-center gap-2">
+      <QuantityStepper size="lg" />
+      <Button @click="addToCart()" {...{ ":disabled": "!canAdd" } as any}>
+        В корзину
+      </Button>
+    </div>
+  </div>
+
+  <div class="mt-6">
+      <div class="max-w-[55ch] [&_p]:text-sm" set:html={description} />
+  </div>
 </div>

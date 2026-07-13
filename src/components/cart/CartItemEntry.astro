@@ -1,0 +1,57 @@
+---
+// Headless: expects `item` (a CartItem from src/lib/cart/types.ts) to be
+// the Alpine scope it's rendered inside, e.g. `x-data="item"` (see checkout.astro).
+import QuantityStepper from "@/components/shared/QuantitySelector.astro";
+import { Icon } from "astro-icon/components";
+import Button from "../shared/Button.astro";
+
+---
+
+<div class="flex items-start gap-3 py-3 border-b-(length:--border-width) border-border last:border-b-0">
+  <a
+    href="/"
+    class="relative block size-20 shrink-0"
+    {...{ ":href": "'/product/' + item.slug" } as any}>
+    <template x-if="item.image">
+      <img
+        alt=""
+        class="absolute inset-0 size-full object-cover"
+        style="mix-blend-mode: darken"
+        {...{ ":src": `item.image` } as any}
+      />
+   
+    </template>
+    <Button
+    size="square"
+    variant="tertiary"
+    class="absolute bottom-0 right-0"
+    @click.prevent="$store.cart.remove(item.id)">
+    <Icon name="x" title="Удалить" />
+
+  </Button>
+  </a>
+
+  <div class="min-w-0 flex-1">
+    <div class="flex items-baseline justify-between gap-2">
+      <a
+        href="/"
+        class="min-w-0 text-sm font-medium wrap-break-word"
+        {...{ ":href": "'/product/' + item.slug" } as any}>
+        <h6 class="text-sm font-normal" x-text="item.name"></h6>
+      </a>
+      <span
+        class="shrink-0 text-xs text-muted-foreground"
+        x-text="item.variationWeight + 'г'">
+      </span>
+    </div>
+
+    <div class="mt-2 flex items-center gap-2">
+      <QuantityStepper mode="cart" />
+    
+
+      <p class="ml-auto font-serif text-sm" x-text="item.price * item.qty"></p>
+
+    
+    </div>
+  </div>
+</div>

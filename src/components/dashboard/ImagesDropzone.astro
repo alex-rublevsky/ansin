@@ -1,8 +1,7 @@
 ---
 import { BASE_IMAGE_URL } from "@/constants";
 import { Image } from "astro:assets";
-import Button from "@/components/shared/Button.astro";
-import { Icon } from "astro-icon/components";
+import ImageTile from "@/components/dashboard/ImageTile.astro";
 
 const { images } = Astro.props;
 ---
@@ -11,17 +10,7 @@ const { images } = Astro.props;
   <div id="gallery">
     {
       images.map((image: string) => (
-        <div
-          class="productImage relative group cursor-grab"
-          data-path={image}
-          data-status="ready">
-          <Button
-            type="button"
-            data-action="remove"
-            class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-out absolute top-0 right-0 z-999"
-            size="square">
-            <Icon name="x" title="Удалить" />
-          </Button>
+        <ImageTile path={image} status="ready">
           <Image
             src={`${BASE_IMAGE_URL}${image}`}
             alt=""
@@ -29,17 +18,7 @@ const { images } = Astro.props;
             height={300}
             data-role="preview"
           />
-          <div class="tileSpinner" role="status">
-            <Icon
-              name="spinner"
-              title="Загрузка"
-              class="size-8 animate-spin"
-            />
-            <span class="sr-only">Загрузка...</span>
-          </div>
-
-          <div class="tileError" aria-hidden="true" />
-        </div>
+        </ImageTile>
       ))
     }
 
@@ -64,25 +43,9 @@ const { images } = Astro.props;
 </div>
 
 <template id="image-tile-template">
-  <div class="productImage relative group cursor-grab">
-    <Button
-      type="button"
-      data-action="remove"
-      class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-out absolute top-0 right-0 z-999"
-      size="square">
-      <Icon name="x" title="Удалить" />
-    </Button>
+  <ImageTile>
     <img alt="" data-role="preview" />
-    <div class="tileSpinner" role="status">
-      <Icon
-        name="spinner"
-        title="Загрузка"
-        class="size-8 animate-spin"
-      />
-      <span class="sr-only">Загрузка...</span>
-    </div>
-    <div class="tileError" aria-hidden="true"></div>
-  </div>
+  </ImageTile>
 </template>
 
 <style>
@@ -105,28 +68,10 @@ const { images } = Astro.props;
     gap: 0.5rem;
   }
 
-  .productImage img,
   .addItemEntry {
     width: 100%;
     aspect-ratio: 1;
     user-select: none;
-  }
-
-  .productImage {
-    position: relative;
-    border: var(--border-width) solid var(--border);
-  }
-
-  .productImage img {
-    display: block;
-    object-fit: cover;
-    transition:
-      opacity 170ms ease-out,
-      filter 170ms ease-out,
-      transform 0.3s ease-out;
-  }
-
-  .addItemEntry {
     padding: 0.2rem;
     text-align: center;
     line-height: 1;
@@ -163,57 +108,6 @@ const { images } = Astro.props;
   .addItemEntry:hover .plus {
     transform: scale(1.15);
     color: var(--foreground);
-  }
-
-  /* Per-tile upload state overlays. Only one of these is visible at a time,
-     driven by the `data-status` attribute set from dropzone-gallery.ts. */
-  .tileSpinner,
-  .tileError {
-    display: none;
-    position: absolute;
-    inset: 0;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .productImage[data-status="uploading"] {
-    cursor: wait;
-  }
-
-  .productImage[data-status="uploading"] img {
-    opacity: 0.5;
-    filter: grayscale(0.4);
-  }
-
-  .productImage[data-status="uploading"] .tileSpinner {
-    display: flex;
-  }
-
-  .productImage[data-status="error"] img {
-    opacity: 0.35;
-  }
-
-  .productImage[data-status="error"] .tileError {
-    display: flex;
-  }
-
-  .tileError {
-    background: color-mix(in oklch, var(--destructive) 15%, transparent);
-  }
-
-  .tileError::after {
-    content: "!";
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: 50%;
-    background: var(--destructive);
-    color: var(--destructive-foreground);
-    font-size: var(--step--1);
-    font-weight: 700;
-    line-height: 1;
   }
 </style>
 

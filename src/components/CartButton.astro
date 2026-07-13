@@ -4,7 +4,7 @@ import { Icon } from "astro-icon/components";
 ---
 
 <Button
-  class="relative aspect-square size-9! px-0! py-0! bg-background! text-foreground! hover:bg-foreground! hover:text-background!"
+  class="navElementWrapper relative aspect-square size-9! px-0! py-0! text-foreground! hover:bg-muted! hover:text-background!"
   size="sm"
   aria-label="Корзина"
   href="/checkout"
@@ -13,6 +13,7 @@ import { Icon } from "astro-icon/components";
   <span
     class="absolute -top-1 -right-1 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-foreground px-1 text-xs leading-none text-background!"
     x-transition
+    x-cloak
     x-show="$store.cart.cartItemsCount"
     x-text="$store.cart.cartItemsCount"></span>
 </Button>

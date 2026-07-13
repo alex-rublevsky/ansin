@@ -1,0 +1,21 @@
+---
+import { getAllDashboardCategories } from "@/db/dashboard/categories/allCategories";
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+
+const categories = await getAllDashboardCategories();
+---
+
+<DashboardLayout title="Ансин — Админка">
+  <section class="min-h-screen flex flex-col justify-center items-center py-2 pb-18">
+   {categories.length > 0 ? (
+    <div class="flex flex-col gap-s">
+      {categories.map((category) => (
+          <h2>{category.name}</h2>
+      ))}
+    </div>
+   ) : (
+    <h1 class="text-center">пока пусто</h1>
+   )}
+  </section>
+</DashboardLayout>
+

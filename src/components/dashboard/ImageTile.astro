@@ -1,0 +1,100 @@
+---
+import Button from "@/components/shared/Button.astro";
+import { Icon } from "astro-icon/components";
+
+interface Props {
+  path?: string;
+  status?: "ready" | "uploading" | "error";
+}
+
+const { path, status } = Astro.props;
+---
+
+<div
+  class="productImage relative group cursor-grab"
+  data-path={path}
+  data-status={status}>
+  <Button
+    data-action="remove"
+    class="opacity-0 group-hover:opacity-100 absolute top-0.5 right-0.5 z-999"
+    size="square">
+    <Icon name="x" title="Удалить" />
+  </Button>
+  <slot />
+  <div class="tileSpinner" role="status">
+    <Icon name="spinner" title="Загрузка" class="size-8 animate-spin" />
+    <span class="sr-only">Загрузка...</span>
+  </div>
+  <div class="tileError" aria-hidden="true" />
+</div>
+
+<style>
+  /* `img` lives in the caller's slot (either an optimized <Image> for
+     existing photos, or a plain <img> for newly-staged uploads), so it
+     carries the caller's own scope attribute, not this component's. These
+     rules are marked :global() to still reach across that boundary. */
+  :global(.productImage) {
+    position: relative;
+    border: var(--border-width) solid var(--border);
+  }
+
+  :global(.productImage img) {
+    width: 100%;
+    aspect-ratio: 1;
+    user-select: none;
+    display: block;
+    object-fit: cover;
+    transition:
+      opacity 170ms ease-out,
+      filter 170ms ease-out,
+      transform 0.3s ease-out;
+  }
+
+  :global(.tileSpinner, .tileError) {
+    display: none;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+  }
+
+  :global(.productImage[data-status="uploading"]) {
+    cursor: wait;
+  }
+
+  :global(.productImage[data-status="uploading"] img) {
+    opacity: 0.5;
+    filter: grayscale(0.4);
+  }
+
+  :global(.productImage[data-status="uploading"] .tileSpinner) {
+    display: flex;
+  }
+
+  :global(.productImage[data-status="error"] img) {
+    opacity: 0.35;
+  }
+
+  :global(.productImage[data-status="error"] .tileError) {
+    display: flex;
+  }
+
+  :global(.tileError) {
+    background: color-mix(in oklch, var(--destructive) 15%, transparent);
+  }
+
+  :global(.tileError::after) {
+    content: "!";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--destructive);
+    color: var(--destructive-foreground);
+    font-size: var(--step--1);
+    font-weight: 700;
+    line-height: 1;
+  }
+</style>

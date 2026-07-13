@@ -1,22 +1,22 @@
 ---
-import { Image } from "astro:assets";
-import { Icon } from "astro-icon/components";
 import { BASE_IMAGE_URL } from "@/constants";
+import { Icon } from "astro-icon/components";
+import { Image } from "astro:assets";
 import Badge from "../shared/Badge.astro";
 
 const { product } = Astro.props;
 
-const { images } = product;
+const images = product.images ?? [];
 ---
 
-<a href={`dashboard/product/${product.slug}`} class="productСard">
+<a href={`/dashboard/product/${product.slug}`} class="productCard relative block">
   {!product.isActive && (
     <Badge class="absolute top-2 left-2 z-10 pointer-events-none">
       Черновик
     </Badge>
   )}
 
-  <div class="productImage">
+  <div class="productImage relative aspect-square">
     {
       images.length > 0 ? (
         <Image
@@ -25,10 +25,10 @@ const { images } = product;
           height={500}
           alt={product.name}
           loading="lazy"
-          class="object-cover "
+          class="h-full w-full object-cover object-center"
         />
       ) : (
-        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none bg-muted/20">
           <Icon
             name="image"
             title="Нет изображения"
@@ -39,5 +39,5 @@ const { images } = product;
     }
   </div>
 
-  <p class="text-sm">{product.name}</p>
+  <p class="text-sm pt-1">{product.name}</p>
 </a>

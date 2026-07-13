@@ -64,6 +64,18 @@ export const categories = sqliteTable("categories", {
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
 });
 
+/** Snapshot of a cart line at checkout — keep display fields even if the product changes later. */
+export type OrderItem = {
+  productId: number;
+  variationId: number;
+  productName: string;
+  slug: string;
+  image: string;
+  variationWeight: number;
+  quantity: number;
+  price: number;
+};
+
 export const orders = sqliteTable("orders", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   orderNumber: text("order_number").notNull().unique(),
@@ -71,14 +83,7 @@ export const orders = sqliteTable("orders", {
   customerEmail: text("customer_email").notNull(),
   customerPhone: text("customer_phone"),
   items: text("items", { mode: "json" })
-    .$type<
-      Array<{
-        productId: number;
-        productName: string;
-        quantity: number;
-        price: number;
-      }>
-    >()
+    .$type<OrderItem[]>()
     .notNull(),
   totalAmount: real("total_amount").notNull(),
   status: text("status", { enum: ["pending", "confirmed", "cancelled"] })
@@ -215,3 +220,5 @@ export type Product = typeof products.$inferSelect;
 export type NewProduct = typeof products.$inferInsert;
 export type ProductVariation = typeof productVariations.$inferSelect;
 export type NewProductVariation = typeof productVariations.$inferInsert;
+export type Order = typeof orders.$inferSelect;
+export type NewOrder = typeof orders.$inferInsert;

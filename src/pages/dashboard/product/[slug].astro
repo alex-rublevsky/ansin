@@ -1,25 +1,17 @@
 ---
 import DashboardLayout from "@/layouts/DashboardLayout.astro";
-import { getDashboardProductBySlug } from "@/db/dashboard/products/productBySlug";
+import { getProductBySlug } from "@/db/dashboard/products/productBySlug";
 import AdminProductForm from "@/components/dashboard/ProductForm.astro";
 
 const { slug } = Astro.params;
 
-const detail = await getDashboardProductBySlug(slug!);
+const product = await getProductBySlug(slug);
 
-if (!detail) {
-  return Astro.redirect("/dashboard");
+if (!product) {
+  return Astro.redirect("/dashboard/product/404");
 }
-
-const { product, variations } = detail;
 ---
 
 <DashboardLayout title={product.name}>
-  <section
-    class="relative flex flex-col items-start gap-6 lg:flex-row lg:gap-10 pt-10"
-  >
-    <div class="min-w-0 lg:flex-1">
-      <AdminProductForm product={product} variations={variations} />
-    </div>
-  </section>
+  <AdminProductForm product={product} />
 </DashboardLayout>

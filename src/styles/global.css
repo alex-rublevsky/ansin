@@ -25,6 +25,22 @@
   );
 }
 
+.autoGridLarge {
+  /* Fluid min column: ~5rem on narrow viewports → ~10rem from ~360px up (replaces 5rem / 10rem @ 360px). */
+  --min-col-size: clamp(
+    10rem,
+    calc(10rem + 10rem * (100vw - 280px) / 80px),
+    27rem
+  );
+  display: grid;
+  gap: var(--space-2xs);
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(var(--min-col-size), 100%), 1fr)
+  );
+}
+
+
 .productImageWrapper {
   position: relative;
 }
@@ -48,4 +64,12 @@
   }
 }
 
-
+.navElementWrapper {
+    background: color-mix(in oklch, var(--background) 80%, transparent);
+    backdrop-filter: var(--nav-backdrop-blur, blur(6px));
+    z-index: 9999;
+    width: fit-content;
+    border-radius: var(--radius-lg);
+    border: var(--border-width) solid color-mix(in oklch, var(--muted) 40%, transparent);
+    padding: var(--space-3xs);
+}

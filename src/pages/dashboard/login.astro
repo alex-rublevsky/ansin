@@ -2,15 +2,56 @@
 import AuthLayout from "@/layouts/AuthLayout.astro";
 import Button from "@/components/shared/Button.astro";
 import Link from "@/components/shared/Link.astro";
-
+import { auth } from "@/lib/auth";
 import { Icon } from "astro-icon/components";
 
 const error = Astro.url.searchParams.get("error");
+
+const session = await auth.api.getSession({
+  headers: Astro.request.headers,
+});
+
+const user = session?.user ?? null;
+const displayName = user?.name || user?.email;
+const displayPic = user?.image;
 ---
 
 <AuthLayout title="Вход в админку">
-  <main class="w-full max-w-md space-y-8 text-center">
-    <h1 class="text-lg! font-normal!">Вход в админку</h1>
+  <main class="w-full max-w-sm space-y-6 text-center grid">
+    <h1 class="text-md! font-thin! text-foreground-muted leading-[1.7]">
+      {
+        displayName ? (
+          <>
+            Вы уже авторизованы,
+            <br />
+            <span class="inline-flex items-center justify-center gap-2">
+              {displayPic && (
+                <img
+                  src={displayPic}
+                  alt=""
+                  referrerpolicy="no-referrer"
+                  class="size-12 rounded-full object-cover"
+                />
+              )}
+              <span class="font-cursive text-lg">{displayName}</span>
+            </span>
+          </>
+        ) : (
+          "Вход в админку"
+        )
+      }
+    </h1>
+
+    {
+      displayName ? (
+        <Button href="/dashboard">В админку</Button>
+      ) : (
+        <Button id="google-signin" class="w-full" withIcon>
+          <Icon name="google" title="Google" />
+          <span data-signin-label>Войти</span>
+        </Button>
+      )
+    }
 
     {
       error === "unauthorized" && (
@@ -20,54 +61,51 @@ const error = Astro.url.searchParams.get("error");
       )
     }
 
-    <Button id="google-signin" class="w-full" withIcon>
-      <Icon name="google" title="Google" />
-      <span data-signin-label>Войти</span>
-    </Button>
-
-    <Link href="/">
-      &larr; Вернуться в магазин
-    </Link>
+    <Link href="/"> &larr; В магазин </Link>
   </main>
 </AuthLayout>
 
 <script>
-  document.getElementById("google-signin")?.addEventListener("click", async (e) => {
-    const button = e.currentTarget as HTMLButtonElement;
-    const label = button.querySelector<HTMLSpanElement>("[data-signin-label]");
-    button.disabled = true;
-    if (label) label.textContent = "Вход...";
+  document
+    .getElementById("google-signin")
+    ?.addEventListener("click", async (e) => {
+      const button = e.currentTarget as HTMLButtonElement;
+      const label = button.querySelector<HTMLSpanElement>(
+        "[data-signin-label]",
+      );
+      button.disabled = true;
+      if (label) label.textContent = "Вход...";
 
-    try {
-      const response = await fetch("/api/auth/sign-in/social", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          provider: "google",
-          callbackURL: "/dashboard",
-        }),
-      });
+      try {
+        const response = await fetch("/api/auth/sign-in/social", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            provider: "google",
+            callbackURL: "/dashboard",
+          }),
+        });
 
-      if (!response.ok) {
-        alert("Не удалось войти. Попробуйте еще раз.");
+        if (!response.ok) {
+          alert("Не удалось войти. Попробуйте еще раз.");
+          button.disabled = false;
+          if (label) label.textContent = "Войти";
+          return;
+        }
+
+        const data = await response.json();
+
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          alert("Ошибка аутентификации: Нет redirect URL");
+          button.disabled = false;
+          if (label) label.textContent = "Войти";
+        }
+      } catch (_error) {
+        alert("Ошибка сети. Попробуйте еще раз.");
         button.disabled = false;
         if (label) label.textContent = "Войти";
-        return;
       }
-
-      const data = await response.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Ошибка аутентификации: Нет redirect URL");
-        button.disabled = false;
-        if (label) label.textContent = "Войти";
-      }
-    } catch (_error) {
-      alert("Ошибка сети. Попробуйте еще раз.");
-      button.disabled = false;
-      if (label) label.textContent = "Войти";
-    }
-  });
+    });
 </script>

@@ -62,6 +62,10 @@
   --spacing-l-xl: var(--space-l-xl);
   --spacing-xl-2xl: var(--space-xl-2xl);
   --spacing-2xl-3xl: var(--space-2xl-3xl);
+
+  --radius-sm: var(--spacing-xs);
+  --radius-md: var(--spacing-m);
+  --radius-lg: var(--spacing-l);
 }
 
 :root {
@@ -69,17 +73,18 @@
   --font-serif: var(--font-kazuki-reiwa), serif;
   --font-chinese: var(--font-long-cang), cursive;
 
-  --hue: 263.26;
+  --hue: 48.72;
 
-  --background: oklch(0.98 0.005 var(--hue));
+
+  --background: oklch(0.9893 0.0025 var(--hue));
   --foreground: oklch(0.12 0.03 var(--hue));
 
-  --foreground-muted: oklch(0.55 0.03 var(--hue));
+  --foreground-muted: oklch(0.55 0.015 var(--hue));
 
-  --muted: oklch(0.75 0.02 var(--hue));
-  --muted-foreground: oklch(0.3 0.02 var(--hue));
+  --muted: oklch(0.75 0.015 var(--hue));
+  --muted-foreground: oklch(0.3 0.015 var(--hue));
 
-  --border: oklch(0.92 0.02 var(--hue));
+  --border: oklch(0.92 0.015 var(--hue));
 
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.98 0.01 25);
@@ -114,8 +119,7 @@
   --space-xl-2xl: clamp(3.1875rem, 2.7105rem + 2.3849vw, 5rem);
   --space-2xl-3xl: clamp(4.25rem, 3.3947rem + 4.2763vw, 7.5rem);
 
-  --border-width: clamp(0.12rem, 0.05rem + -0.05vw, 0.15rem);
-  --border-thick: clamp(0.17rem, 0.15rem + -0.05vw, 0.23rem);
+  --border-width: clamp(0.117rem, 0.05rem + 0.03vw, 0.14rem);
 }
 
 html {
@@ -133,8 +137,8 @@ html {
   }
 
   section {
-    padding-left: var(--space-s);
-    padding-right: var(--space-s);
+    padding-left: var(--space-2xs);
+    padding-right: var(--space-2xs);
   }
 
   section.no-padding {

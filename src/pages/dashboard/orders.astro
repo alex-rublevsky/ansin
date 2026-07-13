@@ -1,7 +1,19 @@
 ---
+import DashboardCard from "@/components/dashboard/DashboardCard.astro";
+import { getAllDashboardOrders } from "@/db/dashboard/orders/allOrders";
 import DashboardLayout from "@/layouts/DashboardLayout.astro";
+
+const orders = await getAllDashboardOrders();
 ---
 
 <DashboardLayout title="Ансин — Админка">
-  <div></div>
+  <section class="min-h-screen flex flex-col justify-cente py-2 pb-18">
+   {orders.length > 0 ? (
+    <div class="grid grid-cols-1 gap-4 autoGridLarge">
+      {orders.map((order) => <DashboardCard order={order} />)}
+    </div>
+   ) : (
+    <h1 class="text-center">пока пусто</h1>
+   )}
+  </section>
 </DashboardLayout>

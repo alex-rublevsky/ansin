@@ -1,9 +1,11 @@
 ---
-import DashboardLayout from "@/layouts/DashboardLayout.astro";
-import { getAllDashboardProducts } from "@/db/dashboard/products/allProducts";
 import DashboardProductCard from "@/components/dashboard/DashboardProductCard.astro";
+import { getAllDashboardProducts } from "@/db/dashboard/products/allProducts";
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
 
 const products = await getAllDashboardProducts();
+const activeProducts = products.filter((product) => product.isActive);
+const inactiveProducts = products.filter((product) => !product.isActive);
 ---
 
 <DashboardLayout title="Ансин — Админка">
@@ -12,8 +14,31 @@ const products = await getAllDashboardProducts();
       <div class="pt-10 pb-16 mx-auto">
         <h1 class="text-center pb-1">Админка</h1>
       </div>
-      <div class="autoGrid pb-24">
-        {products.map((product) => <DashboardProductCard product={product} />)}
+      <div class="pb-24 space-y-12">
+        {
+          activeProducts.length > 0 && (
+            <div>
+              <h2 class="pb-4 text-xl">Активные</h2>
+              <div class="autoGrid">
+                {activeProducts.map((product) => (
+                  <DashboardProductCard product={product} />
+                ))}
+              </div>
+            </div>
+          )
+        }
+        {
+          inactiveProducts.length > 0 && (
+            <div>
+              <h2 class="pb-4 text-xl">Черновики</h2>
+              <div class="autoGrid">
+                {inactiveProducts.map((product) => (
+                  <DashboardProductCard product={product} />
+                ))}
+              </div>
+            </div>
+          )
+        }
       </div>
     </section>
   </main>

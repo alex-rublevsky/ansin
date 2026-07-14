@@ -1,7 +1,8 @@
 ---
 // Headless: expects to be rendered inside a `productPicker` Alpine scope
 // (see src/lib/product-picker.ts) and reads/calls:
-//   variations, availableWeights, isSelected(weight), selectWeight(weight)
+//   variations, availableWeights, isSelected(weight), selectWeight(weight),
+//   variationLabel(weight)
 // Stale/removed variations are handled globally by StaleVariationModal.astro,
 // not here.
 const { size = "default", class: className } = Astro.props;
@@ -22,7 +23,7 @@ const sizeClass =
       @click.prevent="selectWeight(v.weight)"
       :disabled="!availableWeights.includes(v.weight)"
       :class="{ 'is-selected': isSelected(v.weight) }"
-      x-text="v.weight + 'г'">
+      x-text="variationLabel(v.weight)">
     </button>
   </template>
 </div>
@@ -35,7 +36,7 @@ const sizeClass =
     justify-content: center;
     white-space: nowrap;
     border-radius: 9999px;
-    border: 1px solid var(--border);
+    border: var(--border-width) solid var(--border);
     background: var(--background);
     transition:
       background-color 0.2s ease-out,
@@ -43,21 +44,20 @@ const sizeClass =
       color 0.2s ease-out;
   }
 
- .variationOption:active {
-  transform: scale(0.97);
-  transition: 170ms ease-out;
-}
+  .variationOption:active {
+    transform: scale(0.97);
+    transition: 170ms ease-out;
+  }
   .variationOption:hover:not(:disabled) {
     border-color: var(--foreground-muted);
     background: color-mix(in oklch, var(--muted) 20%, var(--background));
   }
 
   .variationOption.is-selected:hover:not(:disabled) {
-  border-color: var(--foreground);
-  background: color-mix(in oklch, var(--foreground) 75%, var(--background));
-  color: var(--background);
-}
- 
+    border-color: var(--foreground);
+    background: color-mix(in oklch, var(--foreground) 75%, var(--background));
+    color: var(--background);
+  }
 
   .variationOption.is-selected {
     border-color: var(--foreground);
@@ -67,7 +67,7 @@ const sizeClass =
 
   .variationOption--sm {
     padding: 0 0.25rem;
-    font-size: 0.75rem;
+    font-size: var(--step--2);
     line-height: 1rem;
   }
 

@@ -12,6 +12,7 @@
 
 .autoGrid {
   /* Fluid min column: ~5rem on narrow viewports → ~10rem from ~360px up (replaces 5rem / 10rem @ 360px). */
+  /* auto-fill keeps empty tracks so sparse rows don't stretch cards or inflate gaps. */
   --min-col-size: clamp(
     5rem,
     calc(5rem + 5rem * (100vw - 280px) / 80px),
@@ -20,7 +21,7 @@
   display: grid;
   gap: var(--space-2xs);
   grid-template-columns: repeat(
-    auto-fit,
+    auto-fill,
     minmax(min(var(--min-col-size), 100%), 1fr)
   );
 }
@@ -35,7 +36,7 @@
   display: grid;
   gap: var(--space-2xs);
   grid-template-columns: repeat(
-    auto-fit,
+    auto-fill,
     minmax(min(var(--min-col-size), 100%), 1fr)
   );
 }

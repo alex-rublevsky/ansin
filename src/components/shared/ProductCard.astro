@@ -1,10 +1,11 @@
 ---
-import { BASE_IMAGE_URL } from "@/constants";
-import { Image } from "astro:assets";
+import Badge from "@/components/shared/Badge.astro";
 import Button from "@/components/shared/Button.astro";
-import { Icon } from "astro-icon/components";
 import VariationPicker from "@/components/shared/VariationPicker.astro";
+import { ADMIN_STOREFRONT_FLAG_KEY, BASE_IMAGE_URL } from "@/constants";
 import { toProductPickerInit } from "@/lib/product-picker";
+import { Icon } from "astro-icon/components";
+import { Image } from "astro:assets";
 
 const { product } = Astro.props;
 
@@ -21,7 +22,9 @@ const pickerInit = toProductPickerInit(
     name: product.name,
     image: images.length > 0 ? BASE_IMAGE_URL + images[0] : "",
     volume: product.volume,
+    cakeVolume: product.cakeVolume,
     variations: product.variations,
+    discountedPrice: product.discountedPrice,
   },
   { mode: "quickAdd" },
 );
@@ -30,19 +33,41 @@ const pickerInit = toProductPickerInit(
 <a
   class="productCard"
   href={`/product/${product.slug}`}
+  data-product-slug={product.slug}
+  data-product-id={product.id}
   x-data={`productPicker(${JSON.stringify(pickerInit)})`}>
-  <div class="productImageWrapper">
-    <div class="productImage">
+  <div class="productImageWrapper" data-image-container>
+    <div class="productImage relative aspect-square">
       {
         images.length > 0 ? (
-          <Image
-            src={BASE_IMAGE_URL + images[0]}
-            width={500}
-            height={500}
-            alt={product.name}
-            loading="lazy"
-            class="object-cover "
-          />
+          <>
+            <div data-image-wrapper="0" class="absolute inset-0 bg-background">
+              <Image
+                src={BASE_IMAGE_URL + images[0]}
+                width={500}
+                height={500}
+                alt={product.name}
+                loading="lazy"
+                class="h-full w-full object-cover object-center"
+                data-image-index="0"
+              />
+            </div>
+            {images.length > 1 ? (
+              <div
+                data-image-wrapper="1"
+                class="productCardSecondImage absolute inset-0 bg-background opacity-0">
+                <Image
+                  src={BASE_IMAGE_URL + images[1]}
+                  width={500}
+                  height={500}
+                  alt=""
+                  loading="lazy"
+                  class="h-full w-full object-cover object-center"
+                  data-image-index="1"
+                />
+              </div>
+            ) : null}
+          </>
         ) : (
           <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
             <Icon
@@ -56,8 +81,21 @@ const pickerInit = toProductPickerInit(
     </div>
 
     <Button
+      variant="tertiary"
+      size="square"
+      class="editProductButton"
+      x-cloak
+      {...{
+        "x-show": `!!localStorage.getItem(${JSON.stringify(ADMIN_STOREFRONT_FLAG_KEY)})`,
+        "@click.prevent.stop": `window.location.assign(${JSON.stringify(`/dashboard/product/${product.slug}`)})`,
+      } as any}>
+      <Icon name="edit" title="Изменить" />
+    </Button>
+
+    <Button
       @click.prevent.stop="addToCart()"
       class="addToCartButton"
+      variant="primary"
       size="square"
       {...{ ":disabled": "!canAdd" } as any}>
       <Icon name="cart" title="Корзина" />
@@ -65,31 +103,61 @@ const pickerInit = toProductPickerInit(
   </div>
 
   <div class="flex gap-2xs">
-    <p x-text="displayPrice"></p>
+    <p class="font-serif font-light px-1 pt-1 pb-0" x-show="!allInCart" x-text="displayPrice">
+    </p>
+    <Badge x-show="allInCart" class="mx-1 mt-1.5" x-cloak>Уже в корзине</Badge>
     {
       product.discountedPrice ? (
-        <p class="line-through">{product.discountedPrice}</p>
+        <p class="line-through" x-show="!allInCart">
+          {product.discountedPrice}
+        </p>
       ) : null
     }
   </div>
 
-  <p class="text-sm">{product.name}</p>
+  <p class="text-xs pt-0.5 pb-1 px-1">{product.name}</p>
 
   <VariationPicker size="sm" />
 </a>
 
 <style>
-  .addToCartButton {
+  .addToCartButton,
+  .editProductButton {
     display: block;
     position: absolute;
+    opacity: 0;
+    z-index: 2;
+  }
+
+  .addToCartButton {
     bottom: 0.4rem;
     right: 0.4rem;
-    opacity: 0;
     transform: translateY(0.4rem);
   }
 
+  .editProductButton {
+    top: 0.4rem;
+    right: 0.4rem;
+    transform: translateY(-0.4rem);
+  }
+
+  /* Stay hidden until card hover; Button handles disabled mute. */
+  .addToCartButton:disabled {
+    opacity: 0;
+  }
+
   @media (hover: hover) {
-    .productCard:hover .addToCartButton {
+    .productCardSecondImage {
+      display: block;
+      transition: opacity 240ms ease-out;
+    }
+
+    .productCard:hover .productCardSecondImage {
+      opacity: 1;
+    }
+
+    .productCard:hover .addToCartButton,
+    .productCard:hover .editProductButton {
       opacity: 1;
       transform: translateY(0);
     }

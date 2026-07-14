@@ -55,9 +55,9 @@ const baseClasses =
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    "border-(length:--border-width) border-foreground bg-foreground text-background hover:bg-background hover:text-foreground active:scale-[0.97] active:bg-foreground active:text-background",
+    "border-(length:--border-width) border-foreground bg-foreground text-background hover:bg-background hover:text-foreground active:scale-[0.97] active:bg-foreground active:text-background disabled:opacity-100 disabled:border-muted disabled:bg-[color-mix(in_oklch,var(--background)_75%,transparent)] disabled:text-muted-foreground disabled:backdrop-blur-[6px] hover:disabled:bg-[color-mix(in_oklch,var(--background)_75%,transparent)] hover:disabled:text-muted-foreground",
   secondary:
-    "border-(length:--border-width) border-foreground bg-transparent text-foreground hover:bg-foreground hover:text-background active:bg-foreground active:text-background",
+    "border-(length:--border-width) border-foreground bg-background text-foreground hover:bg-foreground hover:text-background active:bg-foreground active:text-background",
   tertiary:
     "border-(length:--border-width) border-foreground/15 bg-background/70 text-foreground backdrop-blur-sm hover:bg-foreground hover:text-background active:bg-foreground active:text-background disabled:border-muted/60 disabled:bg-muted/70 disabled:text-muted-foreground hover:disabled:bg-muted",
   pill: "text-foreground rounded-full hover:bg-[color-mix(in_oklch,var(--muted)_50%,var(--background))] active:bg-muted-foreground data-[active]:bg-foreground data-[active]:text-background data-[active]:border-foreground",
@@ -70,7 +70,7 @@ const sizeClasses: Record<Size, string> = {
   default: "h-11 px-4 py-3 text-sm",
   sm: "h-9 px-3 py-1 text-sm",
   categoryFilter: "px-2 pt-0.5 pb-0.5 radius-md text-sm",
-  square: "aspect-square p-0.5 text-sm",
+  square: "aspect-square p-1.5 text-sm",
   xs: "px-0.5 px-1 py-0 text-xs",
   lg: "h-12 px-6 text-base! font-normal [&_svg]:size-6",
 };

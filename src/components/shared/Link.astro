@@ -13,13 +13,24 @@ const { href, class: className } = Astro.props;
 </a>
 
 <style>
-  a:hover {
+ 
+  a:active {
+    transform: scale(0.97);
+    transition: 170ms ease-out;
+  }
+
+  @media (hover: hover) {
+    a:hover {
     text-decoration: underline;
     text-decoration-thickness: 0.065rem;
     text-underline-offset: 0.3rem;
   }
-  a:active {
-    transform: scale(0.97);
-    transition: 170ms ease-out;
+  }
+  @media !(hover: none) {
+    a {
+    text-decoration: underline;
+    text-decoration-thickness: 0.065rem;
+    text-underline-offset: 0.3rem;
+  }
   }
 </style>

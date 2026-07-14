@@ -1,11 +1,8 @@
-import { asc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
-  productVariations,
-  products,
   type Product,
-  type ProductVariation,
+  type ProductVariation
 } from "@/db/schema";
 
 export type DashboardProductDetail = {
@@ -13,22 +10,15 @@ export type DashboardProductDetail = {
   variations: ProductVariation[];
 };
 
-export async function getDashboardProductBySlug(
-  slug: string,
-): Promise<DashboardProductDetail | undefined> {
-  const [product] = await db
-    .select()
-    .from(products)
-    .where(eq(products.slug, slug))
-    .limit(1);
+export async function getProductBySlug(slug?: string) {
+  if (!slug) throw new Error("slug is required");
 
-  if (!product) return undefined;
-
-  const variations = await db
-    .select()
-    .from(productVariations)
-    .where(eq(productVariations.productId, product.id))
-    .orderBy(asc(productVariations.weight));
-
-  return { product, variations };
+  return await db.query.products.findFirst({
+    where: {
+      slug: slug,
+    },
+    with: {
+      variations: { orderBy: { weight: "desc" } },
+    },
+  });
 }

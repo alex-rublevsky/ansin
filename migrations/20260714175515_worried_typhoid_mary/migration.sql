@@ -1,5 +1,5 @@
 CREATE TABLE `accounts` (
-	`id` text PRIMARY KEY NOT NULL,
+	`id` text PRIMARY KEY,
 	`account_id` text NOT NULL,
 	`provider_id` text NOT NULL,
 	`user_id` text NOT NULL,
@@ -12,21 +12,20 @@ CREATE TABLE `accounts` (
 	`password` text,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
-	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
+	CONSTRAINT `fk_accounts_user_id_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`)
 );
 --> statement-breakpoint
 CREATE TABLE `categories` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`id` integer PRIMARY KEY AUTOINCREMENT,
 	`name` text NOT NULL,
-	`slug` text NOT NULL,
+	`slug` text NOT NULL UNIQUE,
 	`description` text,
 	`display_order` integer DEFAULT 0 NOT NULL,
 	`is_active` integer DEFAULT true NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `categories_slug_unique` ON `categories` (`slug`);--> statement-breakpoint
 CREATE TABLE `deployment_changes` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`id` integer PRIMARY KEY AUTOINCREMENT,
 	`entity_type` text NOT NULL,
 	`entity_slug` text NOT NULL,
 	`action` text NOT NULL,
@@ -35,7 +34,7 @@ CREATE TABLE `deployment_changes` (
 );
 --> statement-breakpoint
 CREATE TABLE `deployments` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`id` integer PRIMARY KEY AUTOINCREMENT,
 	`source` text NOT NULL,
 	`status` text DEFAULT 'pending' NOT NULL,
 	`changes_count` integer DEFAULT 0 NOT NULL,
@@ -44,8 +43,8 @@ CREATE TABLE `deployments` (
 );
 --> statement-breakpoint
 CREATE TABLE `orders` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`order_number` text NOT NULL,
+	`id` integer PRIMARY KEY AUTOINCREMENT,
+	`order_number` text NOT NULL UNIQUE,
 	`customer_name` text NOT NULL,
 	`customer_email` text NOT NULL,
 	`customer_phone` text,
@@ -58,67 +57,59 @@ CREATE TABLE `orders` (
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `orders_order_number_unique` ON `orders` (`order_number`);--> statement-breakpoint
 CREATE TABLE `product_variations` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`id` integer PRIMARY KEY AUTOINCREMENT,
 	`product_id` integer NOT NULL,
 	`weight` integer DEFAULT 0 NOT NULL,
 	`price` real NOT NULL,
-	`sku` text NOT NULL,
-	`sort` integer DEFAULT 0 NOT NULL,
+	`sku` text NOT NULL UNIQUE,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
-	FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON UPDATE no action ON DELETE cascade
+	CONSTRAINT `fk_product_variations_product_id_products_id_fk` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `product_variations_sku_unique` ON `product_variations` (`sku`);--> statement-breakpoint
-CREATE INDEX `idx_product_variations_product_id` ON `product_variations` (`product_id`);--> statement-breakpoint
-CREATE INDEX `idx_product_variations_product_sort` ON `product_variations` (`product_id`,`sort`);--> statement-breakpoint
 CREATE TABLE `products` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`id` integer PRIMARY KEY AUTOINCREMENT,
 	`name` text NOT NULL,
-	`description` text NOT NULL,
-	`price` real NOT NULL,
-	`slug` text NOT NULL,
-	`category_id` integer,
+	`description` text,
+	`slug` text NOT NULL UNIQUE,
+	`category_id` integer NOT NULL,
 	`volume` integer DEFAULT 0 NOT NULL,
 	`cake_volume` integer DEFAULT 0 NOT NULL,
-	`images` text DEFAULT '[]',
+	`images` text DEFAULT '[]' NOT NULL,
 	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
-	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
-	FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE no action ON DELETE no action
+	CONSTRAINT `fk_products_category_id_categories_id_fk` FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`)
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `products_slug_unique` ON `products` (`slug`);--> statement-breakpoint
 CREATE TABLE `sessions` (
-	`id` text PRIMARY KEY NOT NULL,
+	`id` text PRIMARY KEY,
 	`expires_at` integer NOT NULL,
-	`token` text NOT NULL,
+	`token` text NOT NULL UNIQUE,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`user_id` text NOT NULL,
 	`ip_address` text,
 	`user_agent` text,
-	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
+	CONSTRAINT `fk_sessions_user_id_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`)
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `sessions_token_unique` ON `sessions` (`token`);--> statement-breakpoint
 CREATE TABLE `users` (
-	`id` text PRIMARY KEY NOT NULL,
+	`id` text PRIMARY KEY,
 	`name` text NOT NULL,
-	`email` text NOT NULL,
+	`email` text NOT NULL UNIQUE,
 	`email_verified` integer DEFAULT false NOT NULL,
 	`image` text,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint
 CREATE TABLE `verifications` (
-	`id` text PRIMARY KEY NOT NULL,
+	`id` text PRIMARY KEY,
 	`identifier` text NOT NULL,
 	`value` text NOT NULL,
 	`expires_at` integer NOT NULL,
 	`created_at` integer,
 	`updated_at` integer
 );
+--> statement-breakpoint
+CREATE INDEX `idx_product_variations_product_id` ON `product_variations` (`product_id`);--> statement-breakpoint
+CREATE INDEX `idx_product_variations_product_weight` ON `product_variations` (`product_id`,`weight`);

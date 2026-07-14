@@ -14,6 +14,7 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@alpinejs/persist": "^3.15.12",
     "@astrojs/alpinejs": "^0.5.0",
     "@astrojs/check": "^0.9.9",
     "@astrojs/node": "^10.0.6",
@@ -41,6 +42,7 @@
     "typescript": "^6.0.3"
   },
   "devDependencies": {
+    "@types/alpinejs__persist": "^3.13.4",
     "drizzle-kit": "1.0.0-beta.22",
     "prettier": "^3.8.3",
     "prettier-plugin-astro": "^0.14.1",

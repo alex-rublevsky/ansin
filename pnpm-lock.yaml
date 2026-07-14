@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@alpinejs/persist':
+        specifier: ^3.15.12
+        version: 3.15.12
       '@astrojs/alpinejs':
         specifier: ^0.5.0
         version: 0.5.0(@types/alpinejs@3.13.11)(alpinejs@3.15.12)
@@ -84,6 +87,9 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
     devDependencies:
+      '@types/alpinejs__persist':
+        specifier: ^3.13.4
+        version: 3.13.4
       drizzle-kit:
         specifier: 1.0.0-beta.22
         version: 1.0.0-beta.22
@@ -98,6 +104,9 @@ importers:
         version: 4.22.4
 
 packages:
+
+  '@alpinejs/persist@3.15.12':
+    resolution: {integrity: sha512-vzDRf/3r8B5ihHvLYUkkg+XbJz4nNst+5jR5BM4Uff3BhdRenJlXKFnd3kYbM2Z/KCU65zg5neqOVhbNpytZ9A==}
 
   '@antfu/install-pkg@1.1.0':
     resolution: {integrity: sha512-MGQsmw10ZyI+EJo45CdSER4zEb+p31LpDAFp2Z3gkSd1yqVZGi0Ebx++YTEMonJy4oChEMLsxZ64j8FH6sSqtQ==}
@@ -1628,6 +1637,9 @@ packages:
 
   '@types/alpinejs@3.13.11':
     resolution: {integrity: sha512-3KhGkDixCPiLdL3Z/ok1GxHwLxEWqQOKJccgaQL01wc0EVM2tCTaqlC3NIedmxAXkVzt/V6VTM8qPgnOHKJ1MA==}
+
+  '@types/alpinejs__persist@3.13.4':
+    resolution: {integrity: sha512-H+cW7294EV5fGmIGD3BCJme54//KyWxZcP4uI9pk6W7fECR5hEwdO7j7wogz0o4vapS/kXiXiAjuqC9F+W0Vpw==}
 
   '@types/debug@4.1.13':
     resolution: {integrity: sha512-KSVgmQmzMwPlmtljOomayoR89W4FynCAi3E8PPs7vmDVPe84hT+vGPKkJfThkmXs0x0jAaa9U8uW8bbfyS2fWw==}
@@ -3464,6 +3476,8 @@ packages:
 
 snapshots:
 
+  '@alpinejs/persist@3.15.12': {}
+
   '@antfu/install-pkg@1.1.0':
     dependencies:
       package-manager-detector: 1.6.0
@@ -4834,6 +4848,10 @@ snapshots:
       '@tursodatabase/sync-win32-x64-msvc': 0.5.3
 
   '@types/alpinejs@3.13.11': {}
+
+  '@types/alpinejs__persist@3.13.4':
+    dependencies:
+      '@types/alpinejs': 3.13.11
 
   '@types/debug@4.1.13':
     dependencies:

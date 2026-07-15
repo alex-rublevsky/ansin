@@ -7,69 +7,250 @@ import Button from "@/components/shared/Button.astro";
 import Input from "@/components/shared/Input.astro";
 import { Icon } from "astro-icon/components";
 import CartItemEntry from "../components/cart/CartItemEntry.astro";
-
 ---
 
 <MainLayout title="Оформление заказа" description="Оформите ваш заказ">
-  <main x-data>
-    <section class="mx-auto max-w-7xl py-4 pb-28">
+  <main
+    x-data
+    class="min-h-screen"
+    x-effect="!$store.cart.cartItemsCount && window.scrollTo(0, 0)">
+    <!-- Empty cart: fixed so viewport centering is independent of checkout height/scroll -->
+    <section
+      class="fixed inset-0 z-10 grid place-items-center gap-4 py-16 pb-28"
+      x-show="!$store.cart.cartItemsCount"
+      x-cloak
+      x-transition:enter="transition ease-out duration-1000"
+      x-transition:enter-start="opacity-0 scale-90"
+      x-transition:enter-end="opacity-100 scale-100"
+      x-transition:leave="transition ease-in duration-1000"
+      x-transition:leave-start="opacity-100 scale-100"
+      x-transition:leave-end="opacity-0 scale-90">
+      <div class="flex flex-col items-center gap-s">
+        <h1 class="">Корзина пуста</h1>
+        <p class="text-foreground-muted max-w-prose pb-2">
+          Добавьте товары, чтобы оформить заказ.
+        </p>
+        <Button href="/" size="lg">Перейти в каталог</Button>
+      </div>
+    </section>
+
+    <!-- Checkout -->
+    <section
+      class="mx-auto w-full max-w-7xl py-4 pb-28"
+      x-show="$store.cart.cartItemsCount"
+      x-cloak
+      x-transition:enter="transition ease-out duration-1000"
+      x-transition:enter-start="opacity-0 scale-90"
+      x-transition:enter-end="opacity-100 scale-100"
+      x-transition:leave="transition ease-out duration-1000"
+      x-transition:leave-start="opacity-100 scale-100"
+      x-transition:leave-end="opacity-0 scale-90">
       <h1 class="text-lg! font-normal! pb-2xs">Оформление заказа</h1>
 
-      <div class="flex flex-col gap-8 lg:flex-row">
-        <!-- Left: Customer Information Form -->
+      <div class="flex flex-col-reverse gap-8 lg:flex-row">
         <div class="flex-1">
-          <form id="checkout-form">
+          <form novalidate id="checkout-form">
             <div class="textInputFields">
-              <Input name="name" label="Имя" required />
-              <Input name="lastName" label="Фамилия" required />
-              <Input name="email" label="Email" required />
-              <Input name="phone" label="Телефон" required />
+              <div class="nameFields">
+                <Input name="name" label="Имя" required />
+
+                <Input name="lastName" label="Фамилия" required />
+              </div>
+              <div class="contactFields">
+                <Input name="email" type="email" label="Email" required />
+                <Input
+                  name="phone"
+                  type="tel"
+                  label="Телефон"
+                  required
+                  pattern={"\\+?\\d{10,15}"}
+                  title="Введите корректный номер телефона"
+                />
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-y-2xs gap-x-s">
+              <fieldset>
+                <legend class="font-serif text-base">Оплата</legend>
+                <div class="flex items-center gap-2">
+                  <div class="form-group">
+                    <input
+                      type="radio"
+                      id="cash"
+                      name="paymentMethod"
+                      value="cash"
+                      required
+                    />
+                    <label for="cash">Наличные</label>
+                  </div>
+
+                  <div class="form-group">
+                    <input
+                      type="radio"
+                      id="card"
+                      name="paymentMethod"
+                      value="card"
+                      required
+                    />
+                    <label for="card">Карта</label>
+                  </div>
+                </div>
+                <p class="error-message mt-2 text-sm text-red-600" role="alert"></p>
+              </fieldset>
+
+              <fieldset x-data="{ deliveryMethod: '' }">
+                <legend class="font-serif text-base">Метод доставки</legend>
+                <div class="flex items-center gap-2">
+  
+                 <div class="form-group"> 
+                  <input x-model="deliveryMethod" type="radio" id="pickup" name="deliveryMethod" value="pickup" required />
+                  <label for="pickup" >Самовывоз <br> <span class="text-foreground-muted text-sm leading-[1.1]! inline-block text-nowrap">Черняховского 3в</span></label>
+                  </div>
+  
+                  <div class="form-group">
+                    <input x-model="deliveryMethod" type="radio" id="delivery" name="deliveryMethod" value="delivery" required />
+                    <label for="delivery">Доставка <br> <span class="text-foreground-muted text-sm leading-[1.1]! inline-block">Обсуждается после заказа</span></label>
+                  </div>
+  
+                 
+                  
+                </div>
+                <p class="error-message mt-2 text-sm text-red-600" role="alert"></p>
+                <div class="pt-3xs" x-cloak>
+                  <p class="text-sm text-foreground-muted" x-show="deliveryMethod === 'pickup'" x-cloak>Мы отправим вам адрес после оформления заказа</p>
+                  <p class="text-sm text-foreground-muted" x-show="deliveryMethod === 'delivery'" x-cloak>Укажите адрес доставки в комментарии к заказу</p>
+                </div>
+              </fieldset>
+
+              <fieldset x-data="{ contactMethod: '' }">
+                <legend class="font-serif text-base">Связаться со мной через</legend>
+                <div class="flex flex-wrap items-center gap-2">
+  
+                 <div class="form-group"> 
+                  <input 
+                  x-model="contactMethod"
+                  type="radio" id="instagram" name="contactMethod" value="instagram" required />
+                  <label for="instagram">Инстаграм</label>
+                  </div>
+  
+                  <div class="form-group">
+                    <input  x-model="contactMethod" type="radio" id="telegram" name="contactMethod" value="telegram" required />
+                    <label for="telegram">Телеграм</label>
+                  </div>
+  
+                  <div class="form-group">
+                    <input                   x-model="contactMethod"
+                    type="radio" id="email" name="contactMethod" value="email" required />
+                    <label for="email">Имейл</label>
+                  </div>
+  
+                  <div class="form-group">
+                    <input                  x-model="contactMethod"
+                     type="radio" id="whatsapp" name="contactMethod" value="whatsapp" required />
+                    <label for="whatsapp">WhatsApp</label>
+                  </div>
+                    
+               
+                    
+                </div>
+                <p class="error-message mt-2 text-sm text-red-600" role="alert"></p>
+                <div class="pt-3xs">
+                  <p
+                    class="text-sm text-foreground-muted"
+                    x-show="contactMethod === 'instagram'"
+                    x-cloak>
+                    Укажите название вашего профила в комментарии к заказу
+                  </p>
+                  <p
+                    class="text-sm text-foreground-muted"
+                    x-show="contactMethod === 'telegram'"
+                    x-cloak>
+                    Убедитесь, что указанный номер соответствует вашему профилю
+                  </p>
+                  <p
+                    class="text-sm text-foreground-muted"
+                    x-show="contactMethod === 'whatsapp'"
+                    x-cloak>
+                    Убедитесь, что указанный номер соответствует вашему профилю
+                  </p>
+                </div>
+              </fieldset>
+             
             </div>
             <Input name="comment" label="Комментарий к заказу" as="textarea" />
-           <div class="flex items-center gap-2 pt-3">
-            <Icon class="text-green-600 size-7 " name="safetyCheck" title="Данные в безопасности" />
-            <p class="text-sm text-foreground-muted">Данные в безопасности, надёжно защищены и не передаются третьим лицам</p>
-
-           </div>
+            <div class="lg:hidden">
+              <Button
+                type="submit"
+                class="place-order-btn w-full"
+                size="lg">
+                Оформить заказ
+              </Button>
+              <p
+                class="checkout-error mt-3 text-sm text-red-600"
+                hidden>
+              </p>
+            </div>
+            <div class="infoBlocks">
+              <div class="infoBlock">
+                <Icon
+                  class="text-green-600 size-7"
+                  name="safetyCheck"
+                  title="Данные в безопасности"
+                />
+                <p class="text-sm text-foreground-muted">
+                  Данные в безопасности, надёжно защищены и не передаются третьим
+                  лицам
+                </p>
+              </div>
+              <div class="infoBlock">
+                <Icon
+                  class="text-muted size-7"
+                  name="message"
+                  title="Данные в безопасности"
+                />
+                <p class="text-sm text-foreground-muted">
+                  Оформляя заказ, вы соглашаетесь на обработку персональных
+                  данных и связь с вами по указанным контактным данным для
+                  подтверждения и выполнения заказа.
+                </p>
+              </div>
+            </div>
           </form>
         </div>
 
-        <!-- Right: Order Summary -->
         <div class="lg:sticky lg:top-4 lg:w-108 lg:self-start">
           <div class="summaryWrap p-6">
-          
-              <div x-show="$store.cart.discount" class="flex items-baseline justify-between">
-                <p class="text-foreground-muted font-light">Скидка</p>
-                <p
-                  class="text-foreground-muted font-light"
-                  x-text="'-' + $store.cart.discount"></p>
-              </div>
-          
-
-            <div class="flex items-baseline justify-between">
-              <p class="text-foreground-muted font-light">Доставка</p>
-              <p class="text-foreground-muted text-sm font-light">
-                Обсуждается после заказа
+            <div
+              x-show="$store.cart.discount"
+              class="flex items-baseline justify-between bottomSeparator">
+              <p class="text-foreground-muted font-light">Скидка</p>
+              <p
+                class="text-foreground-muted font-light"
+                x-text="'-' + $store.cart.discount">
               </p>
             </div>
 
+          
+
             <div
-              class="flex items-baseline justify-between topSeparator py-5 mt-4 text-xl">
+              class="flex items-baseline justify-between py-5 mt-4 text-xl">
               <h3>Итого</h3>
               <h3 class="text-md" x-text="$store.cart.subtotal"></h3>
             </div>
 
-            <Button
-              id="place-order-btn"
-              type="submit"
-              form="checkout-form"
-              class="w-full"
-              size="lg">
-              Оформить заказ
-            </Button>
+            <div class="hidden lg:block">
+              <Button
+                type="submit"
+                form="checkout-form"
+                class="place-order-btn w-full"
+                size="lg">
+                Оформить заказ
+              </Button>
+              <p
+                class="checkout-error mt-3 text-sm text-red-600"
+                hidden>
+              </p>
+            </div>
 
-            <!-- Order Items -->
-            <!-- TODO: show only if items are present for the border to be gone -->
             <div class="mt-6">
               <div class="space-y-3">
                 <template
@@ -86,13 +267,178 @@ import CartItemEntry from "../components/cart/CartItemEntry.astro";
   </main>
 </MainLayout>
 
+<script>
+  import type { CartItem } from "@/lib/cart/types";
+import { toOrderItem } from "@/lib/orders/toOrderItem";
+import { actions } from "astro:actions";
+
+  type Field = HTMLInputElement | HTMLTextAreaElement;
+
+  const formEl = document.getElementById("checkout-form");
+  const submitBtns =
+    document.querySelectorAll<HTMLButtonElement>(".place-order-btn");
+  const errorEls = document.querySelectorAll<HTMLElement>(".checkout-error");
+
+  if (!(formEl instanceof HTMLFormElement)) {
+    throw new Error("Checkout form not found");
+  }
+
+  const form = formEl;
+
+  function validateField(field: Field): boolean {
+    const isRadio =
+      field instanceof HTMLInputElement && field.type === "radio";
+    const errorEl = isRadio
+      ? field.closest("fieldset")?.querySelector(".error-message")
+      : field.parentElement?.querySelector(".error-message");
+
+    if (!field.validity.valid) {
+      const message =
+        field.dataset.error ||
+        (field.validity.valueMissing
+          ? "Обязательное поле"
+          : field.title || "Некорректное значение");
+
+      if (errorEl) errorEl.textContent = message;
+
+      if (isRadio) {
+        field.closest("fieldset")?.classList.add("has-error");
+      } else {
+        field.setAttribute("aria-invalid", "true");
+        field.parentElement?.classList.add("has-error");
+      }
+      return false;
+    }
+
+    if (errorEl) errorEl.textContent = "";
+
+    if (isRadio) {
+      field.closest("fieldset")?.classList.remove("has-error");
+    } else {
+      field.setAttribute("aria-invalid", "false");
+      field.parentElement?.classList.remove("has-error");
+    }
+    return true;
+  }
+
+  function setSubmitDisabled(disabled: boolean) {
+    for (const btn of submitBtns) {
+      btn.disabled = disabled;
+    }
+  }
+
+  function setCheckoutError(message: string) {
+    for (const el of errorEls) {
+      el.textContent = message;
+      el.hidden = !message;
+    }
+  }
+
+  function cartItems(): CartItem[] {
+    const store = (window as any).Alpine?.store?.("cart");
+    return Object.values(store?.cartItems ?? {}) as CartItem[];
+  }
+
+  form.querySelectorAll<Field>("input, textarea").forEach((input) => {
+    input.addEventListener("blur", () => validateField(input));
+
+    if (input instanceof HTMLInputElement && input.type === "radio") {
+      input.addEventListener("change", () => validateField(input));
+    }
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    setCheckoutError("");
+
+    let isValid = true;
+    for (const field of form.querySelectorAll<Field>("input, textarea")) {
+      if (!validateField(field)) isValid = false;
+    }
+
+    if (!isValid) {
+      form.querySelector<HTMLElement>(":invalid")?.focus();
+      return;
+    }
+
+    const items = cartItems();
+    if (items.length === 0) {
+      setCheckoutError("Корзина пуста");
+      return;
+    }
+
+    const data = new FormData(form);
+    const name = String(data.get("name") ?? "").trim();
+    const lastName = String(data.get("lastName") ?? "").trim();
+    const customerName = [name, lastName].filter(Boolean).join(" ");
+
+    setSubmitDisabled(true);
+
+    try {
+      const { data: result, error } = await actions.orders.create({
+        customerName,
+        customerEmail: String(data.get("email") ?? "").trim(),
+        customerPhone: String(data.get("phone") ?? "").trim(),
+        notes: String(data.get("comment") ?? "").trim() || undefined,
+        items: items.map(toOrderItem),
+      });
+
+      if (error || !result) {
+        setCheckoutError(error?.message ?? "Не удалось оформить заказ");
+        return;
+      }
+
+      const store = (window as any).Alpine?.store?.("cart");
+      if (store?.cartItems) {
+        for (const id of Object.keys(store.cartItems)) {
+          delete store.cartItems[id];
+        }
+      }
+
+      window.location.href = `/order?orderNumber=${encodeURIComponent(result.orderNumber)}`;
+    } catch {
+      setCheckoutError("Не удалось оформить заказ");
+    } finally {
+      setSubmitDisabled(false);
+    }
+  });
+</script>
+
 <style>
+  #checkout-form {
+    display: grid;
+    gap: var(--space-m);
+    container-type: inline-size;
+  }
+  .infoBlocks {
+    display: grid;
+    gap: var(--space-2xs);
+    @container (min-width: 75ch) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .infoBlock {
+   display: grid;
+   grid-template-columns: auto 1fr;
+   gap: var(--space-2xs);
+  }
+
+  .infoBlock p {
+    max-width: 65ch;  }
   .textInputFields {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.7rem;
+    gap: var(--space-2xs);
     container-type: inline-size;
-    padding-bottom: 0.7rem;
+  }
+
+  .nameFields,
+  .contactFields {
+    display: grid;
+    gap: var(--space-2xs);
+    grid-template-columns: 1fr;
+    @container (min-width: 60ch) {
+      grid-template-columns: 1fr 1fr;
+    }
   }
 
   .summaryWrap {
@@ -100,7 +446,11 @@ import CartItemEntry from "../components/cart/CartItemEntry.astro";
     border-radius: var(--radius-lg);
   }
 
-  .topSeparator {
-    border-top: var(--border-width) solid var(--border);
+  .bottomSeparator {
+    border-bottom: var(--border-width) solid var(--border);
+  }
+
+  .error-message:empty {
+    display: none;
   }
 </style>

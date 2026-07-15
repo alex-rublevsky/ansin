@@ -1,10 +1,12 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
-import { getProductsForSlugPages } from "@/db/products/storefront";
+import { getProductsForSlugPages } from "@/db/storefront/productForSlug";
 import Gallery from "../../components/Gallery.astro";
 import ProductInfo from "../../components/ProductInfo.astro";
+import { BASE_IMAGE_URL } from "@/constants";
 
-import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+import type { GetStaticPaths } from "astro";
+import type { StorefrontProduct } from "@/db/storefront/productForSlug";
 
 export const prerender = true;
 
@@ -14,30 +16,75 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return products.map((p) => ({
     params: { slug: p.slug },
     props: {
+      id: p.id,
       name: p.name,
-      price: p.price,
       images: p.images,
       description: p.description,
+      volume: p.volume,
+      cakeVolume: p.cakeVolume,
+      variations: p.variations,
+      category: p.category,
     },
   }));
 };
 
-type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+type Props = Pick<
+  StorefrontProduct,
+  | "id"
+  | "name"
+  | "images"
+  | "description"
+  | "volume"
+  | "cakeVolume"
+  | "category"
+> & {
+  variations: { id: number; weight: number; price: number }[];
+};
 
-const { name, price, images, description } = Astro.props as Props;
+const {
+  id,
+  name,
+  images,
+  description,
+  volume,
+  cakeVolume,
+  variations,
+  category,
+} = Astro.props as Props;
 const slug = Astro.params.slug as string;
+const productImage = images[0] ? BASE_IMAGE_URL + images[0] : null;
+const serializedProduct = JSON.stringify({
+  id,
+  name,
+  slug,
+  volume,
+  cakeVolume,
+  image: productImage,
+});
 ---
 
 <MainLayout title={name}>
-  <div class="relative flex flex-col items-start gap-6 lg:flex-row lg:gap-10">
+  <section
+    class="no-padding relative flex flex-col items-start gap-6 pb-22 lg:flex-row lg:gap-10"
+    data-product={serializedProduct}>
     <Gallery
       class:list="w-full self-start lg:sticky lg:top-0 lg:w-3/5 xl:w-2/3"
       images={images}
       slug={slug}
+      productId={id}
       alt={name}
     />
-    <div class="min-w-0 lg:flex-1">
-      <ProductInfo name={name} price={price} description={description} />
-    </div>
-  </div>
+
+    <ProductInfo
+      id={id}
+      slug={slug}
+      image={productImage}
+      name={name}
+      category={category}
+      volume={volume}
+      cakeVolume={cakeVolume}
+      variations={variations}
+      description={description}
+    />
+  </section>
 </MainLayout>

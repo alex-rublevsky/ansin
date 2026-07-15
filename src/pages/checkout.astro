@@ -98,7 +98,7 @@ import CartItemEntry from "../components/cart/CartItemEntry.astro";
               </fieldset>
 
               <fieldset x-data="{ deliveryMethod: '' }">
-                <legend class="font-serif text-base">Метод доставки</legend>
+                <legend class="font-serif text-base">Метод получения</legend>
                 <div class="flex items-center gap-2">
   
                  <div class="form-group"> 
@@ -231,10 +231,9 @@ import CartItemEntry from "../components/cart/CartItemEntry.astro";
 
           
 
-            <div
-              class="flex items-baseline justify-between py-5 mt-4 text-xl">
-              <h3>Итого</h3>
-              <h3 class="text-md" x-text="$store.cart.subtotal"></h3>
+            <div class="checkoutTotal navElementWrapper">
+              <h4>Итого</h4>
+              <h3 class="text-lg" x-text="$store.cart.subtotal"></h3>
             </div>
 
             <div class="hidden lg:block">
@@ -274,17 +273,6 @@ import { actions } from "astro:actions";
 
   type Field = HTMLInputElement | HTMLTextAreaElement;
 
-  const formEl = document.getElementById("checkout-form");
-  const submitBtns =
-    document.querySelectorAll<HTMLButtonElement>(".place-order-btn");
-  const errorEls = document.querySelectorAll<HTMLElement>(".checkout-error");
-
-  if (!(formEl instanceof HTMLFormElement)) {
-    throw new Error("Checkout form not found");
-  }
-
-  const form = formEl;
-
   function validateField(field: Field): boolean {
     const isRadio =
       field instanceof HTMLInputElement && field.type === "radio";
@@ -321,87 +309,114 @@ import { actions } from "astro:actions";
     return true;
   }
 
-  function setSubmitDisabled(disabled: boolean) {
-    for (const btn of submitBtns) {
-      btn.disabled = disabled;
-    }
-  }
-
-  function setCheckoutError(message: string) {
-    for (const el of errorEls) {
-      el.textContent = message;
-      el.hidden = !message;
-    }
-  }
-
   function cartItems(): CartItem[] {
     const store = (window as any).Alpine?.store?.("cart");
     return Object.values(store?.cartItems ?? {}) as CartItem[];
   }
 
-  form.querySelectorAll<Field>("input, textarea").forEach((input) => {
-    input.addEventListener("blur", () => validateField(input));
-
-    if (input instanceof HTMLInputElement && input.type === "radio") {
-      input.addEventListener("change", () => validateField(input));
+  function clearCart() {
+    const store = (window as any).Alpine?.store?.("cart");
+    if (!store?.cartItems) return;
+    for (const id of Object.keys(store.cartItems)) {
+      delete store.cartItems[id];
     }
-  });
+  }
 
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    setCheckoutError("");
+  function initCheckout() {
+    const form = document.getElementById("checkout-form");
+    if (!(form instanceof HTMLFormElement)) return;
+    // ClientRouter reuses module scripts; skip if this DOM was already bound.
+    if (form.dataset.bound === "1") return;
+    form.dataset.bound = "1";
 
-    let isValid = true;
-    for (const field of form.querySelectorAll<Field>("input, textarea")) {
-      if (!validateField(field)) isValid = false;
-    }
+    const submitBtns =
+      document.querySelectorAll<HTMLButtonElement>(".place-order-btn");
+    const errorEls = document.querySelectorAll<HTMLElement>(".checkout-error");
 
-    if (!isValid) {
-      form.querySelector<HTMLElement>(":invalid")?.focus();
-      return;
-    }
-
-    const items = cartItems();
-    if (items.length === 0) {
-      setCheckoutError("Корзина пуста");
-      return;
+    function setSubmitDisabled(disabled: boolean) {
+      for (const btn of submitBtns) {
+        btn.disabled = disabled;
+      }
     }
 
-    const data = new FormData(form);
-    const name = String(data.get("name") ?? "").trim();
-    const lastName = String(data.get("lastName") ?? "").trim();
-    const customerName = [name, lastName].filter(Boolean).join(" ");
+    function setCheckoutError(message: string) {
+      for (const el of errorEls) {
+        el.textContent = message;
+        el.hidden = !message;
+      }
+    }
 
-    setSubmitDisabled(true);
+    form.querySelectorAll<Field>("input, textarea").forEach((input) => {
+      input.addEventListener("blur", () => validateField(input));
 
-    try {
-      const { data: result, error } = await actions.orders.create({
-        customerName,
-        customerEmail: String(data.get("email") ?? "").trim(),
-        customerPhone: String(data.get("phone") ?? "").trim(),
-        notes: String(data.get("comment") ?? "").trim() || undefined,
-        items: items.map(toOrderItem),
-      });
+      if (input instanceof HTMLInputElement && input.type === "radio") {
+        input.addEventListener("change", () => validateField(input));
+      }
+    });
 
-      if (error || !result) {
-        setCheckoutError(error?.message ?? "Не удалось оформить заказ");
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      setCheckoutError("");
+
+      let isValid = true;
+      for (const field of form.querySelectorAll<Field>("input, textarea")) {
+        if (!validateField(field)) isValid = false;
+      }
+
+      if (!isValid) {
+        form.querySelector<HTMLElement>(":invalid")?.focus();
         return;
       }
 
-      const store = (window as any).Alpine?.store?.("cart");
-      if (store?.cartItems) {
-        for (const id of Object.keys(store.cartItems)) {
-          delete store.cartItems[id];
-        }
+      const items = cartItems();
+      if (items.length === 0) {
+        setCheckoutError("Корзина пуста");
+        return;
       }
 
-      window.location.href = `/order?orderNumber=${encodeURIComponent(result.orderNumber)}`;
-    } catch {
-      setCheckoutError("Не удалось оформить заказ");
-    } finally {
-      setSubmitDisabled(false);
-    }
-  });
+      const data = new FormData(form);
+      const name = String(data.get("name") ?? "").trim();
+      const lastName = String(data.get("lastName") ?? "").trim();
+      const customerName = [name, lastName].filter(Boolean).join(" ");
+
+      setSubmitDisabled(true);
+
+      try {
+        const { data: result, error } = await actions.orders.create({
+          customerName,
+          customerEmail: String(data.get("email") ?? "").trim(),
+          customerPhone: String(data.get("phone") ?? "").trim(),
+          paymentMethod: String(data.get("paymentMethod") ?? "").trim() as
+            | "cash"
+            | "card",
+          deliveryMethod: String(data.get("deliveryMethod") ?? "").trim() as
+            | "pickup"
+            | "delivery",
+          contactMethod: String(data.get("contactMethod") ?? "").trim() as
+            | "instagram"
+            | "telegram"
+            | "email"
+            | "whatsapp",
+          notes: String(data.get("comment") ?? "").trim() || undefined,
+          items: items.map(toOrderItem),
+        });
+
+        if (error || !result) {
+          setCheckoutError(error?.message ?? "Не удалось оформить заказ");
+          return;
+        }
+
+        clearCart();
+        window.location.href = `/order?orderNumber=${encodeURIComponent(result.orderNumber)}`;
+      } catch {
+        setCheckoutError("Не удалось оформить заказ");
+      } finally {
+        setSubmitDisabled(false);
+      }
+    });
+  }
+
+  document.addEventListener("astro:page-load", initCheckout);
 </script>
 
 <style>
@@ -448,6 +463,38 @@ import { actions } from "astro:actions";
 
   .bottomSeparator {
     border-bottom: var(--border-width) solid var(--border);
+  }
+
+  /* Fixed bar below lg; in-flow once layout is 2-col (lg:flex-row). */
+  .checkoutTotal {
+    position: fixed;
+    bottom: 0.375rem;
+    left: 0;
+    right: 0;
+    width: auto;
+    margin-inline: 5rem;
+    padding: var(--space-2xs) var(--space-xs);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    font-size: var(--step-3);
+  }
+
+  @media (min-width: 64rem) {
+    .checkoutTotal {
+      position: relative;
+      left: auto;
+      right: auto;
+      bottom: auto;
+      width: auto;
+      margin-inline: 0;
+      padding: 0;
+      padding-bottom: var(--space-xs);
+      background: transparent;
+      backdrop-filter: none;
+      border: none;
+      border-radius: 0;
+    }
   }
 
   .error-message:empty {

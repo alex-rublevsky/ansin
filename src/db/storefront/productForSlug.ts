@@ -11,6 +11,7 @@ export type StorefrontProduct = {
   volume: number;
   cakeVolume: number;
   images: string[];
+  category: { name: string; slug: string };
 };
 
 export async function getProductsForSlugPages() {
@@ -40,6 +41,7 @@ export async function getProductsForSlugPages() {
     // columns: {},
     where: { isActive: true },
     with: {
+      category: { columns: { name: true, slug: true } },
       variations: { orderBy: { weight: "desc" } },
     },
   });

@@ -75,11 +75,20 @@
     padding: var(--space-3xs);
 }
 
-.productCard, a {
-  transition: transform 70ms ease-out;
-  z-index: 1;
+
+/* In @layer base so Tailwind display utilities (e.g. Button's inline-flex) still win. */
+@layer base {
+  a {
+    display: inline-block;
+    transition: transform 70ms ease-out;
+    z-index: 1;
+  }
+
+  a:active:not(:has(button:active)) {
+    transform: scale(0.97);
+  }
 }
 
-.productCard:active:not(:has(button:active)), a:active {
-  transform: scale(0.97);
+.productCard {
+  display: block;
 }

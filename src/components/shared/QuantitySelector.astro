@@ -1,0 +1,90 @@
+---
+interface Props {
+  size?: "sm" | "lg";
+  class?: string;
+  /** Picker: local qty before add (product page). Cart: mutate store line (checkout). */
+  mode?: "picker" | "cart";
+}
+
+const { size = "sm", mode = "picker" } = Astro.props;
+
+import Button from "@/components/shared/Button.astro";
+import { Icon } from "astro-icon/components";
+
+const inputOverrides =
+  "px-0 text-center font-medium tabular-nums border-none! shadow-none! bg-transparent! focus-visible:ring-0! focus-visible:border-transparent! outline-none appearance-none [-webkit-appearance:textfield] [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none";
+
+const inputClass =
+  size === "sm"
+    ? `${inputOverrides} h-7 w-9 text-sm`
+    : `${inputOverrides} h-11 w-[3.25rem]`;
+
+const wrapperClass =
+  size === "sm"
+    ? "inline-grid grid-cols-[auto_auto_auto] items-center gap-1"
+    : "inline-grid grid-cols-[auto_3.25rem_auto] items-center gap-2";
+
+// Only these Alpine expressions differ between modes — everything else
+// (markup, styling, button sizes) is shared below.
+const expr =
+  mode === "cart"
+    ? {
+        decrement: "$store.cart.add(item, -1)",
+        decrementDisabled: undefined,
+        value: "item.qty",
+        max: "$store.cart.maxQtyFor(item)",
+        inputDisabled: undefined,
+        onInput: "$store.cart.setQty(item.id, $event.target.value, item)",
+        increment: "$store.cart.add(item, 1)",
+        incrementDisabled: "item.qty >= $store.cart.maxQtyFor(item)",
+      }
+    : {
+        decrement: "quantity = Math.max(quantity - 1, 1)",
+        decrementDisabled: "quantity <= 1 || maxQuantity <= 0",
+        value: "quantity",
+        max: "maxQuantity",
+        inputDisabled: "maxQuantity <= 0",
+        onInput:
+          "quantity = Math.min(Math.max(1, Number($event.target.value) || 1), maxQuantity || 1)",
+        increment: "quantity = Math.min(quantity + 1, maxQuantity)",
+        incrementDisabled: "quantity >= maxQuantity || maxQuantity <= 0",
+      };
+
+// Match input height; force square so icon-only +/- aren't wide rectangles
+// (Button xs/default use horizontal padding without equal width).
+const buttonClass = size === "sm" ? "size-7! p-0!" : "size-11! p-0!";
+---
+
+<div class:list={[wrapperClass]}>
+  <Button
+    variant="tertiary"
+    size="xs"
+    class={buttonClass}
+    aria-label="Уменьшить количество"
+    @click={expr.decrement}
+    {...{ ":disabled": expr.decrementDisabled } as any}>
+    <Icon name="minus" title="Уменьшить количество" />
+  </Button>
+  <input
+    type="number"
+    inputmode="numeric"
+    min="1"
+    class={inputClass}
+    aria-label="Количество"
+    {...{
+      ":value": expr.value,
+      ":max": expr.max,
+      ":disabled": expr.inputDisabled,
+      "@input": expr.onInput,
+    } as any}
+  />
+  <Button
+    variant="tertiary"
+    size="xs"
+    class={buttonClass}
+    aria-label="Увеличить количество"
+    @click={expr.increment}
+    {...{ ":disabled": expr.incrementDisabled } as any}>
+    <Icon name="plus" title="Увеличить количество" />
+  </Button>
+</div>

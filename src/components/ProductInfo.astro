@@ -1,5 +1,7 @@
 ---
+import { ADMIN_STOREFRONT_FLAG_KEY } from "@/constants";
 import { toProductPickerInit } from "@/lib/product-picker";
+import { Icon } from "astro-icon/components";
 
 interface Props {
   id: string | number;
@@ -29,15 +31,33 @@ const pickerInit = toProductPickerInit({
   cakeVolume,
   variations,
 });
+
+const editHref = `/dashboard/product/${slug}`;
 ---
 
 <div
-  class="px-(--space-2xs) mx-auto lg:max-w-[45ch] lg:pl-0 lg:pr-5 lg:py-5"
+  class="px-(--space-2xs) mx-auto lg:max-w-[55ch] lg:pl-0 lg:pr-5 lg:py-5"
   x-data={`productPicker(${JSON.stringify(pickerInit)})`}>
   <h1 class="text-lg! leading-[1.35]">{name}</h1>
-  <p class="mt-2 font-serif text-lg font-light" x-show="!allInCart" x-text="displayPrice">
-  </p>
-  <Badge class="mt-2" x-show="allInCart" x-cloak>Уже в корзине</Badge>
+
+  <div class="mt-2 flex flex-wrap items-center gap-2">
+    <p
+      class="font-serif text-lg font-light"
+      x-show="!allInCart"
+      x-text="displayPrice">
+    </p>
+    <Badge x-show="allInCart" x-cloak>Уже в корзине</Badge>
+    <Button
+      variant="primary"
+      size="square"
+      href={editHref}
+      x-cloak
+      {...{
+        "x-show": `!!localStorage.getItem(${JSON.stringify(ADMIN_STOREFRONT_FLAG_KEY)})`,
+      } as any}>
+      <Icon name="edit" title="Изменить" />
+    </Button>
+  </div>
 
   <div class="mt-4 flex flex-col gap-4">
     {variations.length > 0 && <VariationPicker />}
@@ -51,6 +71,6 @@ const pickerInit = toProductPickerInit({
   </div>
 
   <div class="mt-6">
-      <div class="max-w-[55ch] [&_p]:text-sm" set:html={description} />
+    <div class="max-w-[55ch] [&_p]:text-base" set:html={description} />
   </div>
 </div>

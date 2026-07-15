@@ -1,6 +1,7 @@
 ---
 import Head from "@/components/shared/Head.astro";
 import DashboardNavBar from "@/components/DashboardNavBar.astro";
+import { ADMIN_STOREFRONT_FLAG_KEY } from "@/constants";
 
 interface Props {
   title: string;
@@ -18,5 +19,8 @@ const { title, description = "Панель управления" } = Astro.props
   <body>
     <DashboardNavBar />
     <slot />
+    <script define:vars={{ ADMIN_STOREFRONT_FLAG_KEY }}>
+      localStorage.setItem(ADMIN_STOREFRONT_FLAG_KEY, "1");
+    </script>
   </body>
 </html>

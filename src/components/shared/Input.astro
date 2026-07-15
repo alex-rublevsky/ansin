@@ -8,6 +8,8 @@ interface Props {
   placeholder?: string;
   label?: string;
   required?: boolean;
+  pattern?: string;
+  title?: string;
   error?: string;
   step?: number | string;
   readonly?: boolean;
@@ -23,6 +25,8 @@ const {
   placeholder,
   label,
   required,
+  pattern,
+  title,
   error,
   step,
   readonly = false,
@@ -63,6 +67,8 @@ const isTextarea = as === "textarea";
     placeholder={hasLabel ? " " : placeholder}
     class={className + " input-field"}
     required={required || undefined}
+    pattern={pattern}
+    title={title}
     aria-invalid={hasError ? "true" : undefined}
     step={step?.toString()}
     readonly={readonly}
@@ -129,11 +135,10 @@ const isTextarea = as === "textarea";
   }
 
   .textarea-field {
-        height: auto;
-        min-height: 6rem;
-        padding-block: 1.125rem 0.625rem;
-        resize: vertical;
-    }
+    height: auto;
+    min-height: 6rem;
+    resize: vertical;
+  }
 
 
   .has-error .input-field,

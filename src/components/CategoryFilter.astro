@@ -1,31 +1,31 @@
 ---
-import { getActiveCategories } from "@/db/categories";
 import Button from "@/components/shared/Button.astro";
+import { listStorefrontCategories } from "@/db/storefront/listCategories";
 
-const categories = await getActiveCategories();
-
-const selected = Astro.url.searchParams.get("category") ?? "all";
+const categories = await listStorefrontCategories();
 
 const items = [
-  { label: "Все", value: "all", active: selected === "all" },
+  { label: "Все", value: "all" },
   ...categories.map((cat) => ({
     label: cat.name,
     value: cat.slug,
-    active: selected === cat.slug,
   })),
 ];
+
 ---
 
-{
-  categories.length > 0 &&
-    items.map((cat) => (
-      <Button
-        size="sm"
-        variant="pill"
-        data-category={cat.value}
-        data-category-button
-      >
-        {cat.label}
-      </Button>
-    ))
-}
+<div class="navElementWrapper flex w-full min-w-0 flex-wrap items-center justify-center gap-1 md:justify-start">
+  {
+    categories.length > 0 &&
+      items.map((cat) => (
+        <Button
+          href={cat.value === "all" ? "/" : `/?category=${cat.value}`}
+          size="categoryFilter"
+          variant="pill"
+          data-filter-btn=""
+          data-value={cat.value}>
+          {cat.label}
+        </Button>
+      ))
+  }
+</div>

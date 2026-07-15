@@ -48,7 +48,7 @@ const pickerInit = toProductPickerInit(
                 height={500}
                 alt={product.name}
                 loading="lazy"
-                class="h-full w-full object-cover object-center"
+                class="h-full w-full object-cover object-center select-none"
                 data-image-index="0"
               />
             </div>
@@ -62,7 +62,7 @@ const pickerInit = toProductPickerInit(
                   height={500}
                   alt=""
                   loading="lazy"
-                  class="h-full w-full object-cover object-center"
+                  class="h-full w-full object-cover object-center select-none"
                   data-image-index="1"
                 />
               </div>
@@ -103,9 +103,9 @@ const pickerInit = toProductPickerInit(
   </div>
 
   <div class="flex gap-2xs">
-    <p class="font-serif font-light px-1 pt-1 pb-0" x-show="!allInCart" x-text="displayPrice">
+    <p class="font-serif text-md font-light px-2 pt-1 pb-0" x-show="!allInCart" x-text="displayPrice">
     </p>
-    <Badge x-show="allInCart" class="mx-1 mt-1.5" x-cloak>Уже в корзине</Badge>
+    <Badge x-show="allInCart" class="mx-2 mt-1.5" x-cloak>Уже в корзине</Badge>
     {
       product.discountedPrice ? (
         <p class="line-through" x-show="!allInCart">
@@ -115,38 +115,48 @@ const pickerInit = toProductPickerInit(
     }
   </div>
 
-  <p class="text-xs pt-0.5 pb-1 px-1">{product.name}</p>
+  <p class="text-sm lg:text-xs pt-0.5 pb-1 px-2">{product.name}</p>
 
-  <VariationPicker size="sm" />
+  <VariationPicker size="sm" class="px-1" />
 </a>
 
 <style>
   .addToCartButton,
   .editProductButton {
-    display: block;
     position: absolute;
-    opacity: 0;
+    opacity: 1;
     z-index: 2;
   }
 
   .addToCartButton {
     bottom: 0.4rem;
     right: 0.4rem;
-    transform: translateY(0.4rem);
   }
 
   .editProductButton {
     top: 0.4rem;
     right: 0.4rem;
-    transform: translateY(-0.4rem);
   }
 
-  /* Stay hidden until card hover; Button handles disabled mute. */
-  .addToCartButton:disabled {
-    opacity: 0;
-  }
-
+  /* Hover-capable devices: hide until card hover. Touch: always visible. */
   @media (hover: hover) {
+    .addToCartButton,
+    .editProductButton {
+      opacity: 0;
+    }
+
+    .addToCartButton {
+      transform: translateY(0.4rem);
+    }
+
+    .editProductButton {
+      transform: translateY(-0.4rem);
+    }
+
+    .addToCartButton:disabled {
+      opacity: 0;
+    }
+
     .productCardSecondImage {
       display: block;
       transition: opacity 240ms ease-out;
@@ -161,5 +171,15 @@ const pickerInit = toProductPickerInit(
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  .productCard {
+    display: block;
+    transition: transform 70ms ease-out;
+    z-index: 1;
+  }
+
+  .productCard:active:not(:has(button:active)) {
+    transform: scale(0.97);
   }
 </style>

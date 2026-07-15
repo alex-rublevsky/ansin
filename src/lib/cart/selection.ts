@@ -4,7 +4,10 @@
 import { availableVariations } from "./capacity";
 import type { VariationSnapshot } from "./types";
 
-/** Pick preferred or first available weight; null when nothing fits. */
+/** Default storefront selection when the user hasn't picked a weight yet. */
+const DEFAULT_WEIGHT = 100;
+
+/** Pick preferred weight, else 100g, else largest available; null when nothing fits. */
 export function resolveSelectedWeight(
   variations: VariationSnapshot[],
   remaining: number,
@@ -17,7 +20,11 @@ export function resolveSelectedWeight(
     return prefer;
   }
 
-  return available[0].weight;
+  if (available.some((v) => v.weight === DEFAULT_WEIGHT)) {
+    return DEFAULT_WEIGHT;
+  }
+
+  return Math.max(...available.map((v) => v.weight));
 }
 
 /** After add: keep current if still available, else next in list order that fits. */

@@ -1,16 +1,44 @@
 ---
 import type { HTMLAttributes } from "astro/types";
 
-type Props = HTMLAttributes<"span">;
+type Variation = "gray" | "muted";
+type Size = "default" | "large";
 
-const { class: className, ...rest } = Astro.props;
+type Props = Omit<
+  HTMLAttributes<"span">,
+  keyof {
+    variation?: Variation;
+    size?: Size;
+  }
+> & {
+  variation?: Variation;
+  size?: Size;
+};
+
+const { variation, size, class: className, ...rest } = Astro.props;
+
+const resolvedVariation = variation ?? "muted";
+
+const baseClasses =
+  "inline-flex items-center justify-center whitespace-nowrap rounded-sm border-(length:--border-width) cursor-pointer transition-[background-color] duration-[170ms] ease-out";
+
+const variationClasses: Record<Variation, string> = {
+  muted:
+    "border-[color-mix(in_oklch,var(--muted)_85%,transparent)] bg-[color-mix(in_oklch,var(--muted)_25%,transparent)] text-muted-foreground hover:bg-[color-mix(in_oklch,var(--background)_75%,transparent)]",
+  gray:
+    "border-[color-mix(in_oklch,var(--foreground)_12%,transparent)] bg-[color-mix(in_oklch,var(--foreground)_4%,transparent)] text-muted-foreground hover:bg-[color-mix(in_oklch,var(--foreground)_15%,transparent)]",
+};
+
+const sizeClasses: Record<Size, string> = {
+  default: "px-1.5 py-0.5 text-2xs",
+  large: "px-2 py-0.5 text-s",
+};
+
+const variationClass = variationClasses[resolvedVariation];
+const sizeClass = sizeClasses[size ?? "default"];
+const composedClass = `${baseClasses}${variationClass ? ` ${variationClass}` : ""}${sizeClass ? ` ${sizeClass}` : ""}${className ? ` ${className}` : ""}`;
 ---
 
-<span
-  class:list={[
-    "rounded border-(length:--border-width) border-muted/30 bg-muted/10 px-1.5 py-0.5 text-2xs text-muted-foreground",
-    className,
-  ]}
-  {...rest}>
+<span class={composedClass} {...rest}>
   <slot />
 </span>

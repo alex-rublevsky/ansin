@@ -8,14 +8,24 @@ interface Props {
   slug: string;
   image: string | null;
   name: string;
+  category: { name: string; slug: string };
   volume: number;
   cakeVolume: number;
   variations: { id: number; weight: number; price: number }[];
   description: string;
 }
 
-const { id, slug, image, name, volume, cakeVolume, variations, description } =
-  Astro.props;
+const {
+  id,
+  slug,
+  image,
+  name,
+  category,
+  volume,
+  cakeVolume,
+  variations,
+  description,
+} = Astro.props;
 
 import Badge from "@/components/shared/Badge.astro";
 import Button from "@/components/shared/Button.astro";
@@ -38,7 +48,12 @@ const editHref = `/dashboard/product/${slug}`;
 <div
   class="px-(--space-2xs) mx-auto lg:max-w-[55ch] lg:pl-0 lg:pr-5 lg:py-5"
   x-data={`productPicker(${JSON.stringify(pickerInit)})`}>
-  <h1 class="text-lg! leading-[1.35]">{name}</h1>
+  <div class="flex flex-wrap items-center gap-2">
+  <a href={`/?category=${category.slug}`}>
+    <Badge size="large">{category.name}</Badge>
+    </a>
+    <h1 class="text-lg! leading-[1.35]">{name}</h1>
+  </div>
 
   <div class="mt-2 flex flex-wrap items-center gap-2">
     <p
@@ -46,7 +61,9 @@ const editHref = `/dashboard/product/${slug}`;
       x-show="!allInCart"
       x-text="displayPrice">
     </p>
-    <Badge x-show="allInCart" x-cloak>Уже в корзине</Badge>
+    <a href="/checkout" x-show="allInCart" x-cloak>
+      <Badge variation="gray" size="large">Уже в корзине</Badge>
+    </a>
     <Button
       variant="primary"
       size="square"

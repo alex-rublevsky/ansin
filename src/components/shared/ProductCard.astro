@@ -105,7 +105,16 @@ const pickerInit = toProductPickerInit(
   <div class="flex gap-2xs">
     <p class="font-serif text-md font-light px-2 pt-1 pb-0" x-show="!allInCart" x-text="displayPrice">
     </p>
-    <Badge x-show="allInCart" class="mx-2 mt-1.5" x-cloak>Уже в корзине</Badge>
+    <Badge
+      variation="gray"
+      x-show="allInCart"
+      class="mx-1 mt-1.5"
+      x-cloak
+      {...{
+        "@click.prevent.stop": "window.location.assign('/checkout')",
+      } as any}>
+      Уже в корзине
+    </Badge>
     {
       product.discountedPrice ? (
         <p class="line-through" x-show="!allInCart">
@@ -173,13 +182,5 @@ const pickerInit = toProductPickerInit(
     }
   }
 
-  .productCard {
-    display: block;
-    transition: transform 70ms ease-out;
-    z-index: 1;
-  }
-
-  .productCard:active:not(:has(button:active)) {
-    transform: scale(0.97);
-  }
+ 
 </style>

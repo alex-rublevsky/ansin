@@ -74,3 +74,12 @@
     border: var(--border-width) solid color-mix(in oklch, var(--muted) 40%, transparent);
     padding: var(--space-3xs);
 }
+
+.productCard, a {
+  transition: transform 70ms ease-out;
+  z-index: 1;
+}
+
+.productCard:active:not(:has(button:active)), a:active {
+  transform: scale(0.97);
+}

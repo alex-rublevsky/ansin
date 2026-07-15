@@ -63,8 +63,8 @@ import CartItemEntry from "../components/cart/CartItemEntry.astro";
                   type="tel"
                   label="Телефон"
                   required
-                  pattern={"\\+?\\d{10,15}"}
-                  title="Введите корректный номер телефона"
+                  pattern={"\\+?[\\d\\s()\\-]{10,20}"}
+                  title="Например: +1 (357) 703-1416"
                 />
               </div>
             </div>

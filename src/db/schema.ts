@@ -90,6 +90,7 @@ export const orders = sqliteTable("orders", {
     .notNull()
     .default("pending"),
   paymentMethod: text("payment_method", { enum: ["cash", "card"] }),
+  deliveryMethod: text("delivery_method", { enum: ["pickup", "delivery"] }),
   contactMethod: text("contact_method", {
     enum: ["telegram", "whatsapp", "instagram", "phone", "email"],
   }),

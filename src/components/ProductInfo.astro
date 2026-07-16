@@ -48,12 +48,13 @@ const editHref = `/dashboard/product/${slug}`;
 <div
   class="px-(--space-2xs) mx-auto lg:max-w-[55ch] lg:pl-0 lg:pr-5 lg:py-5"
   x-data={`productPicker(${JSON.stringify(pickerInit)})`}>
-  <div class="flex flex-wrap items-center gap-2">
-  <a href={`/?category=${category.slug}`}>
-    <Badge size="large">{category.name}</Badge>
-    </a>
-    <h1 class="text-lg! leading-[1.35]">{name}</h1>
-  </div>
+  <h1 class="text-lg! leading-[1.35]">
+    <a
+      href={`/?category=${category.slug}`}
+      class="mr-1.5 inline-block align-baseline">
+      <Badge size="large">{category.name}</Badge>
+    </a>{name}
+  </h1>
 
   <div class="mt-2 flex flex-wrap items-center gap-2">
     <p

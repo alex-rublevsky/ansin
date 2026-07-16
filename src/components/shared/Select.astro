@@ -1,0 +1,119 @@
+---
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  name: string;
+  label: string;
+  options: Option[];
+  /** Matches `option.value`; empty string = no selection (placeholder shown). */
+  value?: string;
+  placeholder?: string;
+  required?: boolean;
+  error?: string;
+}
+
+const {
+  name,
+  label,
+  options,
+  value = "",
+  placeholder,
+  required,
+  error,
+  ...rest
+} = Astro.props;
+
+const selectId = `select-${name}`;
+const hasError = !!error;
+---
+
+<div class:list={["select-wrapper", { "has-error": hasError }]}>
+  <select
+    id={selectId}
+    name={name}
+    class="select-field"
+    required={required || undefined}
+    aria-invalid={hasError ? "true" : undefined}
+    {...rest}
+  >
+    {
+      placeholder !== undefined && (
+        <option value="" selected={value === ""}>
+          {placeholder}
+        </option>
+      )
+    }
+    {
+      options.map((option) => (
+        <option value={option.value} selected={option.value === value}>
+          {option.label}
+        </option>
+      ))
+    }
+  </select>
+  <label for={selectId} class="select-label">{label}</label>
+  <span class="error-message select-error" role="alert">{error ?? ""}</span>
+</div>
+
+<style>
+  .select-wrapper {
+    --select-border-color: var(--border);
+    --select-focus-border-color: var(--foreground);
+    --select-label-color: var(--foreground);
+    position: relative;
+    width: 100%;
+  }
+
+  .select-label {
+    pointer-events: none;
+    position: absolute;
+    left: 0.75rem;
+    top: 0;
+    z-index: 1;
+    transform: translateY(-50%);
+    padding-inline: 0.25rem;
+    background-color: var(--background);
+    color: var(--select-label-color);
+    font-size: 0.75rem;
+  }
+
+  .select-field {
+    width: 100%;
+    height: 2.75rem;
+    padding-inline: 0.75rem;
+    padding-block: 0.5rem;
+    border: var(--border-width) solid var(--select-border-color);
+    border-radius: var(--radius-sm);
+    background-color: transparent;
+    color: var(--foreground);
+    font-size: inherit;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s ease-out;
+  }
+
+  .select-field:focus {
+    border-color: var(--select-focus-border-color);
+  }
+
+  .has-error {
+    --select-border-color: var(--destructive);
+    --select-focus-border-color: var(--destructive);
+    --select-label-color: var(--destructive);
+  }
+
+  .select-error {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.75rem;
+    color: var(--destructive);
+  }
+
+  .select-error:empty {
+    display: none;
+  }
+</style>

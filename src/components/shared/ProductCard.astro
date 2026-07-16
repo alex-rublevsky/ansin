@@ -124,7 +124,15 @@ const pickerInit = toProductPickerInit(
     }
   </div>
 
-  <p class="text-sm lg:text-xs pt-0.5 pb-1 px-2">{product.name}</p>
+  <p class="text-sm lg:text-xs pt-0.5 pb-1 px-2 ">
+    {
+      product.category ? (
+        <span class="mr-1 inline-block align-baseline">
+          <Badge>{product.category.name}</Badge>
+        </span>
+      ) : null
+    }{product.name}
+  </p>
 
   <VariationPicker size="sm" class="px-1" />
 </a>

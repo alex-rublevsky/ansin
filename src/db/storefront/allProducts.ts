@@ -14,7 +14,7 @@ export async function getAllStorefrontProducts() {
     },
     orderBy: { categoryId: "asc" },
     with: {
-      category: { columns: { slug: true } },
+      category: { columns: { name: true, slug: true } },
       variations: { orderBy: { weight: "desc" } },
     },
   });

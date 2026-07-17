@@ -71,6 +71,7 @@ export type OrderItem = {
   productName: string;
   slug: string;
   image: string;
+  categoryName?: string;
   variationWeight: number;
   quantity: number;
   price: number;

@@ -1,57 +1,149 @@
 ---
-// Headless: expects `item` (a CartItem from src/lib/cart/types.ts) to be
-// the Alpine scope it's rendered inside, e.g. `x-data="item"` (see checkout.astro).
+// With `item` prop: server-rendered, non-interactive (order page) — "×N", no delete/stepper.
+// Without: headless Alpine — expects CartItem as Alpine scope, e.g. `x-data="item"` (checkout).
+import Badge from "@/components/shared/Badge.astro";
 import QuantityStepper from "@/components/shared/QuantitySelector.astro";
 import { Icon } from "astro-icon/components";
 import Button from "../shared/Button.astro";
 
+interface Item {
+  name: string;
+  slug: string;
+  image: string;
+  categoryName?: string;
+  variationWeight: number;
+  quantity: number;
+  price: number;
+}
+
+interface Props {
+  item?: Item;
+}
+
+const { item } = Astro.props;
+
+const cardClass =
+  "group flex items-start gap-3 py-4.5 px-2 -mx-2 rounded-md hover:bg-border/50 active:bg-border/50";
 ---
 
-<div class="flex items-start gap-3 py-3 border-b-(length:--border-width) border-border last:border-b-0">
-  <a
-    href="/"
-    class="relative block size-20 shrink-0"
-    {...{ ":href": "'/product/' + item.slug" } as any}>
-    <template x-if="item.image">
-      <img
-        alt=""
-        class="absolute inset-0 size-full object-cover"
-        style="mix-blend-mode: darken"
-        {...{ ":src": `item.image` } as any}
-      />
-   
-    </template>
-    <Button
-    size="square"
-    variant="tertiary"
-    class="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 size-5.5!"
-    @click.prevent="$store.cart.remove(item.id)">
-    <Icon name="x" title="Удалить" class="size-3.5" />
+{
+  item ? (
+    <a
+      href={`/product/${item.slug}`}
+      class:list={[
+        cardClass,
+        "border-b-(length:--border-width) border-border last:border-b-0",
+      ]}>
+      <div class="relative block size-20 shrink-0 overflow-hidden">
+        {item.image ? (
+          <img
+            src={item.image}
+            alt=""
+            class="absolute inset-0 size-full object-cover mix-blend-darken"
+            loading="lazy"
+          />
+        ) : (
+          <div class="absolute inset-0 flex items-center justify-center bg-muted/20">
+            <Icon
+              name="image"
+              title="Нет изображения"
+              class="size-6 text-muted-foreground"
+            />
+          </div>
+        )}
+      </div>
 
-  </Button>
-  </a>
+      <div class="min-w-0 flex-1">
+        <h6 class="m-0 text-sm font-normal wrap-break-word leading-[1.35]">
+          {item.categoryName && (
+            <span class="mr-1 inline-block align-baseline">
+              <Badge variation="gray">{item.categoryName}</Badge>
+            </span>
+          )}
+          {item.name}
+          {item.variationWeight > 0 && (
+            <span class="ml-1.5 inline-block align-baseline">
+              <Badge variation="gray">{item.variationWeight}г</Badge>
+            </span>
+          )}
+        </h6>
 
-  <div class="min-w-0 flex-1">
-    <div class="flex items-baseline justify-between gap-2">
-      <a
-        href="/"
-        class="min-w-0 text-sm font-medium wrap-break-word"
-        {...{ ":href": "'/product/' + item.slug" } as any}>
-        <h6 class="text-sm font-normal" x-text="item.name"></h6>
-      </a>
-      <span
-        class="shrink-0 text-xs text-muted-foreground"
-        x-text="item.variationWeight + 'г'">
-      </span>
-    </div>
+        <div class="mt-2 flex items-center gap-2">
+          <span class="text-sm text-muted-foreground">×{item.quantity}</span>
+          <h5 class="ml-auto m-0 font-light">
+            {item.price * item.quantity}
+          </h5>
+        </div>
+      </div>
+    </a>
+  ) : (
+    <a
+      href="/"
+      class={cardClass}
+      {...{ ":href": "'/product/' + item.slug" } as any}>
+      <div class="relative block size-20 shrink-0">
+        <div class="absolute inset-0 overflow-hidden">
+          <template x-if="item.image">
+            <img
+              alt=""
+              class="absolute inset-0 size-full object-cover mix-blend-darken"
+              {...{ ":src": `item.image` } as any}
+            />
+          </template>
+        </div>
+        <Button
+          size="square"
+          variant="tertiary"
+          class="cartItemDelete absolute bottom-0 right-0 z-10 translate-x-1/2 translate-y-1/2 size-6!"
+          @click.prevent.stop="$store.cart.remove(item.id)">
+          <Icon name="x" title="Удалить" class="size-4" />
+        </Button>
+      </div>
 
-    <div class="mt-2 flex items-center gap-2">
-      <QuantityStepper mode="cart" />
-    
+      <div class="min-w-0 flex-1 ml-2">
+        <h6 class="m-0 text-sm font-normal wrap-break-word leading-[1.35]">
+          <span
+            class="mr-1 inline-block align-baseline"
+            {...{ "x-show": "item.categoryName" } as any}>
+            <Badge variation="gray" {...{ "x-text": "item.categoryName" } as any} />
+          </span>
+          <span x-text="item.name" />
+          <span
+            class="ml-1.5 inline-block align-baseline"
+            {...{ "x-show": "item.variationWeight > 0" } as any}>
+            <Badge
+              variation="gray"
+              {...{ "x-text": "item.variationWeight + 'г'" } as any}
+            />
+          </span>
+        </h6>
 
-      <p class="ml-auto font-serif text-sm" x-text="item.price * item.qty"></p>
+        <div class="mt-2 flex items-center gap-2">
+          <div class="relative z-10" @click.stop.prevent>
+            <QuantityStepper mode="cart" />
+          </div>
+          <p
+            class="ml-auto font-serif text-sm"
+            x-text="item.price * item.qty"
+          />
+        </div>
+      </div>
+    </a>
+  )
+}
 
-    
-    </div>
-  </div>
-</div>
+<style>
+  /* Hover-capable: hide until card hover. Touch: always visible. */
+  @media (hover: hover) {
+    :global(.cartItemDelete) {
+      opacity: 0;
+      transition: opacity 200ms ease-out;
+    }
+
+    .group:hover :global(.cartItemDelete),
+    .group:focus-within :global(.cartItemDelete),
+    :global(.cartItemDelete:focus-visible) {
+      opacity: 1;
+    }
+  }
+</style>

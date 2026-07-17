@@ -1,5 +1,6 @@
 ---
 import { ADMIN_STOREFRONT_FLAG_KEY } from "@/constants";
+import { stripEmptyParagraphs } from "@/lib/clean-rich-text";
 import { toProductPickerInit } from "@/lib/product-picker";
 import { Icon } from "astro-icon/components";
 
@@ -40,9 +41,11 @@ const pickerInit = toProductPickerInit({
   volume,
   cakeVolume,
   variations,
+  category,
 });
 
 const editHref = `/dashboard/product/${slug}`;
+const descriptionHtml = stripEmptyParagraphs(description);
 ---
 
 <div
@@ -89,6 +92,15 @@ const editHref = `/dashboard/product/${slug}`;
   </div>
 
   <div class="mt-6">
-    <div class="max-w-[55ch] [&_p]:text-base" set:html={description} />
+    <div
+      class="product-description max-w-[55ch] text-base"
+      set:html={descriptionHtml}
+    />
   </div>
 </div>
+
+<style>
+  .product-description :global(> * + *) {
+    margin-top: 1em;
+  }
+</style>

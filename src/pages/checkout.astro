@@ -13,11 +13,12 @@ import CartItemEntry from "../components/cart/CartItemEntry.astro";
   <main
     x-data
     class="min-h-screen"
-    x-effect="!$store.cart.cartItemsCount && window.scrollTo(0, 0)">
-    <!-- Empty cart: fixed so viewport centering is independent of checkout height/scroll -->
+    x-effect="$store.cart.cartItemsCount === 0 && window.scrollTo(0, 0)">
+    <!-- Empty cart: fixed so viewport centering is independent of checkout height/scroll.
+         Boolean x-show (not raw count): Alpine compares with ===, so 2→3 would re-fire enter. -->
     <section
       class="fixed inset-0 z-10 grid place-items-center gap-4 py-16 pb-28"
-      x-show="!$store.cart.cartItemsCount"
+      x-show="$store.cart.cartItemsCount === 0"
       x-cloak
       x-transition:enter="transition ease-out duration-1000"
       x-transition:enter-start="opacity-0 scale-90"
@@ -37,7 +38,7 @@ import CartItemEntry from "../components/cart/CartItemEntry.astro";
     <!-- Checkout -->
     <section
       class="mx-auto w-full max-w-7xl py-4 pb-28"
-      x-show="$store.cart.cartItemsCount"
+      x-show="$store.cart.cartItemsCount > 0"
       x-cloak
       x-transition:enter="transition ease-out duration-1000"
       x-transition:enter-start="opacity-0 scale-90"
@@ -72,27 +73,15 @@ import CartItemEntry from "../components/cart/CartItemEntry.astro";
               <fieldset>
                 <legend class="font-serif text-base">Оплата</legend>
                 <div class="flex items-center gap-2">
-                  <div class="form-group">
-                    <input
-                      type="radio"
-                      id="cash"
-                      name="paymentMethod"
-                      value="cash"
-                      required
-                    />
-                    <label for="cash">Наличные</label>
-                  </div>
+                  <label class="form-group">
+                    <input type="radio" name="paymentMethod" value="cash" required />
+                    Наличные
+                  </label>
 
-                  <div class="form-group">
-                    <input
-                      type="radio"
-                      id="card"
-                      name="paymentMethod"
-                      value="card"
-                      required
-                    />
-                    <label for="card">Карта</label>
-                  </div>
+                  <label class="form-group">
+                    <input type="radio" name="paymentMethod" value="card" required />
+                    Карта
+                  </label>
                 </div>
                 <p class="error-message mt-2 text-sm text-red-600" role="alert"></p>
               </fieldset>
@@ -100,57 +89,105 @@ import CartItemEntry from "../components/cart/CartItemEntry.astro";
               <fieldset x-data="{ deliveryMethod: '' }">
                 <legend class="font-serif text-base">Метод получения</legend>
                 <div class="flex items-center gap-2">
-  
-                 <div class="form-group"> 
-                  <input x-model="deliveryMethod" type="radio" id="pickup" name="deliveryMethod" value="pickup" required />
-                  <label for="pickup" >Самовывоз <br> <span class="text-foreground-muted text-sm leading-[1.1]! inline-block text-nowrap">Черняховского 3в</span></label>
-                  </div>
-  
-                  <div class="form-group">
-                    <input x-model="deliveryMethod" type="radio" id="delivery" name="deliveryMethod" value="delivery" required />
-                    <label for="delivery">Доставка <br> <span class="text-foreground-muted text-sm leading-[1.1]! inline-block">Обсуждается после заказа</span></label>
-                  </div>
-  
-                 
-                  
+                  <label class="form-group">
+                    <input
+                      x-model="deliveryMethod"
+                      type="radio"
+                      name="deliveryMethod"
+                      value="pickup"
+                      required
+                    />
+                    <span>
+                      Самовывоз
+                      <br />
+                      <span
+                        class="text-foreground-muted text-sm leading-[1.1]! inline-block text-nowrap"
+                        >Черняховского 3в</span
+                      >
+                    </span>
+                  </label>
+
+                  <label class="form-group">
+                    <input
+                      x-model="deliveryMethod"
+                      type="radio"
+                      name="deliveryMethod"
+                      value="delivery"
+                      required
+                    />
+                    <span>
+                      Доставка
+                      <br />
+                      <span
+                        class="text-foreground-muted text-sm leading-[1.1]! inline-block"
+                        >Обсуждается после заказа</span
+                      >
+                    </span>
+                  </label>
                 </div>
                 <p class="error-message mt-2 text-sm text-red-600" role="alert"></p>
                 <div class="pt-3xs" x-cloak>
-                  <p class="text-sm text-foreground-muted" x-show="deliveryMethod === 'pickup'" x-cloak>Мы отправим вам адрес после оформления заказа</p>
-                  <p class="text-sm text-foreground-muted" x-show="deliveryMethod === 'delivery'" x-cloak>Укажите адрес доставки в комментарии к заказу</p>
+                  <p
+                    class="text-sm text-foreground-muted"
+                    x-show="deliveryMethod === 'pickup'"
+                    x-cloak>
+                    Мы отправим вам адрес после оформления заказа
+                  </p>
+                  <p
+                    class="text-sm text-foreground-muted"
+                    x-show="deliveryMethod === 'delivery'"
+                    x-cloak>
+                    Укажите адрес доставки в комментарии к заказу
+                  </p>
                 </div>
               </fieldset>
 
               <fieldset x-data="{ contactMethod: '' }">
                 <legend class="font-serif text-base">Связаться со мной через</legend>
                 <div class="flex flex-wrap items-center gap-2">
-  
-                 <div class="form-group"> 
-                  <input 
-                  x-model="contactMethod"
-                  type="radio" id="instagram" name="contactMethod" value="instagram" required />
-                  <label for="instagram">Инстаграм</label>
-                  </div>
-  
-                  <div class="form-group">
-                    <input  x-model="contactMethod" type="radio" id="telegram" name="contactMethod" value="telegram" required />
-                    <label for="telegram">Телеграм</label>
-                  </div>
-  
-                  <div class="form-group">
-                    <input                   x-model="contactMethod"
-                    type="radio" id="email" name="contactMethod" value="email" required />
-                    <label for="email">Имейл</label>
-                  </div>
-  
-                  <div class="form-group">
-                    <input                  x-model="contactMethod"
-                     type="radio" id="whatsapp" name="contactMethod" value="whatsapp" required />
-                    <label for="whatsapp">WhatsApp</label>
-                  </div>
-                    
-               
-                    
+                  <label class="form-group">
+                    <input
+                      x-model="contactMethod"
+                      type="radio"
+                      name="contactMethod"
+                      value="instagram"
+                      required
+                    />
+                    Инстаграм
+                  </label>
+
+                  <label class="form-group">
+                    <input
+                      x-model="contactMethod"
+                      type="radio"
+                      name="contactMethod"
+                      value="telegram"
+                      required
+                    />
+                    Телеграм
+                  </label>
+
+                  <label class="form-group">
+                    <input
+                      x-model="contactMethod"
+                      type="radio"
+                      name="contactMethod"
+                      value="email"
+                      required
+                    />
+                    Имейл
+                  </label>
+
+                  <label class="form-group">
+                    <input
+                      x-model="contactMethod"
+                      type="radio"
+                      name="contactMethod"
+                      value="whatsapp"
+                      required
+                    />
+                    WhatsApp
+                  </label>
                 </div>
                 <p class="error-message mt-2 text-sm text-red-600" role="alert"></p>
                 <div class="pt-3xs">
@@ -174,7 +211,6 @@ import CartItemEntry from "../components/cart/CartItemEntry.astro";
                   </p>
                 </div>
               </fieldset>
-             
             </div>
             <Input name="comment" label="Комментарий к заказу" as="textarea" />
             <div class="lg:hidden">
@@ -220,7 +256,7 @@ import CartItemEntry from "../components/cart/CartItemEntry.astro";
         <div class="lg:sticky lg:top-4 lg:w-108 lg:self-start">
           <div class="summaryWrap p-6">
             <div
-              x-show="$store.cart.discount"
+              x-show="$store.cart.discount > 0"
               class="flex items-baseline justify-between bottomSeparator">
               <p class="text-foreground-muted font-light">Скидка</p>
               <p
@@ -236,7 +272,7 @@ import CartItemEntry from "../components/cart/CartItemEntry.astro";
               <h3 class="text-lg" x-text="$store.cart.subtotal"></h3>
             </div>
 
-            <div class="hidden lg:block">
+            <div class="hidden lg:block mb-6">
               <Button
                 type="submit"
                 form="checkout-form"
@@ -250,7 +286,7 @@ import CartItemEntry from "../components/cart/CartItemEntry.astro";
               </p>
             </div>
 
-            <div class="mt-6">
+            <div>
               <div class="space-y-3">
                 <template
                   x-for="item in Object.values($store.cart.cartItems)"
@@ -325,7 +361,6 @@ import { actions } from "astro:actions";
   function initCheckout() {
     const form = document.getElementById("checkout-form");
     if (!(form instanceof HTMLFormElement)) return;
-    // ClientRouter reuses module scripts; skip if this DOM was already bound.
     if (form.dataset.bound === "1") return;
     form.dataset.bound = "1";
 
@@ -359,12 +394,17 @@ import { actions } from "astro:actions";
       setCheckoutError("");
 
       let isValid = true;
+      let firstInvalidField: Field | null = null;
+      
       for (const field of form.querySelectorAll<Field>("input, textarea")) {
-        if (!validateField(field)) isValid = false;
+        if (!validateField(field)) {
+          isValid = false;
+          if (!firstInvalidField) firstInvalidField = field;
+        }
       }
 
       if (!isValid) {
-        form.querySelector<HTMLElement>(":invalid")?.focus();
+        firstInvalidField?.focus();
         return;
       }
 
@@ -416,7 +456,7 @@ import { actions } from "astro:actions";
     });
   }
 
-  document.addEventListener("astro:page-load", initCheckout);
+  initCheckout();
 </script>
 
 <style>

@@ -1,3 +1,6 @@
+
+
+
 ---
 import Link from "@/components/shared/Link.astro";
 import { BASE_IMAGE_URL } from "@/constants";
@@ -6,26 +9,27 @@ import { Image } from "astro:assets";
 import Button from "./shared/Button.astro";
 ---
 
-<footer class="grid grow md:grid-cols-2 bg-foreground pt-2 md:pt-12 pb-32">
+<footer class="grid gap-(--space-m) grow md:grid-cols-2 pt-2 md:pt-12 pb-32 md:pb-16">
   <Image
-    src={BASE_IMAGE_URL + "images/sesh.webp"}
+    src={BASE_IMAGE_URL + "images/sesh-full.webp"}
     width={1000}
     height={1000}
     alt="Фото чайной церемонии"
-    class="h-auto max-h-full w-auto px-2 md:px-0 max-w-full object-contain select-none"
+    class="h-auto max-h-full w-auto max-w-full object-contain select-none"
   />
-  <div class="px-4 flex flex-col justify-evenly gap-2xl">
+  <div class="px-4 flex md:px-0 flex-col justify-evenly gap-xl md:gap-auto">
     <div class="flex flex-col gap-m">
-      <span class="font-chinese text-muted/30 text-[5rem] leading-none"
+      <!-- <span class="font-chinese text-muted/50 text-[4.5rem] lg:text-[5rem] leading-none"
         >无尽的茶</span
-      >
-      <h4 class="max-w-[50ch] text-background! text-xl! leading-[1.1]">
+      > -->
+      <h4 class="max-w-[50ch] font-medium text-xl! leading-[1.1] break-pretty">
         Эрудиция, изучение и осмысление явлений через призму чайного мира
       </h4>
 
       <Button
-        class="border-background! bg-background! text-foreground! hover:bg-foreground! hover:text-background! font-medium self-start"
-        href="https://t.me/Unseen_wujin_de_cha">
+        class="font-medium self-start"
+        href="https://t.me/Unseen_wujin_de_cha"
+        size="lg">
         Телеграм Канал
         <Icon name="telegram" title="Telegram" />
       </Button>
@@ -33,7 +37,7 @@ import Button from "./shared/Button.astro";
     <div class="flex flex-col gap-2 self-start">
       <Link
         href="https://t.me/alexrublevsky"
-        class="text-background!  font-normal">
+        class="font-normal">
         Понравился сайт? Написать разработчику
       </Link>
     </div>

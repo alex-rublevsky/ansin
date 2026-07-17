@@ -6,11 +6,11 @@ const pathname = Astro.url.pathname;
 const dashboardNavItems = [
   { label: "Товары", href: "/dashboard", match: "exact" as const },
   { label: "Заказы", href: "/dashboard/orders", match: "prefix" as const },
-  {
-    label: "Категории",
-    href: "/dashboard/categories",
-    match: "prefix" as const,
-  },
+  // {
+  //   label: "Категории",
+  //   href: "/dashboard/categories",
+  //   match: "prefix" as const,
+  // },
 ];
 
 const isActive = (href: string, match: "exact" | "prefix") =>

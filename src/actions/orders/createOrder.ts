@@ -9,6 +9,7 @@ const orderItemSchema = z.object({
   productName: z.string().min(1),
   slug: z.string().min(1),
   image: z.string(),
+  categoryName: z.string().min(1).optional(),
   variationWeight: z.number().positive(),
   quantity: z.number().int().positive(),
   price: z.number().positive(),

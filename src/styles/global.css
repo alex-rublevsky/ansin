@@ -2,6 +2,8 @@
 @import "./theme.css";
 @import "./viewTransitions.css";
 
+
+
 [x-cloak] {
   display: none !important;
 }
@@ -91,4 +93,15 @@
 
 .productCard {
   display: block;
+  transition: transform 70ms ease-out;
 }
+
+/* Scale the card when its stretched link is pressed — not when badge/controls are */
+.productCard:has(> .productCardLink:active) {
+  transform: scale(0.97);
+}
+
+.productCard > .productCardLink:active {
+  transform: none;
+}
+

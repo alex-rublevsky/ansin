@@ -1,6 +1,3 @@
-
-
-
 ---
 import Link from "@/components/shared/Link.astro";
 import { BASE_IMAGE_URL } from "@/constants";
@@ -11,10 +8,12 @@ import Button from "./shared/Button.astro";
 
 <footer class="grid gap-(--space-m) grow md:grid-cols-2 pt-2 md:pt-12 pb-32 md:pb-16">
   <Image
-    src={BASE_IMAGE_URL + "images/sesh-full.webp"}
+    src={BASE_IMAGE_URL + "images/sesh.jpg"}
     width={1000}
     height={1000}
     alt="Фото чайной церемонии"
+    style="mix-blend-mode: darken"
+
     class="h-auto max-h-full w-auto max-w-full object-contain select-none"
   />
   <div class="px-4 flex md:px-0 flex-col justify-evenly gap-xl md:gap-auto">
@@ -22,7 +21,7 @@ import Button from "./shared/Button.astro";
       <!-- <span class="font-chinese text-muted/50 text-[4.5rem] lg:text-[5rem] leading-none"
         >无尽的茶</span
       > -->
-      <h4 class="max-w-[50ch] font-medium text-xl! leading-[1.1] break-pretty">
+      <h4 class="max-w-[50ch] font-medium text-xl! 2xl:text-2xl! leading-[1.1] break-balance">
         Эрудиция, изучение и осмысление явлений через призму чайного мира
       </h4>
 

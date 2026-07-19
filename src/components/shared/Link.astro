@@ -26,11 +26,11 @@ const { href, class: className } = Astro.props;
     text-underline-offset: 0.3rem;
   }
   }
-  @media !(hover: none) {
+  @media (hover: none) {
     a {
-    text-decoration: underline;
-    text-decoration-thickness: 0.065rem;
-    text-underline-offset: 0.3rem;
-  }
+      text-decoration: underline;
+      text-decoration-thickness: 0.065rem;
+      text-underline-offset: 0.3rem;
+    }
   }
 </style>

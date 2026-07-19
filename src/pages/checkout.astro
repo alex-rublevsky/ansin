@@ -7,6 +7,7 @@ import Button from "@/components/shared/Button.astro";
 import Input from "@/components/shared/Input.astro";
 import { Icon } from "astro-icon/components";
 import CartItemEntry from "../components/cart/CartItemEntry.astro";
+import Badge from "@/components/shared/Badge.astro";
 ---
 
 <MainLayout title="Оформление заказа" description="Оформите ваш заказ">
@@ -257,12 +258,11 @@ import CartItemEntry from "../components/cart/CartItemEntry.astro";
           <div class="summaryWrap p-6">
             <div
               x-show="$store.cart.discount > 0"
-              class="flex items-baseline justify-between bottomSeparator">
+              class="flex items-baseline justify-between mb-s">
               <p class="text-foreground-muted font-light">Скидка</p>
-              <p
-                class="text-foreground-muted font-light"
+              <Badge size="large"
                 x-text="'-' + $store.cart.discount">
-              </p>
+              </Badge>
             </div>
 
           
@@ -499,10 +499,6 @@ import { actions } from "astro:actions";
   .summaryWrap {
     border: var(--border-width) solid var(--border);
     border-radius: var(--radius-lg);
-  }
-
-  .bottomSeparator {
-    border-bottom: var(--border-width) solid var(--border);
   }
 
   /* Fixed bar below lg; in-flow once layout is 2-col (lg:flex-row). */

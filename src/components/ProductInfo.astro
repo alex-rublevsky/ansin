@@ -12,7 +12,12 @@ interface Props {
   category: { name: string; slug: string };
   volume: number;
   cakeVolume: number;
-  variations: { id: number; weight: number; price: number }[];
+  variations: {
+    id: number;
+    weight: number;
+    price: number;
+    discountPrice?: number | null;
+  }[];
   description: string;
 }
 
@@ -59,24 +64,40 @@ const descriptionHtml = stripEmptyParagraphs(description);
     </a>{name}
   </h1>
 
-  <div class="mt-2 flex flex-wrap items-center gap-2">
+  <div class="mt-2 flex flex-wrap items-baseline gap-2">
     <p
       class="font-serif text-lg font-light"
       x-show="!allInCart"
       x-text="displayPrice">
     </p>
+    <p
+      class="line-through text-muted-foreground font-serif text-base! font-light"
+      x-show="!allInCart && displayOriginalPrice"
+      x-text="displayOriginalPrice"
+      x-cloak>
+    </p>
+    <Badge
+      variation="gray"
+      size="large"
+      x-show="!allInCart && displayDiscountPercent"
+      x-cloak
+      {...{
+        "x-text": "displayDiscountPercent ? '−' + displayDiscountPercent + '%' : ''",
+      } as any}>
+    </Badge>
     <a href="/checkout" x-show="allInCart" x-cloak>
       <Badge variation="gray" size="large">Уже в корзине</Badge>
     </a>
     <Button
       variant="primary"
-      size="square"
+      
       href={editHref}
       x-cloak
       {...{
         "x-show": `!!localStorage.getItem(${JSON.stringify(ADMIN_STOREFRONT_FLAG_KEY)})`,
       } as any}>
       <Icon name="edit" title="Изменить" />
+      <span class="">Изменить</span>
     </Button>
   </div>
 

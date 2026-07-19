@@ -9,10 +9,10 @@ import alpinejs from "@astrojs/alpinejs";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://d5dlmoeh5bvrbgn8dnuv.akta928u.apigw.yandexcloud.net",
+  site: "https://ansintea.com",
   integrations: [
     icon(),
-    sitemap(),
+    sitemap({filter: (page) => !page.startsWith("https://ansintea.com/dashboard/"),}),
     alpinejs({ entrypoint: "/src/lib/alpine-entrypoint" }),
   ],
   output: "server",

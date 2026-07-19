@@ -16,6 +16,9 @@
   corner-shape: squircle;
 }
 
+.break-balance {text-wrap: balance;}
+
+
 @theme inline {
   --font-sans: var(--font-overused-grotesk), sans-serif;
   --font-serif: var(--font-kazuki-reiwa), serif;
@@ -122,11 +125,20 @@
   --border-width: clamp(0.09rem, 0.05rem + 0.03vw, 0.095rem);
 }
 
+/* Safari Autofill styles */
+input:-webkit-autofill, input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--background) inset;
+  -webkit-text-fill-color: var(--foreground);
+}
+
+
 html {
   font-size: var(--step-0);
   font-family: var(--font-sans);
   /* scroll-behavior: smooth; */
   overflow-x: hidden;
+  background-color: var(--background);
+
 }
 
 @layer base {
@@ -153,6 +165,7 @@ html {
     font-weight: 200;
     line-height: 1;
     letter-spacing: 1.2%;
+    padding-bottom: var(--space-xs);
     color: var(--foreground);
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -254,6 +267,7 @@ fieldset:has([required]) legend,
   transition: border-color 170ms ease-out, background-color 170ms ease-out;
   padding: var(--space-2xs);
   display: flex;
+  align-items: center;
   gap: 1ch;
   &:has(input[type="radio"]:checked) {
     border-color: var(--foreground);
@@ -269,5 +283,20 @@ fieldset:has([required]) legend,
   cursor: pointer;
   & * {
     cursor: inherit;
+  }
+}
+
+.skeleton {
+  animation: skeleton-loading 1s linear infinite alternate;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-color:       color-mix(in oklch, var(--border) 25%, transparent);
+    ;
+  }
+  100% {
+    background-color:       color-mix(in oklch, var(--border) 85%, transparent);
+    ;
   }
 }

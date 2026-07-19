@@ -40,6 +40,8 @@ export const productVariations = sqliteTable(
       .references(() => products.id, { onDelete: "cascade" }),
     weight: integer("weight").notNull().default(0),
     price: real("price").notNull(),
+    /** Sale price in currency (not %). When set and lower than `price`, the customer pays this; `price` becomes the compare-at value. */
+    discountPrice: real("discount_price"),
     sku: text("sku").notNull().unique(),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
@@ -74,7 +76,10 @@ export type OrderItem = {
   categoryName?: string;
   variationWeight: number;
   quantity: number;
+  /** Unit price the customer actually pays (sale price when discounted). */
   price: number;
+  /** Pre-discount unit price, present only when the line was discounted. */
+  originalPrice?: number;
 };
 
 export const orders = sqliteTable("orders", {

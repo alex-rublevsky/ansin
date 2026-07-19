@@ -2,25 +2,20 @@
 import "@/styles/global.css";
 import { Font } from "astro:assets";
 
-import type { ImageMetadata } from "astro";
-//TODO: update the fallback image
-//import FallbackImage from "@/assets/blog-placeholder-1.jpg";
-import { SITE_TITLE } from "@/constants";
+import { BASE_IMAGE_URL, SITE_TITLE } from "@/constants";
 
 interface Props {
   title: string;
   description: string;
-  image?: ImageMetadata;
+  /** Absolute URL for og/twitter image. Defaults to the site banner. */
+  image?: string;
 }
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const DEFAULT_OG_IMAGE = `${BASE_IMAGE_URL}images/sesh-full.jpg`;
 
-const {
-  title,
-  description,
-  //TODO: what is this image for? set it up
-  // image = FallbackImage
-} = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const { title, description, image = DEFAULT_OG_IMAGE } = Astro.props;
+const documentTitle = `${title} — Китайский Чай во Владивостоке`;
 ---
 
 <!-- Global Metadata -->
@@ -50,37 +45,27 @@ const {
 <link rel="canonical" href={canonicalURL} />
 
 <!-- Primary Meta Tags -->
-<title>{title}</title>
-<meta name="title" content={title} />
+<title>{documentTitle}</title>
+<meta name="title" content={documentTitle} />
 <meta name="description" content={description} />
 
 <!-- TODO: Web analytics -->
-<!-- <script
-  data-goatcounter="https://my-account.goatcounter.com/count"
-  async
-  src="//gc.zgo.at/count.js"></script> -->
+<script data-goatcounter="https://rublevsky.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 
-<!-- TODO: Open Graph tags -->
-<!-- <meta property="og:title" content="My New Astro Website" />
+<!-- Open Graph -->
+<meta property="og:title" content={documentTitle} />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="http://www.example.com/" />
-<meta property="og:description" content="Welcome to my new Astro site!" />
-<meta
-  property="og:image"
-  content="https://www.example.com/_astro/seo-banner.BZD7kegZ.webp"
-/>
-<meta property="og:image:alt" content="" /> -->
-
-<!-- Open Graph / Facebook -->
-<!-- <meta property="og:type" content="website" />
-<meta property="og:url" content={Astro.url} />
-<meta property="og:title" content={title} />
+<meta property="og:url" content={canonicalURL} />
 <meta property="og:description" content={description} />
-<meta property="og:image" content={new URL(image.src, Astro.url)} /> -->
+<meta property="og:image" content={image} />
+<meta property="og:image:alt" content={documentTitle} />
+<meta property="og:site_name" content={SITE_TITLE} />
+<meta property="og:locale" content="ru_RU" />
 
 <!-- Twitter -->
-<!-- <meta property="twitter:card" content="summary_large_image" />
-<meta property="twitter:url" content={Astro.url} />
-<meta property="twitter:title" content={title} />
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={canonicalURL} />
+<meta property="twitter:title" content={documentTitle} />
 <meta property="twitter:description" content={description} />
-<meta property="twitter:image" content={new URL(image.src, Astro.url)} /> -->
+<meta property="twitter:image" content={image} />

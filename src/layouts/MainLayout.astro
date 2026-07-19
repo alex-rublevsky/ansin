@@ -3,20 +3,19 @@ import NavBar from "@/components/NavBar.astro";
 import StaleVariationModal from "@/components/cart/StaleVariationModal.astro";
 import Head from "@/components/shared/Head.astro";
 import { SITE_DESCRIPTION } from "@/constants";
-import { ClientRouter } from "astro:transitions";
 
 interface Props {
   title: string;
   description?: string;
+  image?: string;
 }
 
-const { title, description = SITE_DESCRIPTION } = Astro.props;
+const { title, description = SITE_DESCRIPTION, image } = Astro.props;
 ---
 
 <html lang="en">
   <head>
-    <Head title={title} description={description} />
-    <ClientRouter />
+    <Head title={title} description={description} image={image} />
   </head>
 
   <body>

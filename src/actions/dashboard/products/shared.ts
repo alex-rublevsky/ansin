@@ -24,7 +24,7 @@ export function variationRowsOrThrow(
   slug: string,
   volume: number,
   cakeVolume: number,
-  submitted: { weight: number; price: number }[],
+  submitted: { weight: number; price: number; discountPrice?: number | null }[],
 ) {
   try {
     return buildVariationRows(slug, volume, cakeVolume, submitted);

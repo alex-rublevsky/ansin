@@ -14,6 +14,8 @@ interface Item {
   variationWeight: number;
   quantity: number;
   price: number;
+  /** Pre-discount unit price, when the line was discounted. */
+  originalPrice?: number;
 }
 
 interface Props {
@@ -71,6 +73,11 @@ const cardClass =
         <div class="mt-2 flex items-center gap-2">
           <span class="text-sm text-muted-foreground">×{item.quantity}</span>
           <h5 class="ml-auto m-0 font-light">
+            {item.originalPrice ? (
+              <span class="mr-1 text-sm text-muted-foreground line-through">
+                {item.originalPrice * item.quantity}
+              </span>
+            ) : null}
             {item.price * item.quantity}
           </h5>
         </div>
@@ -122,10 +129,15 @@ const cardClass =
           <div class="relative z-10" @click.stop.prevent>
             <QuantityStepper mode="cart" />
           </div>
-          <p
-            class="ml-auto font-serif text-sm"
-            x-text="item.price * item.qty"
-          />
+          <p class="ml-auto font-serif text-sm">
+            <span
+              class="mr-1 text-muted-foreground line-through"
+              {...{ "x-show": "item.originalPrice" } as any}
+              x-cloak
+              {...{ "x-text": "item.originalPrice * item.qty" } as any}
+            />
+            <span x-text="item.price * item.qty" />
+          </p>
         </div>
       </div>
     </a>

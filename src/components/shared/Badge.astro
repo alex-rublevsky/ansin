@@ -20,7 +20,7 @@ const { variation, size, class: className, ...rest } = Astro.props;
 const resolvedVariation = variation ?? "muted";
 
 const baseClasses =
-  "inline-flex items-center justify-center whitespace-nowrap rounded-sm border-(length:--border-width) cursor-pointer transition-[background-color] duration-[170ms] ease-out";
+  "inline-flex items-center justify-center whitespace-nowrap rounded-sm border-(length:--border-width) cursor-select transition-[background-color] duration-[170ms] ease-out";
 
 const variationClasses: Record<Variation, string> = {
   muted:
